@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build-wasm": "rm -rf ./pkg && rm -rf ./app/src/wasm && wasm-pack build --target web --out-dir ./app/src/wasm",
+    "start": "cd ./app && npm start"
+  }
+}
