@@ -1,9 +1,45 @@
 import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { WasmService } from './services/WasmService';
+import { Edge, WasmService } from './services/WasmService';
 
 const wasmService = new WasmService();
+
+async function thing(): Promise<Edge[]> {
+  const ans: Edge[] = [];
+
+  const getKey = (x: number, y: number) => {
+    return `${x},${y}`;
+  };
+
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      if (i > 0) {
+        ans.push({ start: getKey(i, j), end: getKey(i - 1, j), weight: 0 });
+      }
+
+      if (i < 4) {
+        ans.push({ start: getKey(i, j), end: getKey(i + 1, j), weight: 0 });
+      }
+
+      if (j > 0) {
+        ans.push({ start: getKey(i, j), end: getKey(i, j - 1), weight: 0 });
+      }
+
+      if (j < 4) {
+        ans.push({ start: getKey(i, j), end: getKey(i, j + 1), weight: 0 });
+      }
+    }
+  }
+
+  const res = await wasmService.findPath(ans);
+
+  console.log(res);
+
+  console.log(ans);
+
+  return ans;
+}
 
 function fibJS(n: number): number {
   if (n <= 2) {
@@ -70,6 +106,7 @@ function App(): JSX.Element {
         <button onClick={doTest}>Do Test</button>
         <button onClick={doFib}>Do Fib</button>
         <button onClick={doSum}>Do Sum</button>
+        <button onClick={thing}>Do Thing</button>
         <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>

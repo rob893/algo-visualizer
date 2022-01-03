@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -23,4 +24,28 @@ pub fn sum(arr: Vec<i32>) -> i32 {
     let a = arr.into_iter().reduce(|a, b| a + b).unwrap();
 
     return a;
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Edge {
+    pub start: String,
+    pub end: String,
+    pub weight: u32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct PathResult {
+    pub start: String,
+    pub end: String,
+    pub weight: u32,
+}
+
+#[wasm_bindgen]
+pub fn find_path(edges: &JsValue) -> JsValue {
+    let e: Vec<Edge> = edges.into_serde().unwrap();
+    return JsValue::from_serde(&(
+        vec!["0,1".to_string(), "0,0".to_string()],
+        vec!["0,1".to_string(), "0,0".to_string()],
+    ))
+    .unwrap();
 }

@@ -1,4 +1,10 @@
-import init, { fib, test, sum } from '../wasm/algo_visualizer';
+import init, { fib, test, sum, find_path as findPath } from '../wasm/algo_visualizer';
+
+export interface Edge {
+  start: string;
+  end: string;
+  weight: number;
+}
 
 export class WasmService {
   private isInit = false;
@@ -16,6 +22,11 @@ export class WasmService {
   public async sum(n: number[]): Promise<number> {
     await this.init();
     return sum(Int32Array.from(n));
+  }
+
+  public async findPath(n: Edge[]): Promise<[string[], string[]]> {
+    await this.init();
+    return findPath(n);
   }
 
   private async init(): Promise<void> {
