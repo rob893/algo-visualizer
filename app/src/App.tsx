@@ -1,52 +1,76 @@
 import React, { useEffect } from 'react';
 import logo from './logo.svg';
-import init, { fib } from './wasm/algo_visualizer';
 import './App.css';
+import { WasmService } from './services/WasmService';
 
-declare global {
-  const wasm: any | undefined;
-}
+const wasmService = new WasmService();
 
-async function loadWasm(): Promise<void> {
-  console.log(typeof wasm);
-  if (typeof wasm !== 'undefined') {
-    console.log('wasm already loaded');
-    return;
+function fibJS(n: number): number {
+  if (n <= 2) {
+    return 1;
   }
 
-  await init();
-  console.log('wasm loaded!');
+  return fibJS(n - 1) + fibJS(n - 2);
 }
 
-function App() {
-  let f = 0;
+function sumJs(n: number[]): number {
+  return n.reduce((a, b) => a + b);
+}
 
+function App(): JSX.Element {
   async function doFib(): Promise<void> {
-    for (let i = 0; i < 15; i++) {
-      await loadWasm();
-    f = fib(6);
-    console.log(f);
-    }
-    
+    const fibNumber = 46;
+
+    const jsStart = new Date().getTime();
+    const fjs = fibJS(fibNumber);
+    const jsEnd = new Date().getTime();
+    console.log(`JS fib complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
+
+    const wasmStart = new Date().getTime();
+    const f = await wasmService.fib(fibNumber);
+    const wasmEnd = new Date().getTime();
+    console.log(`WASM fib complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
   }
 
-  useEffect(() => {
-    doFib();
-  });
+  async function doTest(): Promise<void> {
+    const f = await wasmService.test([1, 2, 3]);
+    console.log(f);
+  }
+
+  async function doSum(): Promise<void> {
+    const sumArr: number[] = [];
+    for (let i = 0; i < 100000; i++) {
+      sumArr.push(1);
+    }
+
+    const jsStart = new Date().getTime();
+    const fjs = sumJs(sumArr);
+    const jsEnd = new Date().getTime();
+    console.log(`JS sum complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
+
+    const wasmStart = new Date().getTime();
+    const f = await wasmService.sum(sumArr);
+    const wasmEnd = new Date().getTime();
+    console.log(`WASM sum complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
+  }
+
+  // useEffect(() => {
+  //   doFib().then(() => {
+  //     doTest();
+  //   });
+  // });
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.tsx</code> and save to reload {f}.
+          Edit <code>src/App.tsx</code> and save to reload.
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <button onClick={doTest}>Do Test</button>
+        <button onClick={doFib}>Do Fib</button>
+        <button onClick={doSum}>Do Sum</button>
+        <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>
       </header>
