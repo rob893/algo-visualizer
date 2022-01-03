@@ -26,16 +26,6 @@
     "lint": "eslint .",
     "prettier": "prettier --write **/*.{ts,js,jsx,tsx,css,html,json} !**/node_modules/** !**/dist/** !**/coverage/** !**/src/wasm/**"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest",
-      "prettier"
-    ],
-    "ignorePatterns": [
-      "src/wasm/"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",

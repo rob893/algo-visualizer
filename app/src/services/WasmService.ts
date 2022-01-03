@@ -26,10 +26,10 @@ export class WasmService {
 
   public async findPath(n: Edge[]): Promise<[string[], string[]]> {
     await this.init();
-    return findPath(n);
+    return findPath(3, 3, n);
   }
 
-  private async init(): Promise<void> {
+  public async init(): Promise<void> {
     if (this.isInit) {
       console.log('WASM already ready!');
       return;
@@ -43,3 +43,5 @@ export class WasmService {
     console.log(`WASM is now ready in ${end - start}ms!`);
   }
 }
+
+export const wasmService = new WasmService();

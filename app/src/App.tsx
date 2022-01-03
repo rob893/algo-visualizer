@@ -1,14 +1,13 @@
-import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { Edge, WasmService } from './services/WasmService';
+import { Edge, wasmService } from './services/WasmService';
 
-const wasmService = new WasmService();
+wasmService.init();
 
 async function thing(): Promise<Edge[]> {
   const ans: Edge[] = [];
 
-  const getKey = (x: number, y: number) => {
+  const getKey = (x: number, y: number): any => {
     return `${x},${y}`;
   };
 
@@ -55,7 +54,7 @@ function sumJs(n: number[]): number {
 
 function App(): JSX.Element {
   async function doFib(): Promise<void> {
-    const fibNumber = 46;
+    const fibNumber = 40;
 
     const jsStart = new Date().getTime();
     const fjs = fibJS(fibNumber);
