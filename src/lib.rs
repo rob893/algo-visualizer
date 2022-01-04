@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
+mod priority_queue;
+
 #[wasm_bindgen]
 pub fn fib(n: u32) -> u32 {
     if n <= 2 {
@@ -42,7 +44,15 @@ pub struct PathResult {
 }
 
 #[wasm_bindgen]
-pub fn find_path(cols: u32, rows: u32, nodes: &JsValue) -> JsValue {
+pub fn find_path(
+    cols: u32,
+    rows: u32,
+    start_x: u32,
+    start_y: u32,
+    end_x: u32,
+    end_y: u32,
+    nodes: &JsValue,
+) -> JsValue {
     let nodes: Vec<Node> = nodes.into_serde().unwrap();
     let grid = get_grid(nodes, cols, rows);
 
@@ -50,6 +60,8 @@ pub fn find_path(cols: u32, rows: u32, nodes: &JsValue) -> JsValue {
 
     return JsValue::from_serde(&grid).unwrap();
 }
+
+fn astar(grid: &Vec<Vec<Node>>, start_x: u32, start_y: u32, end_x: u32, end_y: u32) {}
 
 //fn get_neighbors(grid: &Vec<Vec<u32>>, x: usize, y: usize) -> Vec<>
 
