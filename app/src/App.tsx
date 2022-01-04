@@ -1,11 +1,11 @@
 import logo from './logo.svg';
 import './App.css';
-import { Edge, wasmService } from './services/WasmService';
+import { Node, wasmService } from './services/WasmService';
 
 wasmService.init();
 
-async function thing(): Promise<Edge[]> {
-  const ans: Edge[] = [];
+async function thing(): Promise<Node[]> {
+  const ans: Node[] = [];
 
   const getKey = (x: number, y: number): any => {
     return `${x},${y}`;
@@ -13,21 +13,7 @@ async function thing(): Promise<Edge[]> {
 
   for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 2; j++) {
-      if (i > 0) {
-        ans.push({ start: getKey(i, j), end: getKey(i - 1, j), weight: 0 });
-      }
-
-      if (i < 4) {
-        ans.push({ start: getKey(i, j), end: getKey(i + 1, j), weight: 0 });
-      }
-
-      if (j > 0) {
-        ans.push({ start: getKey(i, j), end: getKey(i, j - 1), weight: 0 });
-      }
-
-      if (j < 4) {
-        ans.push({ start: getKey(i, j), end: getKey(i, j + 1), weight: 0 });
-      }
+      ans.push({ id: getKey(i, j), x: j, y: i, passable: true, weight: 0 });
     }
   }
 
@@ -54,7 +40,7 @@ function sumJs(n: number[]): number {
 
 function App(): JSX.Element {
   async function doFib(): Promise<void> {
-    const fibNumber = 40;
+    const fibNumber = 47;
 
     const jsStart = new Date().getTime();
     const fjs = fibJS(fibNumber);

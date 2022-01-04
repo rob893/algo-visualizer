@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
@@ -29,10 +27,12 @@ pub fn sum(arr: Vec<i32>) -> i32 {
 }
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
-pub struct Edge {
-    pub start: String,
-    pub end: String,
+pub struct Node {
+    pub id: String,
+    pub x: u32,
+    pub y: u32,
     pub weight: u32,
+    pub passable: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,41 +42,77 @@ pub struct PathResult {
 }
 
 #[wasm_bindgen]
-pub fn find_path(cols: u32, rows: u32, edges: &JsValue) -> JsValue {
-    let edges: Vec<Edge> = edges.into_serde().unwrap();
-    let mut grid = get_grid(cols, rows);
+pub fn find_path(cols: u32, rows: u32, nodes: &JsValue) -> JsValue {
+    let nodes: Vec<Node> = nodes.into_serde().unwrap();
+    let grid = get_grid(nodes, cols, rows);
 
-    setup_grid(&edges, &mut grid);
+    //let grid = get_grid(edges, &mut grid);
 
     return JsValue::from_serde(&grid).unwrap();
 }
 
-fn setup_grid(edges: &Vec<Edge>, grid: &mut Vec<Vec<HashMap<String, u32>>>) {
-    for edge in edges {
-        let (sx, sy) = get_x_y(&edge.start);
+//fn get_neighbors(grid: &Vec<Vec<u32>>, x: usize, y: usize) -> Vec<>
 
-        grid[sy as usize][sx as usize].insert(edge.end.clone(), edge.weight);
-    }
-}
+// fn setup_grid(edges: &Vec<Node>, grid: &mut Vec<Vec<u32>>) {
+//     for edge in edges {
+//         let (sx, sy) = get_x_y(&edge.id);
 
-fn get_grid(cols: u32, rows: u32) -> Vec<Vec<HashMap<String, u32>>> {
-    let mut grid: Vec<Vec<HashMap<String, u32>>> = Vec::with_capacity(cols as usize);
+//         grid[sy as usize][sx as usize] = edge.weight;
+//     }
+// }
+
+fn get_grid(nodes: Vec<Node>, cols: u32, rows: u32) -> Vec<Vec<Node>> {
+    let mut grid: Vec<Vec<Node>> = Vec::with_capacity(cols as usize);
 
     for i in 0..cols {
         grid.push(Vec::with_capacity(rows as usize));
 
         for _ in 0..rows {
-            grid[i as usize].push(HashMap::new());
+            grid[i as usize].push(Node::default());
         }
+    }
+
+    for node in nodes {
+        let Node { x, y, .. } = node;
+        grid[y as usize][x as usize] = node;
     }
 
     return grid;
 }
 
-fn get_x_y(key: &str) -> (u32, u32) {
-    let split: Vec<&str> = key.split(',').collect();
-    let x: u32 = split[0].parse().unwrap();
-    let y: u32 = split[1].parse().unwrap();
+// fn get_x_y(key: &str) -> (u32, u32) {
+//     let split: Vec<&str> = key.split(',').collect();
+//     let x: u32 = split[0].parse().unwrap();
+//     let y: u32 = split[1].parse().unwrap();
 
-    return (x, y);
+//     return (x, y);
+// }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let nodes = vec![
+            Node {
+                id: "1".to_string(),
+                x: 0,
+                y: 0,
+                weight: 0,
+                passable: true,
+            },
+            Node {
+                id: "1".to_string(),
+                x: 1,
+                y: 0,
+                weight: 0,
+                passable: true,
+            },
+        ];
+
+        let grid = get_grid(nodes, 3, 3);
+
+        assert_eq!(grid.len(), 3);
+    }
 }
