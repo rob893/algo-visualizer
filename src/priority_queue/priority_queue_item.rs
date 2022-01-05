@@ -1,7 +1,7 @@
-#[derive(Eq)]
+#[derive(Eq, Debug)]
 pub struct PriorityQueueItem<T> {
     pub item: T,
-    pub priority: u32,
+    pub priority: i32,
 }
 
 impl<T> PartialEq for PriorityQueueItem<T> {

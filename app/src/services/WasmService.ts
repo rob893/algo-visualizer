@@ -1,17 +1,16 @@
 import init, { fib, test, sum, find_path as findPath } from '../wasm/algo_visualizer';
 
-// pub id: String,
-//     pub x: u32,
-//     pub y: u32,
-//     pub weight: u32,
-//     pub passable: bool,
-
 export interface Node {
   id: string;
   x: number;
   y: number;
   weight: number;
   passable: boolean;
+}
+
+export interface PathResult {
+  path: Node[];
+  processed: Node[];
 }
 
 export class WasmService {
@@ -32,9 +31,17 @@ export class WasmService {
     return sum(Int32Array.from(n));
   }
 
-  public async findPath(n: Node[]): Promise<[string[], string[]]> {
+  public async findPath(
+    cols: number,
+    rows: number,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    nodes: Node[]
+  ): Promise<PathResult> {
     await this.init();
-    return findPath(3, 3, n);
+    return findPath(cols, rows, startX, startY, endX, endY, nodes);
   }
 
   public async init(): Promise<void> {

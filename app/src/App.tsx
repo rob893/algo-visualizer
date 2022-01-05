@@ -4,6 +4,12 @@ import { Node, wasmService } from './services/WasmService';
 
 wasmService.init();
 
+async function wait(ms: number): Promise<void> {
+  return new Promise(res => {
+    setTimeout(res, ms);
+  });
+}
+
 async function thing(): Promise<Node[]> {
   const ans: Node[] = [];
 
@@ -11,17 +17,49 @@ async function thing(): Promise<Node[]> {
     return `${x},${y}`;
   };
 
-  for (let i = 0; i < 2; i++) {
-    for (let j = 0; j < 2; j++) {
-      ans.push({ id: getKey(i, j), x: j, y: i, passable: true, weight: 0 });
+  const w = Infinity;
+  const h = 1000;
+
+  const grid = [
+    [0, 0, w, 0, 0],
+    [0, 0, w, 0, 0],
+    [0, 0, w, 0, 0],
+    [0, 0, h, 0, 0],
+    [0, 0, 0, 0, 0]
+  ];
+
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      const w = grid[y][x];
+      ans.push({ id: getKey(x, y), x, y, passable: w !== Infinity, weight: w === Infinity ? 1000 : w });
     }
   }
 
-  const res = await wasmService.findPath(ans);
+  console.log(ans);
+
+  const res = await wasmService.findPath(grid.length, grid[0].length, 0, 0, 4, 3, ans);
+
+  for (const v of res.processed) {
+    const ele = document.getElementById(v.id);
+
+    if (ele) {
+      ele.className = 'visited';
+      await wait(250);
+    }
+  }
+
+  for (const p of res.path) {
+    const ele = document.getElementById(p.id);
+
+    if (ele) {
+      ele.className = 'path';
+      await wait(250);
+    }
+  }
 
   console.log(res);
 
-  console.log(ans);
+  //console.log(ans);
 
   return ans;
 }
@@ -75,6 +113,14 @@ function App(): JSX.Element {
     console.log(`WASM sum complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
   }
 
+  const grid = [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0]
+  ];
+
   // useEffect(() => {
   //   doFib().then(() => {
   //     doTest();
@@ -95,6 +141,20 @@ function App(): JSX.Element {
         <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
           Learn React
         </a>
+
+        <table id="grid">
+          <tbody>
+            {grid.map((row, y) => {
+              return (
+                <tr>
+                  {row.map((c, x) => {
+                    return <td width="25px" height="25px" className="unvisited" id={`${x},${y}`}></td>;
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </header>
     </div>
   );
