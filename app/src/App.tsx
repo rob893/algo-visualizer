@@ -113,13 +113,36 @@ function App(): JSX.Element {
     console.log(`WASM sum complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
   }
 
+  const getKey = (x: number, y: number): any => {
+    return `${x},${y}`;
+  };
+
+  const w = Infinity;
+  const h = 1000;
+
   const grid = [
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
+    [0, 0, w, 0, 0],
+    [0, 0, w, 0, 0],
+    [0, 0, w, 0, 0],
+    [0, 0, h, 0, 0],
     [0, 0, 0, 0, 0]
   ];
+
+  const nodeGrid: { element: JSX.Element; node: Node }[][] = [];
+
+  for (let y = 0; y < grid.length; y++) {
+    nodeGrid.push([]);
+    for (let x = 0; x < grid[y].length; x++) {
+      const w = grid[y][x];
+      const element = <td key={getKey(x, y)} width="25px" height="25px" className="unvisited" id={getKey(x, y)}></td>;
+      nodeGrid[y].push({
+        element,
+        node: { id: getKey(x, y), x, y, passable: w !== Infinity, weight: w === Infinity ? 1000 : w }
+      });
+    }
+  }
+
+  console.log(nodeGrid);
 
   // useEffect(() => {
   //   doFib().then(() => {
@@ -144,14 +167,8 @@ function App(): JSX.Element {
 
         <table id="grid">
           <tbody>
-            {grid.map((row, y) => {
-              return (
-                <tr>
-                  {row.map((c, x) => {
-                    return <td width="25px" height="25px" className="unvisited" id={`${x},${y}`}></td>;
-                  })}
-                </tr>
-              );
+            {nodeGrid.map((row, y) => {
+              return <tr key={y}>{row.map(({ element }) => element)}</tr>;
             })}
           </tbody>
         </table>
