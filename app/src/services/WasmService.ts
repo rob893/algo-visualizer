@@ -32,16 +32,18 @@ export class WasmService {
   }
 
   public async findPath(
-    cols: number,
-    rows: number,
     startX: number,
     startY: number,
     endX: number,
     endY: number,
-    nodes: Node[]
+    nodes: Node[][]
   ): Promise<PathResult> {
+    const startTime = new Date().getTime();
     await this.init();
-    return findPath(cols, rows, startX, startY, endX, endY, nodes);
+    const res = findPath(startX, startY, endX, endY, nodes);
+    console.log(`Path found in ${new Date().getTime() - startTime}ms!`);
+
+    return res;
   }
 
   public async init(): Promise<void> {

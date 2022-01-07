@@ -47,17 +47,8 @@ pub struct PathResult {
 }
 
 #[wasm_bindgen]
-pub fn find_path(
-    cols: u32,
-    rows: u32,
-    start_x: u32,
-    start_y: u32,
-    end_x: u32,
-    end_y: u32,
-    nodes: &JsValue,
-) -> JsValue {
-    let nodes: Vec<Node> = nodes.into_serde().unwrap();
-    let grid = get_grid(nodes, cols, rows);
+pub fn find_path(start_x: u32, start_y: u32, end_x: u32, end_y: u32, nodes: &JsValue) -> JsValue {
+    let grid: Vec<Vec<Node>> = nodes.into_serde().unwrap();
 
     let path = astar(grid, start_x, start_y, end_x, end_y);
 
@@ -155,25 +146,6 @@ fn get_neighbors(grid: &Vec<Vec<Node>>, x: usize, y: usize) -> Vec<&Node> {
     return vec;
 }
 
-fn get_grid(nodes: Vec<Node>, cols: u32, rows: u32) -> Vec<Vec<Node>> {
-    let mut grid: Vec<Vec<Node>> = Vec::with_capacity(cols as usize);
-
-    for i in 0..cols {
-        grid.push(Vec::with_capacity(rows as usize));
-
-        for _ in 0..rows {
-            grid[i as usize].push(Node::default());
-        }
-    }
-
-    for node in nodes {
-        let Node { x, y, .. } = node;
-        grid[y as usize][x as usize] = node;
-    }
-
-    return grid;
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -191,11 +163,12 @@ mod tests {
             [0, 0, 0, 0, 0],
         ];
 
-        let mut nodes: Vec<Node> = Vec::new();
+        let mut grid: Vec<Vec<Node>> = Vec::new();
 
         for y in 0..grid_w.len() {
+            grid.push(Vec::new());
             for x in 0..grid_w[y].len() {
-                nodes.push(Node {
+                grid[y].push(Node {
                     id: format!("{},{}", x, y),
                     x: x as u32,
                     y: y as u32,
@@ -209,11 +182,11 @@ mod tests {
             }
         }
 
-        let grid = get_grid(nodes, grid_w.len() as u32, grid_w[0].len() as u32);
+        //let grid = get_grid(nodes, grid_w.len() as u32, grid_w[0].len() as u32);
 
         assert_eq!(grid.len(), 5);
 
         let path = astar(grid, 0, 0, 4, 3);
-        assert_eq!(path.path.len(), 3);
+        assert_eq!(path.path.len(), 10);
     }
 }
