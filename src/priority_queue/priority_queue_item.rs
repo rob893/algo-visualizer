@@ -24,3 +24,27 @@ where
         self.priority.cmp(&other.priority)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn priority_queue_item() {
+        let item_1 = PriorityQueueItem {
+            item: 5,
+            priority: 10,
+        };
+        let item_2 = PriorityQueueItem {
+            item: 10,
+            priority: 5,
+        };
+        let item_3 = PriorityQueueItem {
+            item: 10,
+            priority: 10,
+        };
+
+        assert_eq!(item_1 > item_2, true);
+        assert_eq!(item_1 == item_3, true);
+    }
+}

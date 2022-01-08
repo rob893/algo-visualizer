@@ -151,7 +151,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
+    fn astar_works() {
         let w: i32 = -1;
         let h = 1000;
 

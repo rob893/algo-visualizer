@@ -2,8 +2,6 @@ import './App.css';
 import { useState, useEffect } from 'react';
 import { Node, wasmService } from './services/WasmService';
 
-wasmService.init();
-
 function useKeyPress(targetKey: string): boolean {
   const [keyPressed, setKeyPressed] = useState(false);
 
