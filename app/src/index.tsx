@@ -1,15 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { wasmService } from './services/WasmService';
+import theme from './theme';
 
 wasmService.init();
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

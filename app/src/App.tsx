@@ -1,40 +1,8 @@
+import Button from '@mui/material/Button';
 import './App.css';
-import { useState, useEffect } from 'react';
+import { useKeyPress } from './hooks/useKeyPress';
 import { Node, wasmService } from './services/WasmService';
-
-function useKeyPress(targetKey: string): boolean {
-  const [keyPressed, setKeyPressed] = useState(false);
-
-  const downHandler = ({ key }: KeyboardEvent): void => {
-    if (key === targetKey) {
-      setKeyPressed(true);
-    }
-  };
-
-  const upHandler = ({ key }: KeyboardEvent): void => {
-    if (key === targetKey) {
-      setKeyPressed(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', downHandler);
-    window.addEventListener('keyup', upHandler);
-
-    return () => {
-      window.removeEventListener('keydown', downHandler);
-      window.removeEventListener('keyup', upHandler);
-    };
-  });
-
-  return keyPressed;
-}
-
-async function wait(ms: number): Promise<void> {
-  return new Promise(res => {
-    setTimeout(res, ms);
-  });
-}
+import { wait } from './utilities/utilities';
 
 async function thing({ x: sx, y: sy }: Node, { x: ex, y: ey }: Node, grid: Node[][]): Promise<Node[]> {
   const res = await wasmService.findPath(sx, sy, ex, ey, grid);
@@ -138,12 +106,12 @@ function App(): JSX.Element {
   const ePressed = useKeyPress('e');
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button onClick={doTest}>Do Test</button>
-        <button onClick={doFib}>Do Fib</button>
-        <button onClick={doSum}>Do Sum</button>
-        <button
+    <div>
+      <header>
+        <Button onClick={doTest}>Do Test</Button>
+        <Button onClick={doFib}>Do Fib</Button>
+        <Button onClick={doSum}>Do Sum</Button>
+        <Button
           onClick={() => {
             nodeGrid.flat().forEach(node => {
               node.passable = true;
@@ -157,8 +125,8 @@ function App(): JSX.Element {
           }}
         >
           Clear
-        </button>
-        <button onClick={() => thing(start, end, nodeGrid)}>Do Thing</button>
+        </Button>
+        <Button onClick={() => thing(start, end, nodeGrid)}>Do Thing</Button>
 
         <table id="grid">
           <tbody>
