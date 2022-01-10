@@ -3,8 +3,19 @@ import './App.css';
 import { useKeyPress } from './hooks/useKeyPress';
 import { Node, wasmService } from './services/WasmService';
 import { wait } from './utilities/utilities';
+import { Universe } from './wasm/algo_visualizer';
 
 async function thing({ x: sx, y: sy }: Node, { x: ex, y: ey }: Node, grid: Node[][]): Promise<Node[]> {
+  const universe = new Universe(35, 15);
+  const node = universe.get_cell(1, 0);
+  node.weight = 69;
+  await wait(100);
+  const node2 = universe.get_cell(1, 0);
+  console.log(node2);
+  const startT = new Date().getTime();
+  const uPath = universe.find_path(sx, sy, ex, ey);
+  console.log(`u path done in ${new Date().getTime() - startT}ms!`);
+  console.log(uPath);
   const res = wasmService.findPath(sx, sy, ex, ey, grid);
 
   for (const v of res.processed) {
