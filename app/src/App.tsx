@@ -5,7 +5,7 @@ import { Node, wasmService } from './services/WasmService';
 import { wait } from './utilities/utilities';
 
 async function thing({ x: sx, y: sy }: Node, { x: ex, y: ey }: Node, grid: Node[][]): Promise<Node[]> {
-  const res = await wasmService.findPath(sx, sy, ex, ey, grid);
+  const res = wasmService.findPath(sx, sy, ex, ey, grid);
 
   for (const v of res.processed) {
     const ele = document.getElementById(v.id);
@@ -65,7 +65,7 @@ let start = nodeGrid[0][0];
 let end = nodeGrid[5][5];
 
 function App(): JSX.Element {
-  async function doFib(): Promise<void> {
+  function doFib(): void {
     const fibNumber = 47;
 
     const jsStart = new Date().getTime();
@@ -74,19 +74,19 @@ function App(): JSX.Element {
     console.log(`JS fib complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
 
     const wasmStart = new Date().getTime();
-    const f = await wasmService.fib(fibNumber);
+    const f = wasmService.fib(fibNumber);
     const wasmEnd = new Date().getTime();
     console.log(`WASM fib complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
   }
 
-  async function doTest(): Promise<void> {
-    const f = await wasmService.test([1, 2, 3]);
+  function doTest(): void {
+    const f = wasmService.test([1, 2, 3]);
     console.log(f);
   }
 
-  async function doSum(): Promise<void> {
+  function doSum(): void {
     const sumArr: number[] = [];
-    for (let i = 0; i < 100000; i++) {
+    for (let i = 0; i < 10000000; i++) {
       sumArr.push(1);
     }
 
@@ -96,7 +96,7 @@ function App(): JSX.Element {
     console.log(`JS sum complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
 
     const wasmStart = new Date().getTime();
-    const f = await wasmService.sum(sumArr);
+    const f = wasmService.sum(sumArr);
     const wasmEnd = new Date().getTime();
     console.log(`WASM sum complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
   }

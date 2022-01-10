@@ -16,30 +16,25 @@ export interface PathResult {
 export class WasmService {
   private isInit = false;
 
-  public async fib(n: number): Promise<number> {
-    await this.init();
+  public fib(n: number): number {
+    this.assertInit();
     return fib(n);
   }
 
-  public async test(n: number[]): Promise<number[]> {
-    await this.init();
+  public test(n: number[]): number[] {
+    this.assertInit();
     return [...test(Int32Array.from(n))];
   }
 
-  public async sum(n: number[]): Promise<number> {
-    await this.init();
+  public sum(n: number[]): number {
+    this.assertInit();
     return sum(Int32Array.from(n));
   }
 
-  public async findPath(
-    startX: number,
-    startY: number,
-    endX: number,
-    endY: number,
-    nodes: Node[][]
-  ): Promise<PathResult> {
+  public findPath(startX: number, startY: number, endX: number, endY: number, nodes: Node[][]): PathResult {
+    this.assertInit();
+
     const startTime = new Date().getTime();
-    await this.init();
     const res = findPath(startX, startY, endX, endY, nodes);
     console.log(`Path found in ${new Date().getTime() - startTime}ms!`);
 
@@ -53,11 +48,17 @@ export class WasmService {
     }
 
     const start = new Date().getTime();
-    //await init();
+    await init();
     const end = new Date().getTime();
 
     this.isInit = true;
     console.log(`WASM is now ready in ${end - start}ms!`);
+  }
+
+  private assertInit(): void {
+    if (!this.isInit) {
+      throw new Error('WASM is not initialized! Please call init() before using wasm functions.');
+    }
   }
 }
 
