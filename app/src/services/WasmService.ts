@@ -53,7 +53,7 @@ export class WasmService {
     }
 
     const start = new Date().getTime();
-    await init();
+    //await init();
     const end = new Date().getTime();
 
     this.isInit = true;
