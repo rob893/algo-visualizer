@@ -1,25 +1,34 @@
 import Button from '@mui/material/Button';
 import './App.css';
 import { useKeyPress } from './hooks/useKeyPress';
-import { Node, wasmService } from './services/WasmService';
+import { wasmService } from './services/WasmService';
 import { wait } from './utilities/utilities';
-import { Universe } from './wasm/algo_visualizer';
 
-async function thing({ x: sx, y: sy }: Node, { x: ex, y: ey }: Node, grid: Node[][]): Promise<Node[]> {
-  const universe = new Universe(35, 15);
-  const node = universe.get_cell(1, 0);
-  node.weight = 69;
-  await wait(100);
-  const node2 = universe.get_cell(1, 0);
-  console.log(node2);
-  const startT = new Date().getTime();
-  const uPath = universe.find_path(sx, sy, ex, ey);
-  console.log(`u path done in ${new Date().getTime() - startT}ms!`);
-  console.log(uPath);
-  const res = wasmService.findPath(sx, sy, ex, ey, grid);
+type Point = { x: number; y: number };
 
-  for (const v of res.processed) {
-    const ele = document.getElementById(v.id);
+function getKey(x: number, y: number): string;
+function getKey(node: Point): string;
+function getKey(xOrNode: number | Point, y?: number): string {
+  if (typeof xOrNode === 'number') {
+    return `${xOrNode},${y}`;
+  }
+
+  return `${xOrNode.x},${xOrNode.y}`;
+}
+
+function getPoint(key: string): Point {
+  const [x, y] = key.split(',');
+  return { x: Number(x), y: Number(y) };
+}
+
+async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promise<void> {
+  const t0 = performance.now();
+  const res = wasmService.universe.findPath(sx, sy, ex, ey);
+  console.log(`u path done in ${performance.now() - t0}ms!`);
+  console.log(res);
+
+  for (const visitedNode of res.processed) {
+    const ele = document.getElementById(getKey(visitedNode));
 
     if (ele) {
       ele.className = 'visited';
@@ -27,107 +36,42 @@ async function thing({ x: sx, y: sy }: Node, { x: ex, y: ey }: Node, grid: Node[
     }
   }
 
-  for (const p of res.path) {
-    const ele = document.getElementById(p.id);
+  for (const pathNode of res.path) {
+    const ele = document.getElementById(getKey(pathNode));
 
     if (ele) {
       ele.className = 'path';
       await wait(150);
     }
   }
-
-  console.log(res);
-
-  //console.log(ans);
-
-  return [];
 }
 
-function fibJS(n: number): number {
-  if (n <= 2) {
-    return 1;
-  }
-
-  return fibJS(n - 1) + fibJS(n - 2);
-}
-
-function sumJs(n: number[]): number {
-  return n.reduce((a, b) => a + b);
-}
-
-const getKey = (x: number, y: number): any => {
-  return `${x},${y}`;
-};
-
-const nodeGrid: Node[][] = [];
-const nodeLookup = new Map<string, Node>();
-
-for (let y = 0; y < 15; y++) {
-  nodeGrid.push([]);
-  for (let x = 0; x < 35; x++) {
-    const node = { id: getKey(x, y), x, y, passable: true, weight: 0 };
-    nodeLookup.set(node.id, node);
-
-    nodeGrid[y].push(node);
-  }
-}
-
-let start = nodeGrid[0][0];
-let end = nodeGrid[5][5];
+let start = '0,0';
+let end = '5,5';
 
 function App(): JSX.Element {
-  function doFib(): void {
-    const fibNumber = 47;
-
-    const jsStart = new Date().getTime();
-    const fjs = fibJS(fibNumber);
-    const jsEnd = new Date().getTime();
-    console.log(`JS fib complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
-
-    const wasmStart = new Date().getTime();
-    const f = wasmService.fib(fibNumber);
-    const wasmEnd = new Date().getTime();
-    console.log(`WASM fib complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
-  }
-
-  function doTest(): void {
-    const f = wasmService.test([1, 2, 3]);
-    console.log(f);
-  }
-
-  function doSum(): void {
-    const sumArr: number[] = [];
-    for (let i = 0; i < 10000000; i++) {
-      sumArr.push(1);
-    }
-
-    const jsStart = new Date().getTime();
-    const fjs = sumJs(sumArr);
-    const jsEnd = new Date().getTime();
-    console.log(`JS sum complete in ${(jsEnd - jsStart) / 1000} seconds: ${fjs}`);
-
-    const wasmStart = new Date().getTime();
-    const f = wasmService.sum(sumArr);
-    const wasmEnd = new Date().getTime();
-    console.log(`WASM sum complete in ${(wasmEnd - wasmStart) / 1000} seconds: ${f}`);
-  }
-
   const wPressed = useKeyPress('w');
   const sPressed = useKeyPress('s');
   const ePressed = useKeyPress('e');
 
+  const gridKeys: string[][] = [];
+
+  for (let y = 0; y < 15; y++) {
+    gridKeys.push([]);
+
+    for (let x = 0; x < 35; x++) {
+      gridKeys[y].push(getKey(x, y));
+    }
+  }
+
   return (
     <div>
       <header>
-        <Button onClick={doTest}>Do Test</Button>
-        <Button onClick={doFib}>Do Fib</Button>
-        <Button onClick={doSum}>Do Sum</Button>
         <Button
           onClick={() => {
-            nodeGrid.flat().forEach(node => {
-              node.passable = true;
-              node.weight = 0;
-              const ele = document.getElementById(node.id);
+            wasmService.universe.reset();
+            gridKeys.flat().forEach(nodeKey => {
+              const ele = document.getElementById(nodeKey);
 
               if (ele) {
                 ele.className = 'unvisited';
@@ -137,25 +81,28 @@ function App(): JSX.Element {
         >
           Clear
         </Button>
-        <Button onClick={() => thing(start, end, nodeGrid)}>Do Thing</Button>
+        <Button onClick={() => drawPath(getPoint(start), getPoint(end))}>Find Path!</Button>
 
         <table id="grid">
           <tbody>
-            {nodeGrid.map((row, y) => {
+            {gridKeys.map((row, y) => {
               return (
                 <tr key={y}>
-                  {row.map(node => {
+                  {row.map(nodeKey => {
+                    const point = getPoint(nodeKey);
+                    const node = wasmService.universe.getCell(point.x, point.y);
+
                     let className = 'unvisited';
 
                     if (node.weight > 0) {
                       className = 'heavy';
                     }
 
-                    if (node === start) {
+                    if (nodeKey === start) {
                       className = 'start';
                     }
 
-                    if (node === end) {
+                    if (nodeKey === end) {
                       className = 'end';
                     }
 
@@ -165,55 +112,58 @@ function App(): JSX.Element {
 
                     return (
                       <td
-                        key={getKey(node.x, node.y)}
+                        key={nodeKey}
                         width="25px"
                         height="25px"
                         className={className}
-                        id={getKey(node.x, node.y)}
+                        id={nodeKey}
                         onClick={() => {
                           if (wPressed) {
-                            node.passable = true;
-                            node.weight = 15;
-                            const ele = document.getElementById(node.id);
+                            wasmService.universe.setWeight(node.x, node.y, 15);
+                            wasmService.universe.setPassable(node.x, node.y, true);
+
+                            const ele = document.getElementById(nodeKey);
 
                             if (ele) {
                               ele.className = 'heavy';
                             }
                           } else if (sPressed) {
-                            node.passable = true;
-                            node.weight = 0;
-                            const oldEle = document.getElementById(start.id);
+                            wasmService.universe.setWeight(node.x, node.y, 0);
+                            wasmService.universe.setPassable(node.x, node.y, true);
+
+                            const oldEle = document.getElementById(start);
 
                             if (oldEle) {
                               oldEle.className = 'unvisited';
                             }
 
-                            const ele = document.getElementById(node.id);
+                            const ele = document.getElementById(nodeKey);
 
                             if (ele) {
                               ele.className = 'start';
                             }
 
-                            start = node;
+                            start = nodeKey;
                           } else if (ePressed) {
-                            node.passable = true;
-                            node.weight = 0;
-                            const oldEle = document.getElementById(end.id);
+                            wasmService.universe.setWeight(node.x, node.y, 0);
+                            wasmService.universe.setPassable(node.x, node.y, true);
+
+                            const oldEle = document.getElementById(end);
 
                             if (oldEle) {
                               oldEle.className = 'unvisited';
                             }
 
-                            const ele = document.getElementById(node.id);
+                            const ele = document.getElementById(nodeKey);
 
                             if (ele) {
                               ele.className = 'end';
                             }
 
-                            end = node;
+                            end = nodeKey;
                           } else {
-                            node.passable = false;
-                            const ele = document.getElementById(node.id);
+                            wasmService.universe.setPassable(node.x, node.y, false);
+                            const ele = document.getElementById(nodeKey);
 
                             if (ele) {
                               ele.className = 'wall';

@@ -1,44 +1,17 @@
-import init, { fib, test, sum, find_path as findPath } from '../wasm/algo_visualizer';
-
-export interface Node {
-  id: string;
-  x: number;
-  y: number;
-  weight: number;
-  passable: boolean;
-}
-
-export interface PathResult {
-  path: Node[];
-  processed: Node[];
-}
+import init, { Universe } from '../wasm/algo_visualizer';
 
 export class WasmService {
   private isInit = false;
+  private universeObj?: Universe;
 
-  public fib(n: number): number {
-    this.assertInit();
-    return fib(n);
-  }
-
-  public test(n: number[]): number[] {
-    this.assertInit();
-    return [...test(Int32Array.from(n))];
-  }
-
-  public sum(n: number[]): number {
-    this.assertInit();
-    return sum(Int32Array.from(n));
-  }
-
-  public findPath(startX: number, startY: number, endX: number, endY: number, nodes: Node[][]): PathResult {
+  public get universe(): Universe {
     this.assertInit();
 
-    const startTime = new Date().getTime();
-    const res = findPath(startX, startY, endX, endY, nodes);
-    console.log(`Path found in ${new Date().getTime() - startTime}ms!`);
+    if (!this.universeObj) {
+      this.universeObj = new Universe(35, 15);
+    }
 
-    return res;
+    return this.universeObj;
   }
 
   public async init(): Promise<void> {
