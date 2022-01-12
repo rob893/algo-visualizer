@@ -47,7 +47,7 @@ jobs:
       - name: Get build version
         uses: tyankatsu0105/read-package-version-actions@v1
         with:
-          path: app/package.json
+          path: app/
         id: package-version
       - name: Echo Version
         run: ls && echo ${{ steps.package-version.outputs.version }}
