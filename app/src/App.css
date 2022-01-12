@@ -1,34 +1,168 @@
-.unvisited {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: white;
+table {
+  border-collapse: collapse;
 }
 
-.visited {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: blue;
+td {
+  border: 1px solid rgba(98, 0, 234, 0.75);
 }
 
 .path {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: red;
+  animation-name: pathAnimation;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
 }
 
 .wall {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: black;
+  animation-name: wallAnimation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
 }
 
 .heavy {
-  border: 1px solid rgb(175, 216, 248);
   background-color: yellow;
 }
 
 .start {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: green;
+  animation-name: startAnimation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
 }
 
 .end {
-  border: 1px solid rgb(175, 216, 248);
-  background-color: brown;
+  animation-name: endAnimation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+.current {
+  background: radial-gradient(rgba(76, 175, 80, 0.25), rgba(76, 175, 80, 0.5));
+  border: 1px double rgba(76, 175, 80, 1);
+}
+
+.visited {
+  animation-name: visitedAnimation;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+@keyframes wallAnimation {
+  0% {
+    background: radial-gradient(rgba(213, 0, 0, 0), rgba(213, 0, 0, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(213, 0, 0, 0), rgba(213, 0, 0, 0.5));
+    border: 1px double #f44336;
+  }
+}
+
+@keyframes startAnimation {
+  0% {
+    background: radial-gradient(rgba(255, 235, 59, 0), rgba(255, 235, 59, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(255, 235, 59, 0), rgba(255, 235, 59, 0.5));
+    border: 1px double rgba(255, 235, 59, 1);
+  }
+}
+
+@keyframes endAnimation {
+  0% {
+    background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
+    border: 1px double rgba(255, 87, 34, 1);
+  }
+}
+
+@keyframes visitedAnimation {
+  0% {
+    transform: scale(0.3);
+    background: rgba(0, 23, 43, 0.75);
+    border-radius: 100%;
+  }
+
+  50% {
+    background: rgba(0, 131, 143, 0.75);
+  }
+
+  75% {
+    transform: scale(1.2);
+    background: rgba(29, 233, 182, 0.75);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.5));
+    border: 1px double rgba(0, 188, 212, 1);
+  }
+}
+
+@keyframes pathAnimation {
+  0% {
+    transform: scale(0.3);
+    background: rgba(0, 66, 0, 0.75);
+    border-radius: 100%;
+  }
+
+  50% {
+    background: rgba(27, 94, 32, 0.75);
+  }
+
+  75% {
+    transform: scale(1.2);
+    background: rgba(29, 233, 182, 0.75);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(76, 175, 80, 0), rgba(76, 175, 80, 0.5));
+    border: 1px double rgba(76, 175, 80, 1);
+  }
 }

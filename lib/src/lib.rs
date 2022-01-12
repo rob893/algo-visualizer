@@ -73,12 +73,13 @@ impl Universe {
         let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
 
         frontier.enqueue(start_node, 0);
-        result.processed.push(start_node.clone());
+        //result.processed.push(start_node.clone());
 
         cost_so_far.insert(start_node, 0);
 
         while frontier.count() > 0 {
             let current = frontier.dequeue().unwrap();
+            result.processed.push(current.clone());
 
             if current == end_node {
                 return Universe::construct_path(result, came_from, end_node);
@@ -90,7 +91,7 @@ impl Universe {
                 let next_cost = cost_so_far.get(next);
 
                 if next_cost == None || new_cost < *next_cost.unwrap() {
-                    result.processed.push(next.clone());
+                    //result.processed.push(next.clone());
                     cost_so_far.insert(next, new_cost);
                     let priority = -1 * (new_cost + Universe::heuristic(next, end_node));
                     frontier.enqueue(next, priority);

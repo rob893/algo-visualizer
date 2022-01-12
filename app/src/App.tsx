@@ -27,12 +27,23 @@ async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promi
   console.log(`u path done in ${performance.now() - t0}ms!`);
   console.log(res);
 
+  let prev: HTMLElement | null = null;
+
   for (const visitedNode of res.processed) {
     const ele = document.getElementById(getKey(visitedNode));
 
     if (ele) {
-      ele.className = 'visited';
+      if (ele.className !== 'start' && ele.className !== 'end') {
+        ele.className = 'current';
+      }
+
       await wait(100);
+
+      prev = ele;
+
+      if (prev.className !== 'start' && prev.className !== 'end') {
+        prev.className = 'visited';
+      }
     }
   }
 
@@ -40,8 +51,17 @@ async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promi
     const ele = document.getElementById(getKey(pathNode));
 
     if (ele) {
-      ele.className = 'path';
-      await wait(150);
+      if (ele.className !== 'start' && ele.className !== 'end') {
+        ele.className = 'current';
+      }
+
+      await wait(100);
+
+      prev = ele;
+
+      if (prev.className !== 'start' && prev.className !== 'end') {
+        prev.className = 'path';
+      }
     }
   }
 }
@@ -53,6 +73,7 @@ function App(): JSX.Element {
   const wPressed = useKeyPress('w');
   const sPressed = useKeyPress('s');
   const ePressed = useKeyPress('e');
+  const aPressed = useKeyPress('a');
 
   const gridKeys: string[][] = [];
 
@@ -74,12 +95,25 @@ function App(): JSX.Element {
               const ele = document.getElementById(nodeKey);
 
               if (ele) {
-                ele.className = 'unvisited';
+                ele.className = '';
               }
             });
           }}
         >
           Clear
+        </Button>
+        <Button
+          onClick={() => {
+            gridKeys.flat().forEach(nodeKey => {
+              const ele = document.getElementById(nodeKey);
+
+              if (ele && (ele.className === 'visited' || ele.className === 'path')) {
+                ele.className = '';
+              }
+            });
+          }}
+        >
+          Clear Path
         </Button>
         <Button onClick={() => drawPath(getPoint(start), getPoint(end))}>Find Path!</Button>
 
@@ -90,11 +124,11 @@ function App(): JSX.Element {
                 <tr key={y}>
                   {row.map(nodeKey => {
                     const point = getPoint(nodeKey);
-                    const node = wasmService.universe.getCell(point.x, point.y);
+                    const nodeOuter = wasmService.universe.getCell(point.x, point.y);
 
-                    let className = 'unvisited';
+                    let className = '';
 
-                    if (node.weight > 0) {
+                    if (nodeOuter.weight > 0) {
                       className = 'heavy';
                     }
 
@@ -106,7 +140,7 @@ function App(): JSX.Element {
                       className = 'end';
                     }
 
-                    if (!node.passable) {
+                    if (!nodeOuter.passable) {
                       className = 'wall';
                     }
 
@@ -117,7 +151,27 @@ function App(): JSX.Element {
                         height="25px"
                         className={className}
                         id={nodeKey}
+                        onMouseEnter={() => {
+                          if (aPressed) {
+                            const point = getPoint(nodeKey);
+                            const node = wasmService.universe.getCell(point.x, point.y);
+
+                            const ele = document.getElementById(nodeKey);
+
+                            if (!ele) {
+                              throw new Error('Invalid node');
+                            }
+
+                            if (node.passable) {
+                              wasmService.universe.setPassable(node.x, node.y, false);
+                              ele.className = 'wall';
+                            }
+                          }
+                        }}
                         onClick={() => {
+                          const point = getPoint(nodeKey);
+                          const node = wasmService.universe.getCell(point.x, point.y);
+
                           if (wPressed) {
                             wasmService.universe.setWeight(node.x, node.y, 15);
                             wasmService.universe.setPassable(node.x, node.y, true);
@@ -162,11 +216,18 @@ function App(): JSX.Element {
 
                             end = nodeKey;
                           } else {
-                            wasmService.universe.setPassable(node.x, node.y, false);
                             const ele = document.getElementById(nodeKey);
 
-                            if (ele) {
+                            if (!ele) {
+                              throw new Error('Invalid node');
+                            }
+
+                            if (node.passable) {
+                              wasmService.universe.setPassable(node.x, node.y, false);
                               ele.className = 'wall';
+                            } else {
+                              wasmService.universe.setPassable(node.x, node.y, true);
+                              ele.className = 'unvisited';
                             }
                           }
                         }}
