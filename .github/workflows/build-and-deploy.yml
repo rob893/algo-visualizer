@@ -70,6 +70,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           name: id_rsa
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      - name: Test Connection
+        run: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'ls'
       - name: Clean remote directories
         run: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'mkdir -p /var/www/html/algo-visualizer && rm -rf /var/www/html/algo-visualizer/* '
       - name: Copy builds to remote server
@@ -89,7 +91,7 @@ jobs:
       - name: Copy to build directory
         run: cp -r algo-visualizer-b${{ github.run_number }}-v* dist
       - name: Deploy to Github Pages
-        uses: JamesIves/github-pages-deploy-action@4.2.2
+        uses: JamesIves/github-pages-deploy-action@v4.2.2
         with:
           branch: gh-pages
           folder: dist
