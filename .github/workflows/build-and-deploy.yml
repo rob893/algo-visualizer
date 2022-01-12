@@ -47,31 +47,33 @@ jobs:
       - name: Get build version
         uses: tyankatsu0105/read-package-version-actions@v1
         id: package-version
+      - name: Echo Version
+        run: ls && echo ${{ steps.package-version.outputs.version }}
       - name: Upload build
         uses: actions/upload-artifact@v2
         with:
           name: algo-visualizer-b${{ github.run_number }}-v${{ steps.package-version.outputs.version }}
-          path: build/
+          path: app/build/
 
-  # deploy-digital-ocean:
-  #   name: Deploy to Digital Ocean Server
-  #   runs-on: ubuntu-latest
-  #   needs:
-  #     - build
+  deploy-digital-ocean:
+    name: Deploy to Digital Ocean Server
+    runs-on: ubuntu-latest
+    needs:
+      - build
 
-  #   steps:
-  #     - name: Download build artifacts
-  #       uses: actions/download-artifact@v2
-  #     - name: Install SSH key
-  #       uses: shimataro/ssh-key-action@v2
-  #       with:
-  #         key: ${{ secrets.SERVER_SSH_KEY }}
-  #         name: id_rsa
-  #         known_hosts: ${{ secrets.KNOWN_HOSTS }}
-  #     - name: Clean remote directories
-  #       run: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'mkdir -p /var/www/html/wow-market-watcher-ui && rm -rf /var/www/html/wow-market-watcher-ui/* '
-  #     - name: Copy builds to remote server
-  #       run: scp -r ./wow-market-watcher-ui-b${{ github.run_number }}-v*/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/var/www/html/wow-market-watcher-ui
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+      - name: Clean remote directories
+        run: ssh ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} 'mkdir -p /var/www/html/algo-visualizer && rm -rf /var/www/html/algo-visualizer/* '
+      - name: Copy builds to remote server
+        run: scp -r ./algo-visualizer-b${{ github.run_number }}-v*/* ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}:/var/www/html/algo-visualizer
 
   deploy-github-pages:
     name: Deploy to Github Pages
@@ -87,7 +89,7 @@ jobs:
       - name: Copy to build directory
         run: cp -r algo-visualizer-b${{ github.run_number }}-v* dist
       - name: Deploy to Github Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: JamesIves/github-pages-deploy-action@4.2.2
         with:
           branch: gh-pages
           folder: dist
