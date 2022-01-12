@@ -46,6 +46,8 @@ jobs:
         run: npm run build
       - name: Get build version
         uses: tyankatsu0105/read-package-version-actions@v1
+        with:
+          path: app/package.json
         id: package-version
       - name: Echo Version
         run: ls && echo ${{ steps.package-version.outputs.version }}
