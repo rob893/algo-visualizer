@@ -51,7 +51,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: algo-visualizer-b${{ github.run_number }}-v${{ steps.package-version.outputs.version }}
-          path: ./build
+          path: build/
 
   # deploy-digital-ocean:
   #   name: Deploy to Digital Ocean Server

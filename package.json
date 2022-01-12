@@ -1,7 +1,6 @@
 {
   "scripts": {
     "build-wasm": "rm -rf ./app/src/wasm && cd lib && wasm-pack build --target web --out-dir ../app/src/wasm",
-    "build-wasm2": "rm -rf ./app/src/wasm && cd lib && wasm-pack build --target bundler --out-dir ../app/src/wasm",
     "start": "cd ./app && npm start"
   }
 }
