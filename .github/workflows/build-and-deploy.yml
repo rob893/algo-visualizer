@@ -12,10 +12,6 @@ on:
   push:
     branches: [master]
 
-defaults:
-  run:
-    working-directory: app
-
 jobs:
   build:
     name: Build Project
@@ -39,18 +35,18 @@ jobs:
       - name: Install WASM Pack
         uses: jetli/wasm-pack-action@v0.3.0
       - name: Build WASM
-        run: cd .. && npm run build-wasm 
+        run: npm run build-wasm 
       - name: Install packages
-        run: npm i
+        run: cd app && npm i
       - name: Build project
-        run: npm run build
+        run: cd app && npm run build
       - name: Get build version
         uses: tyankatsu0105/read-package-version-actions@v1
         with:
           path: app/
         id: package-version
       - name: Echo Version
-        run: ls && echo ${{ steps.package-version.outputs.version }}
+        run: echo ${{ steps.package-version.outputs.version }}
       - name: Upload build
         uses: actions/upload-artifact@v2
         with:
