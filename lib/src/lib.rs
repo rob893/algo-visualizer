@@ -73,7 +73,6 @@ impl Universe {
         let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
 
         frontier.enqueue(start_node, 0);
-        //result.processed.push(start_node.clone());
 
         cost_so_far.insert(start_node, 0);
 
@@ -91,7 +90,6 @@ impl Universe {
                 let next_cost = cost_so_far.get(next);
 
                 if next_cost == None || new_cost < *next_cost.unwrap() {
-                    //result.processed.push(next.clone());
                     cost_so_far.insert(next, new_cost);
                     let priority = -1 * (new_cost + Universe::heuristic(next, end_node));
                     frontier.enqueue(next, priority);
@@ -144,8 +142,8 @@ impl Universe {
     }
 
     fn heuristic(a: &Node, b: &Node) -> i32 {
-        let distance_x = a.x as i32 - b.x as i32;
-        let distance_y = a.y as i32 - b.y as i32;
+        let distance_x = (a.x as i32 - b.x as i32).abs();
+        let distance_y = (a.y as i32 - b.y as i32).abs();
 
         return (distance_x * distance_x) + (distance_y * distance_y);
     }
