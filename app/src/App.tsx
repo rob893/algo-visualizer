@@ -1,3 +1,4 @@
+import { AppBar, Box, Toolbar } from '@mui/material';
 import Button from '@mui/material/Button';
 import './App.css';
 import GridNode from './components/GridNode';
@@ -54,10 +55,10 @@ let end = '5,5';
 function App(): JSX.Element {
   const gridKeys: string[][] = [];
 
-  for (let y = 0; y < 15; y++) {
+  for (let y = 0; y < 25; y++) {
     gridKeys.push([]);
 
-    for (let x = 0; x < 35; x++) {
+    for (let x = 0; x < 55; x++) {
       gridKeys[y].push(getKey(x, y));
     }
   }
@@ -77,23 +78,27 @@ function App(): JSX.Element {
 
   return (
     <div>
-      <header>
-        <Button onClick={handleReset}>Clear</Button>
-        <Button
-          onClick={() => {
-            gridKeys.flat().forEach(nodeKey => {
-              const ele = document.getElementById(nodeKey);
+      <AppBar position="sticky">
+        <Toolbar>
+          <Button onClick={handleReset}>Clear</Button>
+          <Button
+            onClick={() => {
+              gridKeys.flat().forEach(nodeKey => {
+                const ele = document.getElementById(nodeKey);
 
-              if (ele && (ele.className === 'visited' || ele.className === 'path')) {
-                ele.className = '';
-              }
-            });
-          }}
-        >
-          Clear Path
-        </Button>
-        <Button onClick={() => drawPath(getPoint(start), getPoint(end))}>Find Path!</Button>
+                if (ele && (ele.className === 'visited' || ele.className === 'path')) {
+                  ele.className = '';
+                }
+              });
+            }}
+          >
+            Clear Path
+          </Button>
+          <Button onClick={() => drawPath(getPoint(start), getPoint(end))}>Find Path!</Button>
+        </Toolbar>
+      </AppBar>
 
+      <Box paddingTop={2} display="flex" justifyContent="center">
         <table id="grid">
           <tbody>
             {gridKeys.map((row, y) => {
@@ -129,7 +134,7 @@ function App(): JSX.Element {
             })}
           </tbody>
         </table>
-      </header>
+      </Box>
     </div>
   );
 }

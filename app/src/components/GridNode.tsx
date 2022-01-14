@@ -25,65 +25,69 @@ export default function GridNode({
 
   const [className, setClassName] = useState(initialClass);
 
+  function handleOnMouseEnter(): void {
+    if (inputService.getMouseButton(MouseButton.LeftMouseButton)) {
+      if (node.passable) {
+        wasmService.universe.setPassable(node.x, node.y, false);
+        setClassName('wall');
+      }
+    }
+  }
+
+  function handleOnClick(): void {
+    if (inputService.getKey('w')) {
+      wasmService.universe.setWeight(node.x, node.y, 15);
+      wasmService.universe.setPassable(node.x, node.y, true);
+
+      setClassName('heavy');
+    } else if (inputService.getKey('s')) {
+      wasmService.universe.setWeight(node.x, node.y, 0);
+      wasmService.universe.setPassable(node.x, node.y, true);
+
+      const oldEle = document.getElementById(startKey);
+
+      if (oldEle) {
+        oldEle.className = 'unvisited';
+      }
+
+      setClassName('start');
+      onSetAsStart(nodeKey);
+    } else if (inputService.getKey('e')) {
+      wasmService.universe.setWeight(node.x, node.y, 0);
+      wasmService.universe.setPassable(node.x, node.y, true);
+
+      const oldEle = document.getElementById(endKey);
+
+      if (oldEle) {
+        oldEle.className = 'unvisited';
+      }
+
+      setClassName('end');
+      onSetAsEnd(nodeKey);
+    } else {
+      if (node.passable) {
+        wasmService.universe.setPassable(node.x, node.y, false);
+        setClassName('wall');
+      } else {
+        wasmService.universe.setPassable(node.x, node.y, true);
+        setClassName('');
+      }
+    }
+  }
+
   return (
     <td
       key={nodeKey}
-      width="25px"
-      height="25px"
+      style={{
+        minWidth: '25px',
+        minHeight: '25px',
+        width: '25px',
+        height: '25px'
+      }}
       className={className}
       id={nodeKey}
-      onMouseEnter={() => {
-        if (inputService.getMouseButton(MouseButton.LeftMouseButton)) {
-          if (node.passable) {
-            wasmService.universe.setPassable(node.x, node.y, false);
-            setClassName('wall');
-          }
-        }
-      }}
-      onClick={() => {
-        if (inputService.getKey('w')) {
-          wasmService.universe.setWeight(node.x, node.y, 15);
-          wasmService.universe.setPassable(node.x, node.y, true);
-
-          setClassName('heavy');
-        } else if (inputService.getKey('s')) {
-          wasmService.universe.setWeight(node.x, node.y, 0);
-          wasmService.universe.setPassable(node.x, node.y, true);
-
-          const oldEle = document.getElementById(startKey);
-
-          if (oldEle) {
-            oldEle.className = 'unvisited';
-          }
-
-          setClassName('start');
-
-          startKey = nodeKey;
-          onSetAsStart(startKey);
-        } else if (inputService.getKey('e')) {
-          wasmService.universe.setWeight(node.x, node.y, 0);
-          wasmService.universe.setPassable(node.x, node.y, true);
-
-          const oldEle = document.getElementById(endKey);
-
-          if (oldEle) {
-            oldEle.className = 'unvisited';
-          }
-
-          setClassName('end');
-
-          endKey = nodeKey;
-          onSetAsEnd(endKey);
-        } else {
-          if (node.passable) {
-            wasmService.universe.setPassable(node.x, node.y, false);
-            setClassName('wall');
-          } else {
-            wasmService.universe.setPassable(node.x, node.y, true);
-            setClassName('');
-          }
-        }
-      }}
+      onMouseEnter={handleOnMouseEnter}
+      onClick={handleOnClick}
     ></td>
   );
 }

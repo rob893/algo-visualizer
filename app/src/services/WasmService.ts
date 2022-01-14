@@ -8,7 +8,7 @@ export class WasmService {
     this.assertInit();
 
     if (!this.universeObj) {
-      this.universeObj = new Universe(35, 15);
+      this.universeObj = new Universe(55, 25);
     }
 
     return this.universeObj;
