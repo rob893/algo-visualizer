@@ -4,11 +4,13 @@ import './App.css';
 import GridNode from './components/GridNode';
 import { wasmService } from './services/WasmService';
 import { getKey, getPoint, Point, wait } from './utilities/utilities';
+import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 
 async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promise<void> {
   const t0 = performance.now();
-  const res = wasmService.universe.findPath(sx, sy, ex, ey);
+  const res = wasmService.universe.findPath(sx, sy, ex, ey, PathFindingAlgorithm.Dijkstra);
   console.log(`u path done in ${performance.now() - t0}ms!`);
+  console.log(res);
 
   let prev: HTMLElement | null = null;
 

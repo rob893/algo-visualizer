@@ -1,6 +1,9 @@
 use priority_queue::priority_queue::PriorityQueue;
 use serde::Serialize;
-use std::collections::HashMap;
+use std::{
+    collections::{HashMap, VecDeque},
+    hash::Hash,
+};
 use wasm_bindgen::{prelude::*, JsCast};
 
 mod priority_queue;
@@ -24,6 +27,12 @@ interface IPathResponse {
 extern "C" {
     #[wasm_bindgen(typescript_type = "IPathResponse")]
     pub type IPathResponse;
+}
+
+#[wasm_bindgen]
+pub enum PathFindingAlgorithm {
+    Astar,
+    Dijkstra,
 }
 
 #[wasm_bindgen]
@@ -56,6 +65,50 @@ impl Universe {
     fn get_cell_ref(&self, x: u32, y: u32) -> &Node {
         let index = self.get_index(x, y);
         return &self.nodes[index];
+    }
+
+    fn dijkstra(&self, start_x: u32, start_y: u32, end_x: u32, end_y: u32) -> PathResult {
+        let mut result = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let mut frontier: VecDeque<&Node> = VecDeque::new();
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut times: HashMap<&Node, i32> = HashMap::new();
+        let mut came_from: HashMap<&Node, &Node> = HashMap::new();
+
+        for node in &self.nodes {
+            times.insert(node, i32::MAX);
+        }
+
+        times.insert(start_node, 0);
+        frontier.push_back(start_node);
+
+        while frontier.len() > 0 {
+            let current = frontier.pop_front().unwrap();
+            result.processed.push(current.clone());
+
+            if current == end_node {
+                return Universe::construct_path(result, came_from, end_node);
+            }
+
+            for neighbor in self.get_neighbors(current.x, current.y) {
+                let prev_time = times.get(current).unwrap();
+                let new_time = *prev_time + neighbor.weight as i32;
+
+                if new_time < *times.get(neighbor).unwrap() {
+                    times.insert(neighbor, new_time);
+                    came_from.insert(neighbor, current);
+                    frontier.push_back(neighbor);
+                }
+            }
+        }
+
+        return result;
     }
 
     fn astar(&self, start_x: u32, start_y: u32, end_x: u32, end_y: u32) -> PathResult {
@@ -187,8 +240,18 @@ impl Universe {
     }
 
     #[wasm_bindgen(js_name = findPath)]
-    pub fn find_path(&self, start_x: u32, start_y: u32, end_x: u32, end_y: u32) -> IPathResponse {
-        let path = self.astar(start_x, start_y, end_x, end_y);
+    pub fn find_path(
+        &self,
+        start_x: u32,
+        start_y: u32,
+        end_x: u32,
+        end_y: u32,
+        algorithm: PathFindingAlgorithm,
+    ) -> IPathResponse {
+        let path = match algorithm {
+            PathFindingAlgorithm::Dijkstra => self.dijkstra(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::Astar => self.astar(start_x, start_y, end_x, end_y),
+        };
 
         return JsValue::from_serde(&path).unwrap().unchecked_into();
     }
