@@ -1,14 +1,15 @@
 import { AppBar, Box, Toolbar } from '@mui/material';
 import Button from '@mui/material/Button';
+import { useState } from 'react';
 import './App.css';
 import GridNode from './components/GridNode';
 import { wasmService } from './services/WasmService';
 import { getKey, getPoint, Point, wait } from './utilities/utilities';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 
-async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promise<void> {
+async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point, algo: PathFindingAlgorithm): Promise<void> {
   const t0 = performance.now();
-  const res = wasmService.universe.findPath(sx, sy, ex, ey, PathFindingAlgorithm.Dijkstra);
+  const res = wasmService.universe.findPath(sx, sy, ex, ey, algo);
   console.log(`u path done in ${performance.now() - t0}ms!`);
   console.log(res);
 
@@ -51,10 +52,10 @@ async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point): Promi
   }
 }
 
-let start = '0,0';
-let end = '5,5';
-
 function App(): JSX.Element {
+  let start = '0,0';
+  let end = '5,5';
+  let currAlgo = PathFindingAlgorithm.Dijkstra;
   const gridKeys: string[][] = [];
 
   for (let y = 0; y < 25; y++) {
@@ -96,7 +97,9 @@ function App(): JSX.Element {
           >
             Clear Path
           </Button>
-          <Button onClick={() => drawPath(getPoint(start), getPoint(end))}>Find Path!</Button>
+          <Button onClick={() => drawPath(getPoint(start), getPoint(end), currAlgo)}>Find Path!</Button>
+          <Button onClick={() => (currAlgo = PathFindingAlgorithm.Dijkstra)}>Use Dijkstra's!</Button>
+          <Button onClick={() => (currAlgo = PathFindingAlgorithm.Astar)}>Use A*!</Button>
         </Toolbar>
       </AppBar>
 

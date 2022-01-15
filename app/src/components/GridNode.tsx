@@ -22,7 +22,6 @@ export default function GridNode({
 }: GridNodeProps): JSX.Element {
   const point = getPoint(nodeKey);
   const node = wasmService.universe.getCell(point.x, point.y);
-
   const [className, setClassName] = useState(initialClass);
 
   function handleOnMouseEnter(): void {
@@ -36,11 +35,13 @@ export default function GridNode({
 
   function handleOnClick(): void {
     if (inputService.getKey('w')) {
+      console.log('w pressed');
       wasmService.universe.setWeight(node.x, node.y, 15);
       wasmService.universe.setPassable(node.x, node.y, true);
 
       setClassName('heavy');
     } else if (inputService.getKey('s')) {
+      console.log('s pressed');
       wasmService.universe.setWeight(node.x, node.y, 0);
       wasmService.universe.setPassable(node.x, node.y, true);
 
@@ -53,6 +54,7 @@ export default function GridNode({
       setClassName('start');
       onSetAsStart(nodeKey);
     } else if (inputService.getKey('e')) {
+      console.log('e pressed');
       wasmService.universe.setWeight(node.x, node.y, 0);
       wasmService.universe.setPassable(node.x, node.y, true);
 
@@ -65,6 +67,7 @@ export default function GridNode({
       setClassName('end');
       onSetAsEnd(nodeKey);
     } else {
+      console.log('nothing pressed');
       if (node.passable) {
         wasmService.universe.setPassable(node.x, node.y, false);
         setClassName('wall');
