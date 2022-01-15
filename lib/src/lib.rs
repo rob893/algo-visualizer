@@ -78,12 +78,8 @@ impl Universe {
         let start_node = self.get_cell_ref(start_x, start_y);
         let end_node = self.get_cell_ref(end_x, end_y);
 
-        let mut times: HashMap<&Node, i32> = HashMap::new();
+        let mut times: HashMap<&Node, u32> = HashMap::new();
         let mut came_from: HashMap<&Node, &Node> = HashMap::new();
-
-        for node in &self.nodes {
-            times.insert(node, i32::MAX);
-        }
 
         times.insert(start_node, 0);
         frontier.push_back(start_node);
@@ -98,9 +94,9 @@ impl Universe {
 
             for neighbor in self.get_neighbors(current.x, current.y) {
                 let prev_time = times.get(current).unwrap();
-                let new_time = *prev_time + neighbor.weight as i32;
+                let new_time = *prev_time + neighbor.weight;
 
-                if new_time < *times.get(neighbor).unwrap() {
+                if new_time < *times.get(neighbor).unwrap_or(&u32::MAX) {
                     times.insert(neighbor, new_time);
                     came_from.insert(neighbor, current);
                     frontier.push_back(neighbor);
