@@ -1,3 +1,5 @@
+import { PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
+
 export async function wait(ms: number): Promise<void> {
   return new Promise(res => {
     setTimeout(res, ms);
@@ -19,4 +21,55 @@ export function getKey(xOrNode: number | Point, y?: number): string {
 export function getPoint(key: string): Point {
   const [x, y] = key.split(',');
   return { x: Number(x), y: Number(y) };
+}
+
+export async function drawPath(
+  universe: Universe,
+  { x: sx, y: sy }: Point,
+  { x: ex, y: ey }: Point,
+  algo: PathFindingAlgorithm,
+  speed: number
+): Promise<void> {
+  const t0 = performance.now();
+  const res = universe.findPath(sx, sy, ex, ey, algo);
+  console.log(`u path done in ${performance.now() - t0}ms!`);
+  console.log(res);
+
+  let prev: HTMLElement | null = null;
+
+  for (const visitedNode of res.processed) {
+    const ele = document.getElementById(getKey(visitedNode));
+
+    if (ele) {
+      if (ele.className !== 'start' && ele.className !== 'end') {
+        ele.className = 'current';
+      }
+
+      await wait(speed);
+
+      prev = ele;
+
+      if (prev.className !== 'start' && prev.className !== 'end') {
+        prev.className = 'visited';
+      }
+    }
+  }
+
+  for (const pathNode of res.path) {
+    const ele = document.getElementById(getKey(pathNode));
+
+    if (ele) {
+      if (ele.className !== 'start' && ele.className !== 'end') {
+        ele.className = 'current';
+      }
+
+      await wait(speed);
+
+      prev = ele;
+
+      if (prev.className !== 'start' && prev.className !== 'end') {
+        prev.className = 'path';
+      }
+    }
+  }
 }

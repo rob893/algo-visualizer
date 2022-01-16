@@ -3,57 +3,13 @@ import Button from '@mui/material/Button';
 import './App.css';
 import GridNode from './components/GridNode';
 import { wasmService } from './services/WasmService';
-import { getKey, getPoint, Point, wait } from './utilities/utilities';
+import { drawPath, getKey, getPoint } from './utilities/utilities';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
-
-async function drawPath({ x: sx, y: sy }: Point, { x: ex, y: ey }: Point, algo: PathFindingAlgorithm): Promise<void> {
-  const t0 = performance.now();
-  const res = wasmService.universe.findPath(sx, sy, ex, ey, algo);
-  console.log(`u path done in ${performance.now() - t0}ms!`);
-  console.log(res);
-
-  let prev: HTMLElement | null = null;
-
-  for (const visitedNode of res.processed) {
-    const ele = document.getElementById(getKey(visitedNode));
-
-    if (ele) {
-      if (ele.className !== 'start' && ele.className !== 'end') {
-        ele.className = 'current';
-      }
-
-      await wait(100);
-
-      prev = ele;
-
-      if (prev.className !== 'start' && prev.className !== 'end') {
-        prev.className = 'visited';
-      }
-    }
-  }
-
-  for (const pathNode of res.path) {
-    const ele = document.getElementById(getKey(pathNode));
-
-    if (ele) {
-      if (ele.className !== 'start' && ele.className !== 'end') {
-        ele.className = 'current';
-      }
-
-      await wait(100);
-
-      prev = ele;
-
-      if (prev.className !== 'start' && prev.className !== 'end') {
-        prev.className = 'path';
-      }
-    }
-  }
-}
 
 function App(): JSX.Element {
   let start = '0,0';
   let end = '5,5';
+  let speed = 100;
   let currAlgo = PathFindingAlgorithm.Dijkstra;
   const gridKeys: string[][] = [];
 
@@ -96,9 +52,14 @@ function App(): JSX.Element {
           >
             Clear Path
           </Button>
-          <Button onClick={() => drawPath(getPoint(start), getPoint(end), currAlgo)}>Find Path!</Button>
+          <Button onClick={() => drawPath(wasmService.universe, getPoint(start), getPoint(end), currAlgo, speed)}>
+            Find Path!
+          </Button>
           <Button onClick={() => (currAlgo = PathFindingAlgorithm.Dijkstra)}>Use Dijkstra's!</Button>
           <Button onClick={() => (currAlgo = PathFindingAlgorithm.Astar)}>Use A*!</Button>
+          <Button onClick={() => (speed = 200)}>Slow</Button>
+          <Button onClick={() => (speed = 100)}>Normal</Button>
+          <Button onClick={() => (speed = 50)}>Fast</Button>
         </Toolbar>
       </AppBar>
 
