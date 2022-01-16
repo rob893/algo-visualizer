@@ -1,6 +1,5 @@
 import { AppBar, Box, Toolbar } from '@mui/material';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
 import './App.css';
 import GridNode from './components/GridNode';
 import { wasmService } from './services/WasmService';
