@@ -38,9 +38,9 @@ pub enum PathFindingAlgorithm {
 #[wasm_bindgen]
 #[derive(Serialize, Clone, Copy, Debug, PartialEq, Eq, Default, Hash)]
 pub struct Node {
-    pub x: u32,
-    pub y: u32,
-    pub weight: u32,
+    pub x: i32,
+    pub y: i32,
+    pub weight: i32,
     pub passable: bool,
 }
 
@@ -58,16 +58,16 @@ pub struct Universe {
 }
 
 impl Universe {
-    fn get_index(&self, x: u32, y: u32) -> usize {
-        (y * self.width + x) as usize
+    fn get_index(&self, x: i32, y: i32) -> usize {
+        (y * self.width as i32 + x) as usize
     }
 
-    fn get_cell_ref(&self, x: u32, y: u32) -> &Node {
+    fn get_cell_ref(&self, x: i32, y: i32) -> &Node {
         let index = self.get_index(x, y);
         return &self.nodes[index];
     }
 
-    fn dijkstra(&self, start_x: u32, start_y: u32, end_x: u32, end_y: u32) -> PathResult {
+    fn dijkstra(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
         let mut result = PathResult {
             path: Vec::new(),
             processed: Vec::new(),
@@ -78,7 +78,7 @@ impl Universe {
         let start_node = self.get_cell_ref(start_x, start_y);
         let end_node = self.get_cell_ref(end_x, end_y);
 
-        let mut times: HashMap<&Node, u32> = HashMap::new();
+        let mut times: HashMap<&Node, i32> = HashMap::new();
         let mut came_from: HashMap<&Node, &Node> = HashMap::new();
 
         times.insert(start_node, 0);
@@ -96,7 +96,7 @@ impl Universe {
                 let prev_time = times.get(current).unwrap();
                 let new_time = *prev_time + neighbor.weight;
 
-                if new_time < *times.get(neighbor).unwrap_or(&u32::MAX) {
+                if new_time < *times.get(neighbor).unwrap_or(&i32::MAX) {
                     times.insert(neighbor, new_time);
                     came_from.insert(neighbor, current);
                     frontier.push_back(neighbor);
@@ -107,7 +107,7 @@ impl Universe {
         return result;
     }
 
-    fn astar(&self, start_x: u32, start_y: u32, end_x: u32, end_y: u32) -> PathResult {
+    fn astar(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
         let mut result: PathResult = PathResult {
             path: Vec::new(),
             processed: Vec::new(),
@@ -117,13 +117,13 @@ impl Universe {
         let end_node = self.get_cell_ref(end_x, end_y);
 
         let mut came_from: HashMap<&Node, &Node> = HashMap::new();
-        let mut cost_so_far: HashMap<&Node, i32> = HashMap::new();
+        let mut g_score: HashMap<&Node, i32> = HashMap::new();
+
+        g_score.insert(start_node, 0);
 
         let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
 
         frontier.enqueue(start_node, 0);
-
-        cost_so_far.insert(start_node, 0);
 
         while frontier.count() > 0 {
             let current = frontier.dequeue().unwrap();
@@ -134,14 +134,12 @@ impl Universe {
             }
 
             for next in self.get_neighbors(current.x, current.y) {
-                let current_cost = cost_so_far.get(current).unwrap();
-                let new_cost = current_cost + next.weight as i32;
-                let next_cost = cost_so_far.get(next);
+                let tentative_g_score = *g_score.get(current).unwrap() + next.weight as i32;
 
-                if next_cost == None || new_cost < *next_cost.unwrap() {
-                    cost_so_far.insert(next, new_cost);
-                    let priority = -1 * (new_cost + Universe::heuristic(next, end_node));
-                    frontier.enqueue(next, priority);
+                if tentative_g_score < *g_score.get(next).unwrap_or(&i32::MAX) {
+                    g_score.insert(next, tentative_g_score);
+                    let f_score = -1 * (tentative_g_score + Universe::heuristic(next, end_node));
+                    frontier.enqueue(next, f_score);
                     came_from.insert(next, current);
                 }
             }
@@ -150,14 +148,14 @@ impl Universe {
         return result;
     }
 
-    fn get_neighbors(&self, x: u32, y: u32) -> Vec<&Node> {
+    fn get_neighbors(&self, x: i32, y: i32) -> Vec<&Node> {
         let mut vec: Vec<&Node> = Vec::with_capacity(4);
 
         if x > 0 && self.get_cell_ref(x - 1, y).passable {
             vec.push(self.get_cell_ref(x - 1, y));
         }
 
-        if x < self.width - 1 && self.get_cell_ref(x + 1, y).passable {
+        if x < self.width as i32 - 1 && self.get_cell_ref(x + 1, y).passable {
             vec.push(self.get_cell_ref(x + 1, y));
         }
 
@@ -165,7 +163,7 @@ impl Universe {
             vec.push(self.get_cell_ref(x, y - 1));
         }
 
-        if y < self.height - 1 && self.get_cell_ref(x, y + 1).passable {
+        if y < self.height as i32 - 1 && self.get_cell_ref(x, y + 1).passable {
             vec.push(self.get_cell_ref(x, y + 1));
         }
 
@@ -191,10 +189,10 @@ impl Universe {
     }
 
     fn heuristic(a: &Node, b: &Node) -> i32 {
-        let distance_x = (a.x as i32 - b.x as i32).abs();
-        let distance_y = (a.y as i32 - b.y as i32).abs();
+        let distance_x = (a.x - b.x).abs();
+        let distance_y = (a.y - b.y).abs();
 
-        return (distance_x * distance_x) + (distance_y * distance_y);
+        return distance_x + distance_y;
     }
 }
 
@@ -204,8 +202,8 @@ impl Universe {
     pub fn new(width: u32, height: u32) -> Self {
         let mut nodes: Vec<Node> = Vec::with_capacity((width * height) as usize);
 
-        for y in 0..height {
-            for x in 0..width {
+        for y in 0..height as i32 {
+            for x in 0..width as i32 {
                 nodes.push(Node {
                     x,
                     y,
@@ -230,7 +228,7 @@ impl Universe {
     }
 
     #[wasm_bindgen(js_name = getCell)]
-    pub fn get_cell(&self, x: u32, y: u32) -> Node {
+    pub fn get_cell(&self, x: i32, y: i32) -> Node {
         let index = self.get_index(x, y);
         return self.nodes[index];
     }
@@ -238,10 +236,10 @@ impl Universe {
     #[wasm_bindgen(js_name = findPath)]
     pub fn find_path(
         &self,
-        start_x: u32,
-        start_y: u32,
-        end_x: u32,
-        end_y: u32,
+        start_x: i32,
+        start_y: i32,
+        end_x: i32,
+        end_y: i32,
         algorithm: PathFindingAlgorithm,
     ) -> IPathResponse {
         let path = match algorithm {
@@ -253,13 +251,13 @@ impl Universe {
     }
 
     #[wasm_bindgen(js_name = setWeight)]
-    pub fn set_weight(&mut self, x: u32, y: u32, weight: u32) {
+    pub fn set_weight(&mut self, x: i32, y: i32, weight: i32) {
         let index = self.get_index(x, y);
         self.nodes[index].weight = weight;
     }
 
     #[wasm_bindgen(js_name = setPassable)]
-    pub fn set_passable(&mut self, x: u32, y: u32, passable: bool) {
+    pub fn set_passable(&mut self, x: i32, y: i32, passable: bool) {
         let index = self.get_index(x, y);
         self.nodes[index].passable = passable;
     }
@@ -289,8 +287,8 @@ mod tests {
         for y in 0..grid_w.len() {
             for x in 0..grid_w[y].len() {
                 match grid_w[y][x] {
-                    n if n == w => universe.set_passable(x as u32, y as u32, false),
-                    n if n == h => universe.set_weight(x as u32, y as u32, n as u32),
+                    n if n == w => universe.set_passable(x as i32, y as i32, false),
+                    n if n == h => universe.set_weight(x as i32, y as i32, n as i32),
                     _ => {}
                 }
             }
