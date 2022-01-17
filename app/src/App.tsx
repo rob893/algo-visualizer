@@ -1,16 +1,20 @@
 import { AppBar, Box, Toolbar } from '@mui/material';
 import Button from '@mui/material/Button';
+import { useState } from 'react';
 import './App.css';
+import ControlBar from './components/ControlBar';
 import GridNode from './components/GridNode';
 import { wasmService } from './services/WasmService';
 import { drawPath, getKey, getPoint } from './utilities/utilities';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 
 function App(): JSX.Element {
-  let start = '0,0';
-  let end = '5,5';
-  let speed = 100;
-  let currAlgo = PathFindingAlgorithm.Dijkstra;
+  const [start, setStart] = useState('0,0');
+  const [end, setEnd] = useState('5,5');
+  // let start = '0,0';
+  // let end = '5,5';
+  // let speed = 100;
+  // let currAlgo = PathFindingAlgorithm.Dijkstra;
   const gridKeys: string[][] = [];
 
   for (let y = 0; y < 25; y++) {
@@ -32,26 +36,25 @@ function App(): JSX.Element {
     });
   }
 
+  function handleResetPath(): void {
+    gridKeys.flat().forEach(nodeKey => {
+      const ele = document.getElementById(nodeKey);
+
+      if (ele && (ele.className === 'visited' || ele.className === 'path')) {
+        ele.className = '';
+      }
+    });
+  }
+
   handleReset();
 
   return (
     <div>
-      <AppBar position="sticky">
+      <ControlBar handleReset={handleReset} handleResetPath={handleResetPath} start={start} end={end} />
+      {/* <AppBar position="sticky">
         <Toolbar>
           <Button onClick={handleReset}>Clear</Button>
-          <Button
-            onClick={() => {
-              gridKeys.flat().forEach(nodeKey => {
-                const ele = document.getElementById(nodeKey);
-
-                if (ele && (ele.className === 'visited' || ele.className === 'path')) {
-                  ele.className = '';
-                }
-              });
-            }}
-          >
-            Clear Path
-          </Button>
+          <Button onClick={handleResetPath}>Clear Path</Button>
           <Button onClick={() => drawPath(wasmService.universe, getPoint(start), getPoint(end), currAlgo, speed)}>
             Find Path!
           </Button>
@@ -61,7 +64,7 @@ function App(): JSX.Element {
           <Button onClick={() => (speed = 100)}>Normal</Button>
           <Button onClick={() => (speed = 50)}>Fast</Button>
         </Toolbar>
-      </AppBar>
+      </AppBar> */}
 
       <Box paddingTop={2} display="flex" justifyContent="center">
         <table id="grid">
@@ -85,12 +88,8 @@ function App(): JSX.Element {
                         startKey={start}
                         endKey={end}
                         className={className}
-                        onSetAsEnd={newEnd => {
-                          end = newEnd;
-                        }}
-                        onSetAsStart={newStart => {
-                          start = newStart;
-                        }}
+                        onSetAsEnd={setEnd}
+                        onSetAsStart={setStart}
                       />
                     );
                   })}
