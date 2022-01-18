@@ -5,8 +5,8 @@ import { getPoint } from '../utilities/utilities';
 
 export interface GridNodeProps {
   nodeKey: string;
-  startKey: string;
-  endKey: string;
+  isStart: boolean;
+  isEnd: boolean;
   className?: string;
   onSetAsStart: (newStartKey: string) => void;
   onSetAsEnd: (newEndKey: string) => void;
