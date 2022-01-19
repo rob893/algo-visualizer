@@ -46,7 +46,7 @@ export default function Grid(): JSX.Element {
 
   return (
     <table id="grid">
-      <tbody>
+      {/* <tbody>
         {gridKeys.map((row, y) => {
           return (
             <tr key={y}>
@@ -78,7 +78,7 @@ export default function Grid(): JSX.Element {
             </tr>
           );
         })}
-      </tbody>
+      </tbody> */}
     </table>
   );
 }
