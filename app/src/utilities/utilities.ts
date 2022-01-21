@@ -32,8 +32,7 @@ export async function drawPath(
 ): Promise<void> {
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
-  console.log(`u path done in ${performance.now() - t0}ms!`);
-  console.log(res);
+  console.log(`Path found in ${performance.now() - t0}ms!`);
 
   let prev: HTMLElement | null = null;
 
