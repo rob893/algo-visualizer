@@ -113,25 +113,23 @@ export default function Grid({
 
   const handleOnClick = (nodeKey: string, node: Node): void => {
     if (inputService.getKey('w')) {
-      console.log('w pressed');
       setHeavy(node, nodeKey);
     } else if (inputService.getKey('s')) {
       const prevStartPoint = getPoint(start);
       const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
+
       setDefault(prevStartNode, start);
       setStartPoint(node, nodeKey);
     } else if (inputService.getKey('e')) {
-      console.log('e pressed');
       const prevEndPoint = getPoint(end);
+
       const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
       setDefault(prevEndNode, end);
       setEndPoint(node, nodeKey);
     } else {
       if (node.passable) {
-        console.log('nothing pressed. Setting as wall');
         setWall(node, nodeKey);
       } else {
-        console.log('nothing pressed. setting as nothing');
         setDefault(node, nodeKey);
       }
     }
