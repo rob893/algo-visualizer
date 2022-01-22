@@ -1,5 +1,5 @@
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material';
-import { AppBar, Button, Menu, MenuItem, Toolbar } from '@mui/material';
+import { AppBar, Button, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Subject } from 'rxjs';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
@@ -61,7 +61,8 @@ export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: Co
 
   return (
     <AppBar position="sticky">
-      <Toolbar style={{ justifyContent: 'space-between' }}>
+      <Toolbar>
+        <Typography variant="h4">Algo Visualizer</Typography>
         <Button
           style={{ minWidth: 160, justifyContent: 'flex-start' }}
           onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
