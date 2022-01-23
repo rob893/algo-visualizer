@@ -49,7 +49,11 @@ export async function drawPath(
       prev = ele;
 
       if (prev.className !== 'start' && prev.className !== 'end') {
-        prev.className = 'visited';
+        if (visitedNode.weight > 0) {
+          prev.className = 'visited-heavy';
+        } else {
+          prev.className = 'visited';
+        }
       }
     }
   }
@@ -67,7 +71,11 @@ export async function drawPath(
       prev = ele;
 
       if (prev.className !== 'start' && prev.className !== 'end') {
-        prev.className = 'path';
+        if (pathNode.weight > 0) {
+          prev.className = 'path-heavy';
+        } else {
+          prev.className = 'path';
+        }
       }
     }
   }

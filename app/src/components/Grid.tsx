@@ -24,8 +24,8 @@ export default function Grid({
   onResetBoard,
   universe
 }: GridProps): JSX.Element {
-  let start = '0,0';
-  let end = '5,5';
+  let start = '20,12';
+  let end = '40,12';
 
   const gridKeys: string[][] = [];
 
@@ -57,8 +57,12 @@ export default function Grid({
     gridKeys.flat().forEach(nodeKey => {
       const ele = document.getElementById(nodeKey);
 
-      if (ele && (ele.className === 'visited' || ele.className === 'path')) {
-        ele.className = '';
+      if (ele) {
+        if (ele.className === 'visited' || ele.className === 'path') {
+          ele.className = '';
+        } else if (ele.className === 'visited-heavy' || ele.className === 'path-heavy') {
+          ele.className = 'heavy';
+        }
       }
     });
   };
@@ -104,15 +108,17 @@ export default function Grid({
   };
 
   const handleOnMouseEnter = (nodeKey: string, node: Node): void => {
-    if (inputService.getMouseButton(MouseButton.LeftMouseButton)) {
-      if (node.passable && nodeKey !== start && nodeKey !== end) {
+    if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end) {
+      if (inputService.getKey('Shift')) {
+        setHeavy(node, nodeKey);
+      } else if (node.passable) {
         setWall(node, nodeKey);
       }
     }
   };
 
   const handleOnClick = (nodeKey: string, node: Node): void => {
-    if (inputService.getKey('w')) {
+    if (inputService.getKey('Shift')) {
       setHeavy(node, nodeKey);
     } else if (inputService.getKey('s')) {
       const prevStartPoint = getPoint(start);

@@ -6,8 +6,16 @@ td {
   border: 1px solid rgba(98, 0, 234, 0.75);
 }
 
-.path {
-  animation-name: pathAnimation;
+/* rgb(139,133,115) possible mix of visited and heavy? */
+
+.path,
+.start,
+.end,
+.visited,
+.heavy,
+.visited-heavy,
+.path-heavy,
+.wall {
   animation-duration: 1.5s;
   animation-timing-function: ease-out;
   animation-delay: 0;
@@ -17,41 +25,28 @@ td {
   animation-play-state: running;
 }
 
+.path {
+  animation-name: pathAnimation;
+}
+
+.path-heavy {
+  animation-name: pathHeavyAnimation;
+}
+
 .wall {
   animation-name: wallAnimation;
-  animation-duration: 0.5s;
-  animation-timing-function: ease-out;
-  animation-delay: 0;
-  animation-direction: alternate;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-play-state: running;
 }
 
 .heavy {
-  background-color: yellow;
+  animation-name: heavyAnimation;
 }
 
 .start {
   animation-name: startAnimation;
-  animation-duration: 0.5s;
-  animation-timing-function: ease-out;
-  animation-delay: 0;
-  animation-direction: alternate;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-play-state: running;
 }
 
 .end {
   animation-name: endAnimation;
-  animation-duration: 0.5s;
-  animation-timing-function: ease-out;
-  animation-delay: 0;
-  animation-direction: alternate;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-play-state: running;
 }
 
 .current {
@@ -61,13 +56,15 @@ td {
 
 .visited {
   animation-name: visitedAnimation;
-  animation-duration: 1.5s;
-  animation-timing-function: ease-out;
-  animation-delay: 0;
-  animation-direction: alternate;
-  animation-iteration-count: 1;
-  animation-fill-mode: forwards;
-  animation-play-state: running;
+}
+
+.visited-heavy {
+  animation-name: visitedHeavyAnimation;
+}
+
+.app-logo {
+  height: 50px;
+  width: 50px;
 }
 
 @keyframes wallAnimation {
@@ -104,7 +101,7 @@ td {
   }
 }
 
-@keyframes endAnimation {
+@keyframes heavyAnimation {
   0% {
     background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
     transform: scale(0.75);
@@ -118,6 +115,40 @@ td {
     transform: scale(1);
     background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
     border: 1px double rgba(255, 87, 34, 1);
+  }
+}
+
+@keyframes visitedHeavyAnimation {
+  0% {
+    background: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
+    border: 1px double rgba(185, 115, 83, 1);
+  }
+}
+
+@keyframes endAnimation {
+  0% {
+    background: radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5));
+    border: 1px double rgba(118, 255, 5, 1);
   }
 }
 
@@ -164,5 +195,22 @@ td {
     transform: scale(1);
     background: radial-gradient(rgba(76, 175, 80, 0), rgba(76, 175, 80, 0.5));
     border: 1px double rgba(76, 175, 80, 1);
+  }
+}
+
+@keyframes pathHeavyAnimation {
+  0% {
+    background: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
+    transform: scale(0.75);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    background: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
+    border: 1px double rgba(125, 151, 67, 1);
   }
 }

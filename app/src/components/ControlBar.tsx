@@ -1,7 +1,8 @@
 import { ArrowDropDown, ArrowDropUp } from '@mui/icons-material';
-import { AppBar, Button, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { AppBar, Button, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Subject } from 'rxjs';
+import logo from '../logo.svg';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
 
 export interface ControlBarProps {
@@ -62,40 +63,43 @@ export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: Co
   return (
     <AppBar position="sticky">
       <Toolbar>
-        <Typography variant="h4">Algo Visualizer</Typography>
-        <Button
-          style={{ minWidth: 160, justifyContent: 'flex-start' }}
-          onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
-          endIcon={speedMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-        >
-          Speed: {speedText}
-        </Button>
-        <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
-          <MenuItem onClick={() => handleSpeedChange(400)}>Very Slow</MenuItem>
-          <MenuItem onClick={() => handleSpeedChange(200)}>Slow</MenuItem>
-          <MenuItem onClick={() => handleSpeedChange(100)}>Normal</MenuItem>
-          <MenuItem onClick={() => handleSpeedChange(50)}>Fast</MenuItem>
-          <MenuItem onClick={() => handleSpeedChange(25)}>Very Fast</MenuItem>
-        </Menu>
+        <img src={logo} width={50} height={50} alt="logo" />
+        <Stack direction="row" spacing={2} paddingLeft={2}>
+          <Typography variant="h5">Algo Visualizer</Typography>
+          <Button
+            style={{ minWidth: 160, justifyContent: 'flex-start' }}
+            onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
+            endIcon={speedMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
+          >
+            Speed: {speedText}
+          </Button>
+          <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
+            <MenuItem onClick={() => handleSpeedChange(400)}>Very Slow</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(200)}>Slow</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(100)}>Normal</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(50)}>Fast</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(25)}>Very Fast</MenuItem>
+          </Menu>
 
-        <Button
-          style={{ minWidth: 120, justifyContent: 'flex-start' }}
-          onClick={e => setAlgoMenuAnchorEl(e.currentTarget)}
-          endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-        >
-          {algoText}
-        </Button>
-        <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
-          <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>A* Search</MenuItem>
-          <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>Dijkstra's</MenuItem>
-        </Menu>
+          <Button
+            style={{ minWidth: 120, justifyContent: 'flex-start' }}
+            onClick={e => setAlgoMenuAnchorEl(e.currentTarget)}
+            endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
+          >
+            {algoText}
+          </Button>
+          <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>A* Search</MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>Dijkstra's</MenuItem>
+          </Menu>
 
-        <Button onClick={() => onFindPath.next({ speed, algo })} variant="contained" color="success">
-          Visualize Path!
-        </Button>
+          <Button onClick={() => onFindPath.next({ speed, algo })} variant="contained" color="success">
+            Visualize Path!
+          </Button>
 
-        <Button onClick={() => onResetBoard.next()}>Clear</Button>
-        <Button onClick={() => onResetPath.next()}>Clear Path</Button>
+          <Button onClick={() => onResetBoard.next()}>Clear Board</Button>
+          <Button onClick={() => onResetPath.next()}>Clear Path</Button>
+        </Stack>
       </Toolbar>
     </AppBar>
   );

@@ -6,7 +6,7 @@ import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 
 function App(): JSX.Element {
-  const gridWidth = 55;
+  const gridWidth = 60;
   const gridHeight = 25;
 
   wasmService.gridWidth = gridWidth;

@@ -9,18 +9,7 @@ export class InputService {
   private readonly mouseButtonDownMap = new Map<number, boolean>();
 
   public constructor() {
-    document.addEventListener('keydown', e => {
-      this.keyDownMap.set(e.key, true);
-    });
-    document.addEventListener('keyup', e => {
-      this.keyDownMap.set(e.key, false);
-    });
-    document.addEventListener('mousedown', e => {
-      this.mouseButtonDownMap.set(e.button, true);
-    });
-    document.addEventListener('mouseup', e => {
-      this.mouseButtonDownMap.set(e.button, false);
-    });
+    this.addEventListeners();
   }
 
   /**
@@ -35,6 +24,45 @@ export class InputService {
 
   public getMouseButton(mouseButton: 0 | 1 | 2 | MouseButton): boolean {
     return this.mouseButtonDownMap.get(mouseButton) ?? false;
+  }
+
+  public destroy(): void {
+    this.removeEventListeners();
+  }
+
+  private addEventListeners(): void {
+    this.handleEvent = this.handleEvent.bind(this);
+
+    document.addEventListener('keydown', this.handleEvent);
+    document.addEventListener('keyup', this.handleEvent);
+    document.addEventListener('mousedown', this.handleEvent);
+    document.addEventListener('mouseup', this.handleEvent);
+  }
+
+  private removeEventListeners(): void {
+    document.removeEventListener('keydown', this.handleEvent);
+    document.removeEventListener('keyup', this.handleEvent);
+    document.removeEventListener('mousedown', this.handleEvent);
+    document.removeEventListener('mouseup', this.handleEvent);
+  }
+
+  private handleEvent(event: MouseEvent | KeyboardEvent): void {
+    switch (event.type) {
+      case 'keydown':
+        this.keyDownMap.set((event as KeyboardEvent).key, true);
+        break;
+      case 'keyup':
+        this.keyDownMap.set((event as KeyboardEvent).key, false);
+        break;
+      case 'mousedown':
+        this.mouseButtonDownMap.set((event as MouseEvent).button, true);
+        break;
+      case 'mouseup':
+        this.mouseButtonDownMap.set((event as MouseEvent).button, false);
+        break;
+      default:
+        break;
+    }
   }
 }
 
