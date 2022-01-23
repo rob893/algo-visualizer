@@ -1,18 +1,18 @@
 import { memo } from 'react';
-import { wasmService } from '../services/WasmService';
 import { getPoint } from '../utilities/utilities';
+import { Universe } from '../wasm/algo_visualizer';
 import { Node } from '../wasm/algo_visualizer';
 
 export interface GridNodeProps {
   nodeKey: string;
   className: string;
+  universe: Universe;
   onClick: (nodeKey: string, node: Node) => void;
   onMouseEnter: (nodeKey: string, node: Node) => void;
 }
 
-const GridNode = memo(({ nodeKey, className, onClick, onMouseEnter }: GridNodeProps): JSX.Element => {
+const GridNode = memo(({ nodeKey, className, universe, onClick, onMouseEnter }: GridNodeProps): JSX.Element => {
   const point = getPoint(nodeKey);
-  const node = wasmService.universe.getCell(point.x, point.y);
 
   return (
     <td
@@ -25,8 +25,8 @@ const GridNode = memo(({ nodeKey, className, onClick, onMouseEnter }: GridNodePr
       }}
       className={className}
       id={nodeKey}
-      onMouseEnter={() => onMouseEnter(nodeKey, node)}
-      onClick={() => onClick(nodeKey, node)}
+      onMouseEnter={() => onMouseEnter(nodeKey, universe.getCell(point.x, point.y))}
+      onClick={() => onClick(nodeKey, universe.getCell(point.x, point.y))}
     ></td>
   );
 });

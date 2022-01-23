@@ -10,13 +10,13 @@ import GridNode from './GridNode';
 export interface GridProps {
   gridWidth: number;
   gridHeight: number;
-  onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm }>;
+  onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
   universe: Universe;
 }
 
-export default function Grid({
+export default function BoardGrid({
   gridWidth,
   gridHeight,
   onFindPath,
@@ -142,9 +142,15 @@ export default function Grid({
   };
 
   useEffect(() => {
-    const pathSub = onFindPath.subscribe(({ speed, algo }) =>
-      drawPath(universe, getPoint(start), getPoint(end), algo, speed)
-    );
+    const pathSub = onFindPath.subscribe(async event => {
+      if (typeof event === 'boolean') {
+        return;
+      }
+      const { speed, algo, cancelToken } = event;
+      handleResetPath();
+      await drawPath(universe, getPoint(start), getPoint(end), algo, speed, cancelToken);
+      onFindPath.next(true);
+    });
     const resetBoardSub = onResetBoard.subscribe(handleReset);
     const resetPathSub = onResetPath.subscribe(handleResetPath);
 
@@ -176,6 +182,7 @@ export default function Grid({
                       key={nodeKey}
                       nodeKey={nodeKey}
                       className={className}
+                      universe={universe}
                       onClick={handleOnClick}
                       onMouseEnter={handleOnMouseEnter}
                     />

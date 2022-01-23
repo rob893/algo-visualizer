@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 import './App.css';
 import ControlBar from './components/ControlBar';
-import Grid from './components/Grid';
+import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 
@@ -14,14 +14,16 @@ function App(): JSX.Element {
 
   const universe = wasmService.universe;
 
-  const onFindPath = new Subject<{ speed: number; algo: PathFindingAlgorithm }>();
+  const onFindPath = new Subject<
+    { speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean
+  >();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
 
   return (
     <div>
       <ControlBar onFindPath={onFindPath} onResetBoard={onResetBoard} onResetPath={onResetPath} />
-      <Grid
+      <BoardGrid
         gridWidth={gridWidth}
         gridHeight={gridHeight}
         onFindPath={onFindPath}

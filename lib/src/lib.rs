@@ -151,20 +151,20 @@ impl Universe {
     fn get_neighbors(&self, x: i32, y: i32) -> Vec<&Node> {
         let mut vec: Vec<&Node> = Vec::with_capacity(4);
 
-        if x > 0 && self.get_cell_ref(x - 1, y).passable {
-            vec.push(self.get_cell_ref(x - 1, y));
-        }
-
         if y > 0 && self.get_cell_ref(x, y - 1).passable {
             vec.push(self.get_cell_ref(x, y - 1));
         }
 
-        if x < self.width as i32 - 1 && self.get_cell_ref(x + 1, y).passable {
-            vec.push(self.get_cell_ref(x + 1, y));
-        }
-
         if y < self.height as i32 - 1 && self.get_cell_ref(x, y + 1).passable {
             vec.push(self.get_cell_ref(x, y + 1));
+        }
+
+        if x > 0 && self.get_cell_ref(x - 1, y).passable {
+            vec.push(self.get_cell_ref(x - 1, y));
+        }
+
+        if x < self.width as i32 - 1 && self.get_cell_ref(x + 1, y).passable {
+            vec.push(self.get_cell_ref(x + 1, y));
         }
 
         return vec;

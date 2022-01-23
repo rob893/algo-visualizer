@@ -28,7 +28,8 @@ export async function drawPath(
   { x: sx, y: sy }: Point,
   { x: ex, y: ey }: Point,
   algo: PathFindingAlgorithm,
-  speed: number
+  speed: number,
+  cancelToken: { cancel: boolean }
 ): Promise<void> {
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
@@ -37,6 +38,10 @@ export async function drawPath(
   let prev: HTMLElement | null = null;
 
   for (const visitedNode of res.processed) {
+    if (cancelToken.cancel) {
+      return;
+    }
+
     const ele = document.getElementById(getKey(visitedNode));
 
     if (ele) {
@@ -59,6 +64,10 @@ export async function drawPath(
   }
 
   for (const pathNode of res.path) {
+    if (cancelToken.cancel) {
+      return;
+    }
+
     const ele = document.getElementById(getKey(pathNode));
 
     if (ele) {
