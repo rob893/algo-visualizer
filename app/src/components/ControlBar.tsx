@@ -3,6 +3,8 @@ import { AppBar, Box, Button, IconButton, Menu, MenuItem, Stack, Toolbar, Toolti
 import { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import logo from '../logo.svg';
+import { LocalStorageService } from '../services/LocalStorageService';
+import { LocalStorageKey } from '../utilities/LocalStorageKey';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
@@ -11,18 +13,28 @@ export interface ControlBarProps {
   onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
+  localStorageService: LocalStorageService;
 }
 
 let cancelToken = { cancel: false };
 
-export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: ControlBarProps): JSX.Element {
+export default function ControlBar({
+  onFindPath,
+  onResetPath,
+  onResetBoard,
+  localStorageService
+}: ControlBarProps): JSX.Element {
+  const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
+
   const [speed, setSpeed] = useState(100);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speedText, setSpeedText] = useState('Normal');
   const [algoText, setAlgoText] = useState("Dijkstra's");
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
-  const [openHelpDialog, setOpenHelpDialog] = useState(false);
+  const [openHelpDialog, setOpenHelpDialog] = useState(
+    showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
+  );
 
   const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState<null | HTMLElement>(null);
   const speedMenuOpen = Boolean(speedMenuAnchorEl);
@@ -158,7 +170,11 @@ export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: Co
         </Stack>
 
         <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
-        <HelpDialog open={openHelpDialog} onClose={() => setOpenHelpDialog(false)} />
+        <HelpDialog
+          open={openHelpDialog}
+          onClose={() => setOpenHelpDialog(false)}
+          localStorageService={localStorageService}
+        />
       </Toolbar>
     </AppBar>
   );
