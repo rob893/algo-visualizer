@@ -26,6 +26,9 @@ export default function ControlBar({
 }: ControlBarProps): JSX.Element {
   const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
 
+  const [showAtStartChecked, setShowAtStartChecked] = useState(
+    showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
+  );
   const [speed, setSpeed] = useState(100);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speedText, setSpeedText] = useState('Normal');
@@ -96,6 +99,11 @@ export default function ControlBar({
         setSpeedText('Normal');
         break;
     }
+  };
+
+  const handleHelpCheckbox = (checked: boolean): void => {
+    localStorageService.setItem(LocalStorageKey.ShowHelpAtStart, `${checked}`);
+    setShowAtStartChecked(checked);
   };
 
   useEffect(() => {
@@ -173,7 +181,8 @@ export default function ControlBar({
         <HelpDialog
           open={openHelpDialog}
           onClose={() => setOpenHelpDialog(false)}
-          localStorageService={localStorageService}
+          onShowHelpCheckboxChange={handleHelpCheckbox}
+          showHelpAtStartChecked={showAtStartChecked}
         />
       </Toolbar>
     </AppBar>

@@ -1,32 +1,21 @@
 import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel } from '@mui/material';
-import { ChangeEvent, useState } from 'react';
-import { LocalStorageService } from '../services/LocalStorageService';
-import { LocalStorageKey } from '../utilities/LocalStorageKey';
 import ControlsGuide from './ControlsGuide';
 
 export interface HelpDialogProps {
   open: boolean;
+  showHelpAtStartChecked: boolean;
+  onShowHelpCheckboxChange: (checked: boolean) => void;
   onClose: () => void;
-  localStorageService: LocalStorageService;
   title?: string;
 }
 
 export default function HelpDialog({
   open,
+  showHelpAtStartChecked,
+  onShowHelpCheckboxChange,
   onClose,
-  localStorageService,
   title = 'Help'
 }: HelpDialogProps): JSX.Element {
-  const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
-  const [showAtStartChecked, setShowAtStartChecked] = useState(
-    showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
-  );
-
-  const handleHelpCheckbox = (e: ChangeEvent<HTMLInputElement>): void => {
-    localStorage.setItem(LocalStorageKey.ShowHelpAtStart, `${e.target.checked}`);
-    setShowAtStartChecked(e.target.checked);
-  };
-
   return (
     <Dialog
       open={open}
@@ -43,7 +32,9 @@ export default function HelpDialog({
       <DialogActions>
         <FormControlLabel
           sx={{ marginRight: 'auto', paddingLeft: 1 }}
-          control={<Checkbox checked={showAtStartChecked} onChange={handleHelpCheckbox} />}
+          control={
+            <Checkbox checked={showHelpAtStartChecked} onChange={e => onShowHelpCheckboxChange(e.target.checked)} />
+          }
           label="Show help at start"
         />
         <Button onClick={() => onClose()}>Close</Button>

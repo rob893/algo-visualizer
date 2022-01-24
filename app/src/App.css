@@ -1,9 +1,68 @@
+:root {
+  --wall-border-color: rgba(244, 67, 54, 1);
+  --wall-background-gradient: radial-gradient(rgba(213, 0, 0, 0), rgba(213, 0, 0, 0.5));
+  --path-border-color: rgba(76, 175, 80, 1);
+  --path-background-gradient: radial-gradient(rgba(76, 175, 80, 0), rgba(76, 175, 80, 0.5));
+  --start-border-color: rgba(255, 235, 59, 1);
+  --start-background-gradient: radial-gradient(rgba(255, 235, 59, 0), rgba(255, 235, 59, 0.5));
+  --end-border-color: rgba(118, 255, 5, 1);
+  --end-background-gradient: radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5));
+  --visited-border-color: rgba(0, 188, 212, 1);
+  --visited-background-gradient: radial-gradient(rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.5));
+  --heavy-border-color: rgba(255, 87, 34, 1);
+  --heavy-background-gradient: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
+  --path-heavy-border-color: rgba(125, 151, 67, 1);
+  --path-heavy-background-gradient: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
+  --visited-heavy-border-color: rgba(185, 115, 83, 1);
+  --visited-heavy-background-gradient: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
+}
+
 table {
   border-collapse: collapse;
 }
 
 td {
   border: 1px solid rgba(98, 0, 234, 0.75);
+}
+
+.wall-no-animation {
+  background: var(--wall-background-gradient);
+  border: 1px double var(--wall-border-color);
+}
+
+.path-no-animation {
+  background: var(--path-background-gradient);
+  border: 1px double var(--path-border-color);
+}
+
+.start-no-animation {
+  background: var(--start-background-gradient);
+  border: 1px double var(--start-border-color);
+}
+
+.end-no-animation {
+  background: var(--end-background-gradient);
+  border: 1px double var(--end-border-color);
+}
+
+.visited-no-animation {
+  background: var(--visited-background-gradient);
+  border: 1px double var(--visited-border-color);
+}
+
+.heavy-no-animation {
+  background: var(--heavy-background-gradient);
+  border: 1px double var(--heavy-border-color);
+}
+
+.visited-heavy-no-animation {
+  background: var(--visited-heavy-background-gradient);
+  border: 1px double var(--visited-heavy-border-color);
+}
+
+.path-heavy-no-animation {
+  background: var(--path-heavy-background-gradient);
+  border: 1px double var(--path-heavy-border-color);
 }
 
 .path,
@@ -67,7 +126,7 @@ td {
 
 @keyframes wallAnimation {
   0% {
-    background: radial-gradient(rgba(213, 0, 0, 0), rgba(213, 0, 0, 0.5));
+    background: var(--wall-background-gradient);
     transform: scale(0.75);
   }
 
@@ -77,14 +136,14 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(213, 0, 0, 0), rgba(213, 0, 0, 0.5));
-    border: 1px double #f44336;
+    background: var(--wall-background-gradient);
+    border: 1px double var(--wall-border-color);
   }
 }
 
 @keyframes startAnimation {
   0% {
-    background: radial-gradient(rgba(255, 235, 59, 0), rgba(255, 235, 59, 0.5));
+    background: var(--start-background-gradient);
     transform: scale(0.75);
   }
 
@@ -94,14 +153,14 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(255, 235, 59, 0), rgba(255, 235, 59, 0.5));
-    border: 1px double rgba(255, 235, 59, 1);
+    background: var(--start-background-gradient);
+    border: 1px double var(--start-border-color);
   }
 }
 
 @keyframes heavyAnimation {
   0% {
-    background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
+    background: var(--heavy-background-gradient);
     transform: scale(0.75);
   }
 
@@ -111,14 +170,14 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(255, 87, 34, 0), rgba(255, 87, 34, 0.5));
-    border: 1px double rgba(255, 87, 34, 1);
+    background: var(--heavy-background-gradient);
+    border: 1px double var(--heavy-border-color);
   }
 }
 
 @keyframes visitedHeavyAnimation {
   0% {
-    background: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
+    background: var(--visited-heavy-background-gradient);
     transform: scale(0.75);
   }
 
@@ -128,14 +187,14 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
-    border: 1px double rgba(185, 115, 83, 1);
+    background: var(--visited-heavy-background-gradient);
+    border: 1px double var(--visited-heavy-border-color);
   }
 }
 
 @keyframes endAnimation {
   0% {
-    background: radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5));
+    background: var(--end-background-gradient);
     transform: scale(0.75);
   }
 
@@ -145,8 +204,8 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5));
-    border: 1px double rgba(118, 255, 5, 1);
+    background: var(--end-background-gradient);
+    border: 1px double var(--end-border-color);
   }
 }
 
@@ -168,8 +227,8 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.5));
-    border: 1px double rgba(0, 188, 212, 1);
+    background: var(--visited-background-gradient);
+    border: 1px double var(--visited-border-color);
   }
 }
 
@@ -191,14 +250,14 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(76, 175, 80, 0), rgba(76, 175, 80, 0.5));
-    border: 1px double rgba(76, 175, 80, 1);
+    background: var(--path-background-gradient);
+    border: 1px double var(--path-border-color);
   }
 }
 
 @keyframes pathHeavyAnimation {
   0% {
-    background: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
+    background: var(--path-heavy-background-gradient);
     transform: scale(0.75);
   }
 
@@ -208,7 +267,7 @@ td {
 
   100% {
     transform: scale(1);
-    background: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
-    border: 1px double rgba(125, 151, 67, 1);
+    background: var(--path-heavy-background-gradient);
+    border: 1px double var(--path-heavy-border-color);
   }
 }

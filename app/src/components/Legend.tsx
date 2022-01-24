@@ -12,28 +12,28 @@ export default function Legend(): JSX.Element {
   return (
     <Stack direction="row" spacing={2} display="flex" alignItems="center" justifyContent="center">
       <p>Start Node:</p>
-      <span style={style} className="start" />
+      <span style={style} className="start-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>End Node:</p>
-      <span style={style} className="end" />
+      <span style={style} className="end-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Wall Node:</p>
-      <span style={style} className="wall" />
+      <span style={style} className="wall-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Heavy Node:</p>
-      <span style={style} className="heavy" />
+      <span style={style} className="heavy-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Visited Node:</p>
-      <span style={style} className="visited" />
+      <span style={style} className="visited-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Heavy Visited Node:</p>
-      <span style={style} className="visited-heavy" />
+      <span style={style} className="visited-heavy-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Path Node:</p>
-      <span style={style} className="path" />
+      <span style={style} className="path-no-animation" />
       <Divider orientation="vertical" sx={{ height: 30 }} />
       <p>Heavy Path Node:</p>
-      <span style={style} className="path-heavy" />
+      <span style={style} className="path-heavy-no-animation" />
     </Stack>
   );
 }
