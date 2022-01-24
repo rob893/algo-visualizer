@@ -4,6 +4,7 @@ import ControlBar from './components/ControlBar';
 import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
+import Legend from './components/Legend';
 
 function App(): JSX.Element {
   const gridWidth = 60;
@@ -23,6 +24,7 @@ function App(): JSX.Element {
   return (
     <div>
       <ControlBar onFindPath={onFindPath} onResetBoard={onResetBoard} onResetPath={onResetPath} />
+      <Legend />
       <BoardGrid
         gridWidth={gridWidth}
         gridHeight={gridHeight}

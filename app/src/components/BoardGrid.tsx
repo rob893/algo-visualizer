@@ -119,7 +119,11 @@ export default function BoardGrid({
 
   const handleOnClick = (nodeKey: string, node: Node): void => {
     if (inputService.getKey('Shift')) {
-      setHeavy(node, nodeKey);
+      if (node.weight > 0) {
+        setDefault(node, nodeKey);
+      } else {
+        setHeavy(node, nodeKey);
+      }
     } else if (inputService.getKey('s')) {
       const prevStartPoint = getPoint(start);
       const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
@@ -162,7 +166,7 @@ export default function BoardGrid({
   });
 
   return (
-    <Box paddingTop={2} display="flex" justifyContent="center">
+    <Box display="flex" justifyContent="center">
       <table id="grid">
         <tbody>
           {gridKeys.map((row, y) => {

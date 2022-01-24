@@ -1,9 +1,11 @@
-import { ArrowDropDown, ArrowDropUp, HelpOutline } from '@mui/icons-material';
+import { ArrowDropDown, ArrowDropUp, HelpOutline, InfoOutlined } from '@mui/icons-material';
 import { AppBar, Box, Button, IconButton, Menu, MenuItem, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import logo from '../logo.svg';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
+import AboutDialog from './AboutDialog';
+import HelpDialog from './HelpDialog';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
@@ -19,12 +21,22 @@ export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: Co
   const [speedText, setSpeedText] = useState('Normal');
   const [algoText, setAlgoText] = useState("Dijkstra's");
   const [running, setRunning] = useState(false);
+  const [openAboutDialog, setOpenAboutDialog] = useState(false);
+  const [openHelpDialog, setOpenHelpDialog] = useState(false);
 
   const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState<null | HTMLElement>(null);
   const speedMenuOpen = Boolean(speedMenuAnchorEl);
 
   const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
   const algoMenuOpen = Boolean(algoMenuAnchorEl);
+
+  const handleAboutClick = (): void => {
+    setOpenAboutDialog(true);
+  };
+
+  const handleHelpClick = (): void => {
+    setOpenHelpDialog(true);
+  };
 
   const handleFindPath = (): void => {
     if (running) {
@@ -131,13 +143,22 @@ export default function ControlBar({ onFindPath, onResetPath, onResetBoard }: Co
           <Button onClick={() => onResetPath.next()}>Clear Path</Button>
 
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
-            <Tooltip title="Help" sx={{ marginLeft: 'auto' }}>
-              <IconButton>
+            <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
+              <IconButton onClick={handleAboutClick}>
+                <InfoOutlined color="primary" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Help">
+              <IconButton onClick={handleHelpClick}>
                 <HelpOutline color="primary" />
               </IconButton>
             </Tooltip>
           </Box>
         </Stack>
+
+        <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
+        <HelpDialog open={openHelpDialog} onClose={() => setOpenHelpDialog(false)} />
       </Toolbar>
     </AppBar>
   );
