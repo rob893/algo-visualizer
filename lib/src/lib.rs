@@ -144,13 +144,28 @@ impl Universe {
         return result;
     }
 
+    // fn get_closest_node(nodes: &Vec<&Node>, times: &HashMap<&Node, i32>) -> usize { // Used for vec impl
+    //     let mut curr_closest_index = 0;
+
+    //     for i in 0..nodes.len() {
+    //         if times.get(nodes[curr_closest_index]).unwrap_or(&i32::MAX)
+    //             > times.get(nodes[i]).unwrap_or(&i32::MAX)
+    //         {
+    //             curr_closest_index = i;
+    //         }
+    //     }
+
+    //     return curr_closest_index;
+    // }
+
     fn dijkstra(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
         let mut result = PathResult {
             path: Vec::new(),
             processed: Vec::new(),
         };
 
-        let mut frontier: VecDeque<&Node> = VecDeque::new();
+        // let mut frontier: Vec<&Node> = self.nodes.iter().collect(); // Used for vec impl
+        let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
 
         let start_node = self.get_cell_ref(start_x, start_y);
         let end_node = self.get_cell_ref(end_x, end_y);
@@ -159,10 +174,13 @@ impl Universe {
         let mut came_from: HashMap<&Node, &Node> = HashMap::new();
 
         times.insert(start_node, 0);
-        frontier.push_back(start_node);
+        frontier.enqueue(start_node, 0);
 
-        while frontier.len() > 0 {
-            let current = frontier.pop_front().unwrap();
+        while frontier.count() > 0 {
+            // let index = Universe::get_closest_node(&frontier, &times); // Used for vec impl
+            // let current = frontier.swap_remove(index);
+            let current = frontier.dequeue().unwrap();
+
             result.processed.push(current.clone());
 
             if current == end_node {
@@ -171,12 +189,12 @@ impl Universe {
 
             for neighbor in self.get_neighbors(current.x, current.y) {
                 let prev_time = times.get(current).unwrap();
-                let new_time = *prev_time + neighbor.weight;
+                let new_time = *prev_time + neighbor.weight + 1;
 
                 if new_time < *times.get(neighbor).unwrap_or(&i32::MAX) {
                     times.insert(neighbor, new_time);
                     came_from.insert(neighbor, current);
-                    frontier.push_back(neighbor);
+                    frontier.enqueue(neighbor, -1 * new_time);
                 }
             }
         }
