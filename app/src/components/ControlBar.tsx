@@ -68,10 +68,22 @@ export default function ControlBar({
     setCurrAlgo(newAlgo);
     setAlgoMenuAnchorEl(null);
 
-    if (newAlgo === PathFindingAlgorithm.Astar) {
-      setAlgoText('A* Search');
-    } else {
-      setAlgoText("Dijkstra's");
+    switch (newAlgo) {
+      case PathFindingAlgorithm.Astar:
+        setAlgoText('A* Search');
+        break;
+      case PathFindingAlgorithm.Dijkstra:
+        setAlgoText("Dijkstra's");
+        break;
+      case PathFindingAlgorithm.BFS:
+        setAlgoText('Breadth First');
+        break;
+      case PathFindingAlgorithm.DFS:
+        setAlgoText('Depth First');
+        break;
+      default:
+        setAlgoText("Dijkstra's");
+        break;
     }
   };
 
@@ -143,6 +155,8 @@ export default function ControlBar({
           <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
             <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>A* Search</MenuItem>
             <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>Dijkstra's</MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.BFS)}>Breadth First</MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.DFS)}>Depth First</MenuItem>
           </Menu>
 
           <Button

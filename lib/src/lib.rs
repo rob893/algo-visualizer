@@ -1,7 +1,7 @@
 use priority_queue::priority_queue::PriorityQueue;
 use serde::Serialize;
 use std::{
-    collections::{HashMap, VecDeque},
+    collections::{HashMap, HashSet, VecDeque},
     hash::Hash,
 };
 use wasm_bindgen::{prelude::*, JsCast};
@@ -33,6 +33,8 @@ extern "C" {
 pub enum PathFindingAlgorithm {
     Astar,
     Dijkstra,
+    BFS,
+    DFS,
 }
 
 #[wasm_bindgen]
@@ -65,6 +67,81 @@ impl Universe {
     fn get_cell_ref(&self, x: i32, y: i32) -> &Node {
         let index = self.get_index(x, y);
         return &self.nodes[index];
+    }
+
+    fn bfs(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
+        let mut result = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let mut frontier: VecDeque<&Node> = VecDeque::new();
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut came_from: HashMap<&Node, &Node> = HashMap::new();
+        let mut visited: HashSet<&Node> = HashSet::new();
+
+        frontier.push_back(start_node);
+        visited.insert(start_node);
+
+        while frontier.len() > 0 {
+            let current = frontier.pop_front().unwrap();
+
+            result.processed.push(current.clone());
+
+            if current == end_node {
+                return Universe::construct_path(result, came_from, end_node);
+            }
+
+            for neighbor in self.get_neighbors(current.x, current.y) {
+                if !visited.contains(neighbor) {
+                    visited.insert(neighbor);
+                    came_from.insert(neighbor, current);
+                    frontier.push_back(neighbor);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    fn dfs(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
+        let mut result = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let mut frontier: Vec<&Node> = Vec::new();
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut came_from: HashMap<&Node, &Node> = HashMap::new();
+        let mut visited: HashSet<&Node> = HashSet::new();
+
+        frontier.push(start_node);
+
+        while frontier.len() > 0 {
+            let current = frontier.pop().unwrap();
+
+            result.processed.push(current.clone());
+            visited.insert(current);
+
+            if current == end_node {
+                return Universe::construct_path(result, came_from, end_node);
+            }
+
+            for neighbor in self.get_neighbors(current.x, current.y) {
+                if !visited.contains(neighbor) {
+                    came_from.insert(neighbor, current);
+                    frontier.push(neighbor);
+                }
+            }
+        }
+
+        return result;
     }
 
     fn dijkstra(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
@@ -245,6 +322,8 @@ impl Universe {
         let path = match algorithm {
             PathFindingAlgorithm::Dijkstra => self.dijkstra(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::Astar => self.astar(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::BFS => self.bfs(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::DFS => self.dfs(start_x, start_y, end_x, end_y),
         };
 
         return JsValue::from_serde(&path).unwrap().unchecked_into();
