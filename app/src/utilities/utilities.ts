@@ -32,17 +32,16 @@ export async function drawPath(
   { x: sx, y: sy }: Point,
   { x: ex, y: ey }: Point,
   algo: PathFindingAlgorithm,
-  speed: number,
-  cancelToken: { cancel: boolean }
+  context: { cancel: boolean; speed: number }
 ): Promise<void> {
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
-  console.log(`Path found in ${performance.now() - t0}ms!`);
+  console.log(`WASM path found in ${performance.now() - t0}ms!`);
 
   let prev: HTMLElement | null = null;
 
   for (const visitedNode of res.processed) {
-    if (cancelToken.cancel) {
+    if (context.cancel) {
       return;
     }
 
@@ -53,7 +52,7 @@ export async function drawPath(
         ele.className = 'current';
       }
 
-      await wait(speed);
+      await wait(context.speed);
 
       prev = ele;
 
@@ -68,7 +67,7 @@ export async function drawPath(
   }
 
   for (const pathNode of res.path) {
-    if (cancelToken.cancel) {
+    if (context.cancel) {
       return;
     }
 
@@ -79,7 +78,7 @@ export async function drawPath(
         ele.className = 'current';
       }
 
-      await wait(speed);
+      await wait(context.speed);
 
       prev = ele;
 

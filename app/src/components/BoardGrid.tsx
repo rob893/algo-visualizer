@@ -10,7 +10,7 @@ import GridNode from './GridNode';
 export interface GridProps {
   gridWidth: number;
   gridHeight: number;
-  onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
   onGenerateMaze: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
@@ -110,12 +110,12 @@ export default function BoardGrid({
   };
 
   const handleRandomizeWalls = async (num: number): Promise<void> => {
-    for (const nodeKey of gridKeys.flat()) {
+    const computePoint = async (nodeKey: string): Promise<void> => {
       const { x, y } = getPoint(nodeKey);
       const node = universe.getCell(x, y);
 
       if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
-        continue;
+        return;
       }
 
       const rand = getRandomInt(100);
@@ -128,6 +128,19 @@ export default function BoardGrid({
         }
 
         await wait(15);
+      }
+    };
+
+    for (let y = 0; y < gridKeys.length / 2; y++) {
+      for (let x = 0; x < gridKeys[0].length; x++) {
+        const topNodeKey = gridKeys[y][x];
+        const promises = [computePoint(topNodeKey)];
+
+        if (y !== gridKeys.length - 1 - y) {
+          promises.push(computePoint(gridKeys[gridKeys.length - 1 - y][gridKeys[y].length - 1 - x]));
+        }
+
+        await Promise.all(promises);
       }
     }
   };
@@ -175,9 +188,9 @@ export default function BoardGrid({
       if (typeof event === 'boolean') {
         return;
       }
-      const { speed, algo, cancelToken } = event;
+      const { algo, context } = event;
       handleResetPath();
-      await drawPath(universe, getPoint(start), getPoint(end), algo, speed, cancelToken);
+      await drawPath(universe, getPoint(start), getPoint(end), algo, context);
       onFindPath.next(true);
     });
     const resetBoardSub = onResetBoard.subscribe(handleReset);

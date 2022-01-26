@@ -17,7 +17,7 @@ function App(): JSX.Element {
   const universe = wasmService.universe;
 
   const onFindPath = new Subject<
-    { speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean
+    { algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean
   >();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();

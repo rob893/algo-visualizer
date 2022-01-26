@@ -10,14 +10,14 @@ import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
 
 export interface ControlBarProps {
-  onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
   onResetPath: Subject<void>;
   onGenerateMaze: Subject<number>;
   onResetBoard: Subject<void>;
   localStorageService: LocalStorageService;
 }
 
-let cancelToken = { cancel: false };
+let context = { cancel: false, speed: 100 };
 
 export default function ControlBar({
   onFindPath,
@@ -57,12 +57,12 @@ export default function ControlBar({
 
   const handleFindPath = (): void => {
     if (running) {
-      cancelToken.cancel = true;
+      context.cancel = true;
       setRunning(false);
     } else {
       setRunning(true);
-      cancelToken = { cancel: false };
-      onFindPath.next({ speed, algo, cancelToken });
+      context = { cancel: false, speed };
+      onFindPath.next({ algo, context });
     }
   };
 
@@ -92,6 +92,7 @@ export default function ControlBar({
   const handleSpeedChange = (newSpeed: number): void => {
     setSpeed(newSpeed);
     setSpeedMenuAnchorEl(null);
+    context.speed = newSpeed;
 
     switch (newSpeed) {
       case 25:
