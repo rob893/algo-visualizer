@@ -12,6 +12,7 @@ import HelpDialog from './HelpDialog';
 export interface ControlBarProps {
   onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
   onResetPath: Subject<void>;
+  onGenerateMaze: Subject<number>;
   onResetBoard: Subject<void>;
   localStorageService: LocalStorageService;
 }
@@ -21,6 +22,7 @@ let cancelToken = { cancel: false };
 export default function ControlBar({
   onFindPath,
   onResetPath,
+  onGenerateMaze,
   onResetBoard,
   localStorageService
 }: ControlBarProps): JSX.Element {
@@ -175,6 +177,8 @@ export default function ControlBar({
 
           <Button onClick={() => onResetBoard.next()}>Clear Board</Button>
           <Button onClick={() => onResetPath.next()}>Clear Path</Button>
+          <Button onClick={() => onGenerateMaze.next(0)}>Generate Walls</Button>
+          <Button onClick={() => onGenerateMaze.next(1)}>Generate Weights</Button>
 
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
             <Tooltip title="About" sx={{ marginLeft: 'auto' }}>

@@ -18,6 +18,10 @@ export function getKey(xOrNode: number | Point, y?: number): string {
   return `${xOrNode.x},${xOrNode.y}`;
 }
 
+export function getRandomInt(max: number): number {
+  return Math.floor(Math.random() * max);
+}
+
 export function getPoint(key: string): Point {
   const [x, y] = key.split(',');
   return { x: Number(x), y: Number(y) };

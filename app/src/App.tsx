@@ -21,6 +21,7 @@ function App(): JSX.Element {
   >();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
+  const onGenerateMaze = new Subject<number>();
 
   return (
     <div>
@@ -28,6 +29,7 @@ function App(): JSX.Element {
         onFindPath={onFindPath}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
+        onGenerateMaze={onGenerateMaze}
         localStorageService={localStorageService}
       />
       <Legend />
@@ -35,6 +37,7 @@ function App(): JSX.Element {
         gridWidth={gridWidth}
         gridHeight={gridHeight}
         onFindPath={onFindPath}
+        onGenerateMaze={onGenerateMaze}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
         universe={universe}

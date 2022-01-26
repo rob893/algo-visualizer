@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
-import { drawPath, getKey, getPoint } from '../utilities/utilities';
+import { drawPath, getKey, getPoint, getRandomInt, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import GridNode from './GridNode';
@@ -11,6 +11,7 @@ export interface GridProps {
   gridWidth: number;
   gridHeight: number;
   onFindPath: Subject<{ speed: number; algo: PathFindingAlgorithm; cancelToken: { cancel: boolean } } | boolean>;
+  onGenerateMaze: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
   universe: Universe;
@@ -20,6 +21,7 @@ export default function BoardGrid({
   gridWidth,
   gridHeight,
   onFindPath,
+  onGenerateMaze,
   onResetPath,
   onResetBoard,
   universe
@@ -107,6 +109,29 @@ export default function BoardGrid({
     setClass(nodeKey, 'end');
   };
 
+  const handleRandomizeWalls = async (num: number): Promise<void> => {
+    for (const nodeKey of gridKeys.flat()) {
+      const { x, y } = getPoint(nodeKey);
+      const node = universe.getCell(x, y);
+
+      if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
+        continue;
+      }
+
+      const rand = getRandomInt(100);
+
+      if (rand >= 70) {
+        if (num === 0) {
+          setWall(node, nodeKey);
+        } else {
+          setHeavy(node, nodeKey);
+        }
+
+        await wait(15);
+      }
+    }
+  };
+
   const handleOnMouseEnter = (nodeKey: string, node: Node): void => {
     if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end) {
       if (inputService.getKey('Shift')) {
@@ -157,11 +182,13 @@ export default function BoardGrid({
     });
     const resetBoardSub = onResetBoard.subscribe(handleReset);
     const resetPathSub = onResetPath.subscribe(handleResetPath);
+    const mazeSub = onGenerateMaze.subscribe(handleRandomizeWalls);
 
     return () => {
       pathSub.unsubscribe();
       resetBoardSub.unsubscribe();
       resetPathSub.unsubscribe();
+      mazeSub.unsubscribe();
     };
   });
 
