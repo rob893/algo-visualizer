@@ -7,6 +7,7 @@ import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 import Legend from './components/Legend';
 import { localStorageService } from './services/LocalStorageService';
 import { useEffect, useState } from 'react';
+import { inputService } from './services/InputService';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -56,9 +57,11 @@ function App(): JSX.Element {
   };
 
   useEffect(() => {
+    inputService.addEventListeners();
     window.addEventListener('resize', handleResize);
 
     return () => {
+      inputService.removeEventListeners();
       window.removeEventListener('resize', handleResize);
     };
   });

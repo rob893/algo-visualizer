@@ -8,10 +8,6 @@ export class InputService {
   private readonly keyDownMap = new Map<string, boolean>();
   private readonly mouseButtonDownMap = new Map<number, boolean>();
 
-  public constructor() {
-    this.addEventListeners();
-  }
-
   /**
    * This function will return true if the passed in key is currently being pressed.
    *
@@ -26,11 +22,7 @@ export class InputService {
     return this.mouseButtonDownMap.get(mouseButton) ?? false;
   }
 
-  public destroy(): void {
-    this.removeEventListeners();
-  }
-
-  private addEventListeners(): void {
+  public addEventListeners(): void {
     this.handleEvent = this.handleEvent.bind(this);
 
     document.addEventListener('keydown', this.handleEvent);
@@ -39,7 +31,7 @@ export class InputService {
     document.addEventListener('mouseup', this.handleEvent);
   }
 
-  private removeEventListeners(): void {
+  public removeEventListeners(): void {
     document.removeEventListener('keydown', this.handleEvent);
     document.removeEventListener('keyup', this.handleEvent);
     document.removeEventListener('mousedown', this.handleEvent);
