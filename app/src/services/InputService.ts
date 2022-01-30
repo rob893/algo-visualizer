@@ -4,9 +4,29 @@ export enum MouseButton {
   RightMouseButton = 2
 }
 
+export interface Listenable {
+  addEventListener<K extends keyof DocumentEventMap>(
+    type: K,
+    listener: (this: Document, ev: DocumentEventMap[K]) => any,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  removeEventListener<K extends keyof DocumentEventMap>(
+    type: K,
+    listener: (this: Document, ev: DocumentEventMap[K]) => any,
+    options?: boolean | EventListenerOptions
+  ): void;
+}
+
 export class InputService {
   private readonly keyDownMap = new Map<string, boolean>();
+
   private readonly mouseButtonDownMap = new Map<number, boolean>();
+
+  private readonly element: Listenable;
+
+  public constructor(element: Listenable) {
+    this.element = element;
+  }
 
   /**
    * This function will return true if the passed in key is currently being pressed.
@@ -25,20 +45,20 @@ export class InputService {
   public addEventListeners(): void {
     this.handleEvent = this.handleEvent.bind(this);
 
-    document.addEventListener('keydown', this.handleEvent);
-    document.addEventListener('keyup', this.handleEvent);
-    document.addEventListener('mousedown', this.handleEvent);
-    document.addEventListener('mouseup', this.handleEvent);
+    this.element.addEventListener('keydown', this.handleEvent);
+    this.element.addEventListener('keyup', this.handleEvent);
+    this.element.addEventListener('mousedown', this.handleEvent);
+    this.element.addEventListener('mouseup', this.handleEvent);
   }
 
   public removeEventListeners(): void {
-    document.removeEventListener('keydown', this.handleEvent);
-    document.removeEventListener('keyup', this.handleEvent);
-    document.removeEventListener('mousedown', this.handleEvent);
-    document.removeEventListener('mouseup', this.handleEvent);
+    this.element.removeEventListener('keydown', this.handleEvent);
+    this.element.removeEventListener('keyup', this.handleEvent);
+    this.element.removeEventListener('mousedown', this.handleEvent);
+    this.element.removeEventListener('mouseup', this.handleEvent);
   }
 
-  private handleEvent(event: MouseEvent | KeyboardEvent): void {
+  private handleEvent(event: Event): void {
     switch (event.type) {
       case 'keydown':
         this.keyDownMap.set((event as KeyboardEvent).key, true);
@@ -58,4 +78,4 @@ export class InputService {
   }
 }
 
-export const inputService = new InputService();
+export const inputService = new InputService(document);
