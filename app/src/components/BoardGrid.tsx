@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
-import { drawPath, getKey, getPoint, getRandomInt, wait } from '../utilities/utilities';
+import { drawPath, getKey, getPoint, getRandomInt, Point, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import GridNode from './GridNode';
@@ -10,6 +10,8 @@ import GridNode from './GridNode';
 export interface GridProps {
   gridWidth: number;
   gridHeight: number;
+  nodeWidth: number;
+  nodeHeight: number;
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
   onGenerateMaze: Subject<number>;
   onResetPath: Subject<void>;
@@ -20,14 +22,16 @@ export interface GridProps {
 export default function BoardGrid({
   gridWidth,
   gridHeight,
+  nodeWidth,
+  nodeHeight,
   onFindPath,
   onGenerateMaze,
   onResetPath,
   onResetBoard,
   universe
 }: GridProps): JSX.Element {
-  let start = '20,12';
-  let end = '40,12';
+  let start = `${Math.floor(gridWidth / 2 - gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
+  let end = `${Math.floor(gridWidth / 2 + gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
 
   const gridKeys: string[][] = [];
 
@@ -127,7 +131,7 @@ export default function BoardGrid({
           setHeavy(node, nodeKey);
         }
 
-        await wait(15);
+        await wait(5);
       }
     };
 
@@ -145,8 +149,10 @@ export default function BoardGrid({
     }
   };
 
-  const handleOnMouseEnter = (nodeKey: string, node: Node): void => {
+  const handleOnMouseEnter = (nodeKey: string, { x, y }: Point): void => {
     if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end) {
+      const node = universe.getCell(x, y);
+
       if (inputService.getKey('Shift')) {
         setHeavy(node, nodeKey);
       } else if (node.passable) {
@@ -155,7 +161,9 @@ export default function BoardGrid({
     }
   };
 
-  const handleOnClick = (nodeKey: string, node: Node): void => {
+  const handleOnClick = (nodeKey: string, { x, y }: Point): void => {
+    const node = universe.getCell(x, y);
+
     if (inputService.getKey('Shift')) {
       if (node.weight > 0) {
         setDefault(node, nodeKey);
@@ -205,6 +213,8 @@ export default function BoardGrid({
     };
   });
 
+  handleReset();
+
   return (
     <Box display="flex" justifyContent="center">
       <table id="grid">
@@ -226,7 +236,8 @@ export default function BoardGrid({
                       key={nodeKey}
                       nodeKey={nodeKey}
                       className={className}
-                      universe={universe}
+                      nodeWidth={nodeWidth}
+                      nodeHeight={nodeHeight}
                       onClick={handleOnClick}
                       onMouseEnter={handleOnMouseEnter}
                     />

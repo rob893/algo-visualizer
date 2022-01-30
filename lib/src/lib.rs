@@ -315,6 +315,25 @@ impl Universe {
         };
     }
 
+    pub fn resize(&mut self, width: u32, height: u32) {
+        let mut nodes: Vec<Node> = Vec::with_capacity((width * height) as usize);
+
+        for y in 0..height as i32 {
+            for x in 0..width as i32 {
+                nodes.push(Node {
+                    x,
+                    y,
+                    weight: 0,
+                    passable: true,
+                })
+            }
+        }
+
+        self.width = width;
+        self.height = height;
+        self.nodes = nodes;
+    }
+
     pub fn reset(&mut self) {
         for node in &mut self.nodes {
             node.weight = 0;

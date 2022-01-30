@@ -6,6 +6,7 @@ import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
 import Legend from './components/Legend';
 import { localStorageService } from './services/LocalStorageService';
+import { useEffect, useState } from 'react';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -17,13 +18,22 @@ import { localStorageService } from './services/LocalStorageService';
  * I am sure there is a more 'react' way to do it but  ¯\_(ツ)_/¯
  */
 function App(): JSX.Element {
-  const gridWidth = 60;
-  const gridHeight = 25;
+  const nodeHeight = 25;
+  const nodeWidth = 25;
 
-  wasmService.gridWidth = gridWidth;
-  wasmService.gridHeight = gridHeight;
+  const calculateGridWidth = (): number => Math.floor(window.innerWidth / nodeWidth) - 2;
+  const calculateGridHeight = (): number => {
+    const innerHeight = window.innerHeight;
+    const appBarHeight = 120;
+    const expectedHeight = Math.floor((innerHeight - appBarHeight) / nodeHeight);
+    const minusNodeBreakpoint = expectedHeight * nodeHeight + appBarHeight;
 
-  const universe = wasmService.universe;
+    return innerHeight - minusNodeBreakpoint < nodeHeight / 3 ? expectedHeight - 1 : expectedHeight;
+  };
+
+  const [gridWidth, setGridWidth] = useState(calculateGridWidth());
+  const [gridHeight, setGridHeight] = useState(calculateGridHeight());
+  const [universe, setUniverse] = useState(wasmService.resize(gridWidth, gridHeight));
 
   const onFindPath = new Subject<
     { algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean
@@ -31,6 +41,27 @@ function App(): JSX.Element {
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
   const onGenerateMaze = new Subject<number>();
+
+  const handleResize = (): void => {
+    const newWidth = calculateGridWidth();
+    const newHeight = calculateGridHeight();
+
+    if (newHeight === gridHeight && newWidth === gridWidth) {
+      return;
+    }
+
+    setGridWidth(newWidth);
+    setGridHeight(newHeight);
+    setUniverse(wasmService.resize(newWidth, newHeight));
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  });
 
   return (
     <div>
@@ -45,6 +76,8 @@ function App(): JSX.Element {
       <BoardGrid
         gridWidth={gridWidth}
         gridHeight={gridHeight}
+        nodeWidth={nodeWidth}
+        nodeHeight={nodeHeight}
         onFindPath={onFindPath}
         onGenerateMaze={onGenerateMaze}
         onResetBoard={onResetBoard}

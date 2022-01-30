@@ -1,34 +1,35 @@
 import { memo } from 'react';
-import { getPoint } from '../utilities/utilities';
-import { Universe } from '../wasm/algo_visualizer';
-import { Node } from '../wasm/algo_visualizer';
+import { getPoint, Point } from '../utilities/utilities';
 
 export interface GridNodeProps {
   nodeKey: string;
   className: string;
-  universe: Universe;
-  onClick: (nodeKey: string, node: Node) => void;
-  onMouseEnter: (nodeKey: string, node: Node) => void;
+  nodeWidth: number;
+  nodeHeight: number;
+  onClick: (nodeKey: string, point: Point) => void;
+  onMouseEnter: (nodeKey: string, point: Point) => void;
 }
 
-const GridNode = memo(({ nodeKey, className, universe, onClick, onMouseEnter }: GridNodeProps): JSX.Element => {
-  const point = getPoint(nodeKey);
+const GridNode = memo(
+  ({ nodeKey, className, nodeWidth, nodeHeight, onClick, onMouseEnter }: GridNodeProps): JSX.Element => {
+    const point = getPoint(nodeKey);
 
-  return (
-    <td
-      key={nodeKey}
-      style={{
-        minWidth: '25px',
-        minHeight: '25px',
-        width: '25px',
-        height: '25px'
-      }}
-      className={className}
-      id={nodeKey}
-      onMouseEnter={() => onMouseEnter(nodeKey, universe.getCell(point.x, point.y))}
-      onClick={() => onClick(nodeKey, universe.getCell(point.x, point.y))}
-    ></td>
-  );
-});
+    return (
+      <td
+        key={nodeKey}
+        style={{
+          minWidth: `${nodeWidth}px`,
+          minHeight: `${nodeHeight}px`,
+          width: `${nodeWidth}px`,
+          height: `${nodeHeight}px`
+        }}
+        className={className}
+        id={nodeKey}
+        onMouseEnter={() => onMouseEnter(nodeKey, point)}
+        onClick={() => onClick(nodeKey, point)}
+      ></td>
+    );
+  }
+);
 
 export default GridNode;

@@ -5,26 +5,27 @@ export class WasmService {
 
   private universeObj?: Universe;
 
-  private gWidth = 55;
+  private width = 55;
 
-  private gHeight = 25;
+  private height = 25;
 
   public get universe(): Universe {
     this.assertInit();
 
     if (!this.universeObj) {
-      this.universeObj = new Universe(this.gWidth, this.gHeight);
+      this.universeObj = new Universe(this.width, this.height);
     }
 
     return this.universeObj;
   }
 
-  public set gridWidth(value: number) {
-    this.gWidth = value;
-  }
+  public resize(width: number, height: number): Universe {
+    this.width = width;
+    this.height = height;
 
-  public set gridHeight(value: number) {
-    this.gHeight = value;
+    this.universe.resize(width, height);
+
+    return this.universe;
   }
 
   public async init(): Promise<void> {

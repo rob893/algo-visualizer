@@ -17,7 +17,7 @@ export interface ControlBarProps {
   localStorageService: LocalStorageService;
 }
 
-let context = { cancel: false, speed: 100 };
+let context = { cancel: false, speed: 50 };
 
 export default function ControlBar({
   onFindPath,
@@ -31,7 +31,7 @@ export default function ControlBar({
   const [showAtStartChecked, setShowAtStartChecked] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
-  const [speed, setSpeed] = useState(100);
+  const [speed, setSpeed] = useState(50);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speedText, setSpeedText] = useState('Normal');
   const [algoText, setAlgoText] = useState("Dijkstra's");
@@ -95,19 +95,19 @@ export default function ControlBar({
     context.speed = newSpeed;
 
     switch (newSpeed) {
-      case 25:
+      case 10:
         setSpeedText('Very Fast');
         break;
-      case 50:
+      case 25:
         setSpeedText('Fast');
         break;
-      case 100:
+      case 50:
         setSpeedText('Normal');
         break;
-      case 200:
+      case 100:
         setSpeedText('Slow');
         break;
-      case 400:
+      case 200:
         setSpeedText('Very Slow');
         break;
       default:
@@ -169,11 +169,11 @@ export default function ControlBar({
             Speed: {speedText}
           </Button>
           <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleSpeedChange(400)}>Very Slow</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(200)}>Slow</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(100)}>Normal</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(50)}>Fast</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(25)}>Very Fast</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(200)}>Very Slow</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(100)}>Slow</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(50)}>Normal</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(25)}>Fast</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(10)}>Very Fast</MenuItem>
           </Menu>
 
           <Button onClick={() => onResetBoard.next()}>Clear Board</Button>
