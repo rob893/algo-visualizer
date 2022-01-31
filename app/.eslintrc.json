@@ -10,7 +10,7 @@
   },
   "plugins": ["@typescript-eslint", "jest"],
   "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier", "react-app", "react-app/jest"],
-  "ignorePatterns": ["node_modules/", "dist/", "coverage/", "docs/", "src/wasm/"],
+  "ignorePatterns": ["node_modules/", "dist/", "coverage/", "docs/", "src/wasm/", "build/"],
   "rules": {
     "@typescript-eslint/explicit-function-return-type": [
       "error",
