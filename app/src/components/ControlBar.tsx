@@ -3,6 +3,7 @@ import {
   ArrowDropUp,
   ClearAllOutlined,
   ClearOutlined,
+  GitHub,
   HelpOutline,
   InfoOutlined,
   LegendToggleOutlined,
@@ -220,6 +221,12 @@ export default function ControlBar({
             <Tooltip title="Help">
               <IconButton onClick={handleHelpClick}>
                 <HelpOutline color="primary" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Github">
+              <IconButton href="https://github.com/rob893/algo-visualizer" target="_blank">
+                <GitHub color="primary" />
               </IconButton>
             </Tooltip>
           </Box>
