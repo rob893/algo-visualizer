@@ -1,5 +1,5 @@
 /// <reference lib="webworker" />
-/* eslint-disable no-restricted-globals */
+/* eslint-disable  */
 
 // This service worker can be customized!
 // See https://developers.google.com/web/tools/workbox/modules
@@ -50,14 +50,14 @@ registerRoute(
     // Return true to signal that we want to use the handler.
     return true;
   },
-  createHandlerBoundToURL(`${process.env.PUBLIC_URL}/index.html`)
+  createHandlerBoundToURL(process.env.PUBLIC_URL + '/index.html')
 );
 
 // An example runtime caching route for requests that aren't handled by the
 // precache, in this case same-origin .png requests like those from in public/
 registerRoute(
   // Add in any other file extensions or routing criteria as needed.
-  ({ url }: { url: URL }) => url.origin === self.location.origin && url.pathname.endsWith('.png'),
+  ({ url }) => url.origin === self.location.origin && url.pathname.endsWith('.png'),
   // Customize this strategy as needed, e.g., by changing to CacheFirst.
   new StaleWhileRevalidate({
     cacheName: 'images',
