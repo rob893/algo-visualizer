@@ -5,6 +5,7 @@ import { inputService, MouseButton } from '../services/InputService';
 import { drawPath, getKey, getPoint, getRandomInt, Point, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
+import { Selection } from './ControlBar';
 import GridNode from './GridNode';
 
 export interface GridProps {
@@ -16,6 +17,7 @@ export interface GridProps {
   onGenerateMaze: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
+  onSelectionChange: Subject<Selection>;
   universe: Universe;
 }
 
@@ -28,8 +30,11 @@ export default function BoardGrid({
   onGenerateMaze,
   onResetPath,
   onResetBoard,
+  onSelectionChange,
   universe
 }: GridProps): JSX.Element {
+  let currSelection = Selection.Wall;
+  let running = false;
   let start = `${Math.floor(gridWidth / 2 - gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
   let end = `${Math.floor(gridWidth / 2 + gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
 
@@ -43,6 +48,10 @@ export default function BoardGrid({
       gridKeys[y].push(nodeKey);
     }
   }
+
+  const handleSelectionChange = (newSelection: Selection): void => {
+    currSelection = newSelection;
+  };
 
   const handleReset = (): void => {
     universe.reset();
@@ -150,7 +159,7 @@ export default function BoardGrid({
   };
 
   const handleOnMouseEnter = (nodeKey: string, { x, y }: Point): void => {
-    if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end) {
+    if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end && !running) {
       const node = universe.getCell(x, y);
 
       if (inputService.getKey('Shift')) {
@@ -161,7 +170,54 @@ export default function BoardGrid({
     }
   };
 
+  const actionMap = new Map<Selection, (node: Node, nodeKey: string) => void>([
+    [
+      Selection.Wall,
+      (node: Node, nodeKey: string): void => {
+        if (node.passable) {
+          setWall(node, nodeKey);
+        } else {
+          setDefault(node, nodeKey);
+        }
+      }
+    ],
+    [
+      Selection.Heavy,
+      (node: Node, nodeKey: string): void => {
+        if (node.weight > 0) {
+          setDefault(node, nodeKey);
+        } else {
+          setHeavy(node, nodeKey);
+        }
+      }
+    ],
+    [
+      Selection.Start,
+      (node: Node, nodeKey: string): void => {
+        const prevStartPoint = getPoint(start);
+        const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
+
+        setDefault(prevStartNode, start);
+        setStartPoint(node, nodeKey);
+      }
+    ],
+    [
+      Selection.End,
+      (node: Node, nodeKey: string): void => {
+        const prevEndPoint = getPoint(end);
+        const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
+
+        setDefault(prevEndNode, end);
+        setEndPoint(node, nodeKey);
+      }
+    ]
+  ]);
+
   const handleOnClick = (nodeKey: string, { x, y }: Point): void => {
+    if (running) {
+      return;
+    }
+
     const node = universe.getCell(x, y);
 
     if (inputService.getKey('Shift')) {
@@ -178,38 +234,57 @@ export default function BoardGrid({
       setStartPoint(node, nodeKey);
     } else if (inputService.getKey('e')) {
       const prevEndPoint = getPoint(end);
-
       const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
+
       setDefault(prevEndNode, end);
       setEndPoint(node, nodeKey);
     } else {
-      if (node.passable) {
-        setWall(node, nodeKey);
-      } else {
-        setDefault(node, nodeKey);
+      const action = actionMap.get(currSelection);
+
+      if (!action) {
+        console.error(`${currSelection} is an invalid selection.`);
+        return;
       }
+
+      action(node, nodeKey);
     }
   };
 
+  const handleOnFindPath = async (
+    event:
+      | boolean
+      | {
+          algo: PathFindingAlgorithm;
+          context: {
+            cancel: boolean;
+            speed: number;
+          };
+        }
+  ): Promise<void> => {
+    if (typeof event === 'boolean') {
+      return;
+    }
+    const { algo, context } = event;
+    handleResetPath();
+    running = true;
+    await drawPath(universe, getPoint(start), getPoint(end), algo, context);
+    running = false;
+    onFindPath.next(true);
+  };
+
   useEffect(() => {
-    const pathSub = onFindPath.subscribe(async event => {
-      if (typeof event === 'boolean') {
-        return;
-      }
-      const { algo, context } = event;
-      handleResetPath();
-      await drawPath(universe, getPoint(start), getPoint(end), algo, context);
-      onFindPath.next(true);
-    });
+    const pathSub = onFindPath.subscribe(handleOnFindPath);
     const resetBoardSub = onResetBoard.subscribe(handleReset);
     const resetPathSub = onResetPath.subscribe(handleResetPath);
     const mazeSub = onGenerateMaze.subscribe(handleRandomizeWalls);
+    const selectionSub = onSelectionChange.subscribe(handleSelectionChange);
 
     return () => {
       pathSub.unsubscribe();
       resetBoardSub.unsubscribe();
       resetPathSub.unsubscribe();
       mazeSub.unsubscribe();
+      selectionSub.unsubscribe();
     };
   });
 

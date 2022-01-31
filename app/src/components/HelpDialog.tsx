@@ -3,6 +3,7 @@ import ControlsGuide from './ControlsGuide';
 
 export interface HelpDialogProps {
   open: boolean;
+  isDesktop: boolean;
   showHelpAtStartChecked: boolean;
   onShowHelpCheckboxChange: (checked: boolean) => void;
   onClose: () => void;
@@ -11,6 +12,7 @@ export interface HelpDialogProps {
 
 export default function HelpDialog({
   open,
+  isDesktop,
   showHelpAtStartChecked,
   onShowHelpCheckboxChange,
   onClose,
@@ -27,7 +29,7 @@ export default function HelpDialog({
     >
       <DialogTitle id="help-dialog-title">{title}</DialogTitle>
       <DialogContent>
-        <ControlsGuide />
+        <ControlsGuide isDesktop={isDesktop} />
       </DialogContent>
       <DialogActions>
         <FormControlLabel

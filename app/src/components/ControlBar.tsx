@@ -40,7 +40,15 @@ export interface ControlBarProps {
   onResetPath: Subject<void>;
   onGenerateMaze: Subject<number>;
   onResetBoard: Subject<void>;
+  onSelectionChange: Subject<Selection>;
   localStorageService: LocalStorageService;
+}
+
+export enum Selection {
+  Wall = 0,
+  Heavy = 1,
+  Start = 2,
+  End = 3
 }
 
 let context = { cancel: false, speed: 50 };
@@ -50,6 +58,7 @@ export default function ControlBar({
   onResetPath,
   onGenerateMaze,
   onResetBoard,
+  onSelectionChange,
   localStorageService
 }: ControlBarProps): JSX.Element {
   const theme = useTheme();
@@ -76,6 +85,10 @@ export default function ControlBar({
 
   const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
   const algoMenuOpen = Boolean(algoMenuAnchorEl);
+
+  const [selection, setSelection] = useState(Selection.Wall);
+
+  const selections = ['Wall', 'Heavy', 'Start', 'End'];
 
   const handleAboutClick = (): void => {
     setOpenAboutDialog(true);
@@ -146,6 +159,12 @@ export default function ControlBar({
     }
   };
 
+  const handleSelection = (): void => {
+    const newSelection = (selection + 1) % selections.length;
+    onSelectionChange.next(newSelection);
+    setSelection(newSelection);
+  };
+
   const handleHelpCheckbox = (checked: boolean): void => {
     localStorageService.setItem(LocalStorageKey.ShowHelpAtStart, `${checked}`);
     setShowAtStartChecked(checked);
@@ -180,6 +199,7 @@ export default function ControlBar({
           </Button>
 
           <Button
+            disabled={running}
             onClick={e => setAlgoMenuAnchorEl(e.currentTarget)}
             endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
           >
@@ -206,10 +226,18 @@ export default function ControlBar({
             <MenuItem onClick={() => handleSpeedChange(10)}>Very Fast</MenuItem>
           </Menu>
 
-          <Button onClick={() => onResetBoard.next()}>Clear Board</Button>
-          <Button onClick={() => onResetPath.next()}>Clear Path</Button>
-          <Button onClick={() => onGenerateMaze.next(0)}>Generate Walls</Button>
-          <Button onClick={() => onGenerateMaze.next(1)}>Generate Weights</Button>
+          <Button disabled={running} onClick={() => onResetBoard.next()}>
+            Clear Board
+          </Button>
+          <Button disabled={running} onClick={() => onResetPath.next()}>
+            Clear Path
+          </Button>
+          <Button disabled={running} onClick={() => onGenerateMaze.next(0)}>
+            Generate Walls
+          </Button>
+          <Button disabled={running} onClick={() => onGenerateMaze.next(1)}>
+            Generate Weights
+          </Button>
 
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
             <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
@@ -235,6 +263,7 @@ export default function ControlBar({
         <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
         <HelpDialog
           open={openHelpDialog}
+          isDesktop={isDesktop}
           onClose={() => setOpenHelpDialog(false)}
           onShowHelpCheckboxChange={handleHelpCheckbox}
           showHelpAtStartChecked={showAtStartChecked}
@@ -268,6 +297,7 @@ export default function ControlBar({
           <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
           <HelpDialog
             open={openHelpDialog}
+            isDesktop={isDesktop}
             onClose={() => setOpenHelpDialog(false)}
             onShowHelpCheckboxChange={handleHelpCheckbox}
             showHelpAtStartChecked={showAtStartChecked}
@@ -277,11 +307,11 @@ export default function ControlBar({
 
       <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
         <Toolbar>
-          <IconButton onClick={() => onResetBoard.next()} color="primary" aria-label="clear board">
+          <IconButton disabled={running} onClick={() => onResetBoard.next()} color="primary" aria-label="clear board">
             <ClearAllOutlined />
           </IconButton>
 
-          <IconButton onClick={() => onResetPath.next()} color="primary" aria-label="clear path">
+          <IconButton disabled={running} onClick={() => onResetPath.next()} color="primary" aria-label="clear path">
             <ClearOutlined />
           </IconButton>
 
@@ -302,7 +332,7 @@ export default function ControlBar({
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <Button>Wall</Button>
+          <Button onClick={handleSelection}>{selections[selection]}</Button>
 
           <IconButton onClick={() => setOpenLegend(true)}>
             <LegendToggleOutlined color="primary" />

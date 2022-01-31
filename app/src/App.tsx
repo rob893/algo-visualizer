@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import './App.css';
-import ControlBar from './components/ControlBar';
+import ControlBar, { Selection } from './components/ControlBar';
 import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
@@ -43,6 +43,7 @@ export default function App(): JSX.Element {
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
   const onGenerateMaze = new Subject<number>();
+  const onSelectionChange = new Subject<Selection>();
 
   useEffect(() => {
     inputService.addEventListeners();
@@ -59,6 +60,7 @@ export default function App(): JSX.Element {
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
         onGenerateMaze={onGenerateMaze}
+        onSelectionChange={onSelectionChange}
         localStorageService={localStorageService}
       />
       <BoardGrid
@@ -70,6 +72,7 @@ export default function App(): JSX.Element {
         onGenerateMaze={onGenerateMaze}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
+        onSelectionChange={onSelectionChange}
         universe={universe}
       />
     </Fragment>

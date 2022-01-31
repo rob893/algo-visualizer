@@ -1,7 +1,8 @@
+import { ClearAllOutlined, ClearOutlined, LegendToggleOutlined } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 
-export default function ControlsGuide(): JSX.Element {
-  return (
+export default function ControlsGuide({ isDesktop }: { isDesktop: boolean }): JSX.Element {
+  const desktopControls = (
     <div>
       <Typography variant="subtitle1">Controls</Typography>
       <ul>
@@ -22,4 +23,27 @@ export default function ControlsGuide(): JSX.Element {
       </ul>
     </div>
   );
+
+  const mobileControls = (
+    <div>
+      <Typography variant="subtitle1">Controls</Typography>
+      <ul>
+        <li>Select the type of node by tapping the node button (defaults as 'wall')</li>
+        <ul>
+          <li>After a node is selected, tab a grid node to set it as that type.</li>
+        </ul>
+        <li>
+          Tap <LegendToggleOutlined color="primary" /> to view the legend.
+        </li>
+        <li>
+          Tap <ClearAllOutlined color="primary" /> to clear the board (walls, weights, and path).
+        </li>
+        <li>
+          Tap <ClearOutlined color="primary" /> to clear the drawn path.
+        </li>
+      </ul>
+    </div>
+  );
+
+  return isDesktop ? desktopControls : mobileControls;
 }
