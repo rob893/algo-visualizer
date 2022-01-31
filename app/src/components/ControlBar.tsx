@@ -302,6 +302,8 @@ export default function ControlBar({
 
           <Box sx={{ flexGrow: 1 }} />
 
+          <Button>Wall</Button>
+
           <IconButton onClick={() => setOpenLegend(true)}>
             <LegendToggleOutlined color="primary" />
           </IconButton>
