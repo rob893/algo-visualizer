@@ -7,6 +7,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { wasmService } from './services/WasmService';
 import theme from './theme';
+import { ViewportProvider } from './contexts/ViewportContext';
 
 wasmService
   .init()
@@ -14,8 +15,10 @@ wasmService
     ReactDOM.render(
       <React.StrictMode>
         <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <App />
+          <ViewportProvider>
+            <CssBaseline />
+            <App />
+          </ViewportProvider>
         </ThemeProvider>
       </React.StrictMode>,
       document.getElementById('root')

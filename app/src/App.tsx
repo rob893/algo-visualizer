@@ -4,10 +4,10 @@ import ControlBar from './components/ControlBar';
 import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
-import Legend from './components/Legend';
 import { localStorageService } from './services/LocalStorageService';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect } from 'react';
 import { inputService } from './services/InputService';
+import { useViewport } from './hooks/useViewport';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -18,13 +18,14 @@ import { inputService } from './services/InputService';
  *
  * I am sure there is a more 'react' way to do it but  ¯\_(ツ)_/¯
  */
-function App(): JSX.Element {
+export default function App(): JSX.Element {
   const nodeHeight = 25;
   const nodeWidth = 25;
 
-  const calculateGridWidth = (): number => Math.floor(window.innerWidth / nodeWidth) - 2;
+  const { width: innerWidth, height: innerHeight } = useViewport();
+
+  const calculateGridWidth = (): number => Math.floor(innerWidth / nodeWidth) - 2;
   const calculateGridHeight = (): number => {
-    const innerHeight = window.innerHeight;
     const appBarHeight = 120;
     const expectedHeight = Math.floor((innerHeight - appBarHeight) / nodeHeight);
     const minusNodeBreakpoint = expectedHeight * nodeHeight + appBarHeight;
@@ -32,9 +33,9 @@ function App(): JSX.Element {
     return innerHeight - minusNodeBreakpoint < nodeHeight / 3 ? expectedHeight - 1 : expectedHeight;
   };
 
-  const [gridWidth, setGridWidth] = useState(calculateGridWidth());
-  const [gridHeight, setGridHeight] = useState(calculateGridHeight());
-  const [universe, setUniverse] = useState(wasmService.resize(gridWidth, gridHeight));
+  const gridWidth = calculateGridWidth();
+  const gridHeight = calculateGridHeight();
+  const universe = wasmService.resize(gridWidth, gridHeight);
 
   const onFindPath = new Subject<
     { algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean
@@ -43,31 +44,16 @@ function App(): JSX.Element {
   const onResetBoard = new Subject<void>();
   const onGenerateMaze = new Subject<number>();
 
-  const handleResize = (): void => {
-    const newWidth = calculateGridWidth();
-    const newHeight = calculateGridHeight();
-
-    if (newHeight === gridHeight && newWidth === gridWidth) {
-      return;
-    }
-
-    setGridWidth(newWidth);
-    setGridHeight(newHeight);
-    setUniverse(wasmService.resize(newWidth, newHeight));
-  };
-
   useEffect(() => {
     inputService.addEventListeners();
-    window.addEventListener('resize', handleResize);
 
     return () => {
       inputService.removeEventListeners();
-      window.removeEventListener('resize', handleResize);
     };
-  });
+  }, []);
 
   return (
-    <div>
+    <Fragment>
       <ControlBar
         onFindPath={onFindPath}
         onResetBoard={onResetBoard}
@@ -75,7 +61,6 @@ function App(): JSX.Element {
         onGenerateMaze={onGenerateMaze}
         localStorageService={localStorageService}
       />
-      <Legend />
       <BoardGrid
         gridWidth={gridWidth}
         gridHeight={gridHeight}
@@ -87,8 +72,6 @@ function App(): JSX.Element {
         onResetPath={onResetPath}
         universe={universe}
       />
-    </div>
+    </Fragment>
   );
 }
-
-export default App;

@@ -1,7 +1,24 @@
-import { Divider, Stack } from '@mui/material';
-import { CSSProperties } from 'react';
+import { Close } from '@mui/icons-material';
+import { AppBar, Button, Dialog, Divider, IconButton, Grid, Slide, Stack, Toolbar, Typography } from '@mui/material';
+import { TransitionProps } from '@mui/material/transitions';
+import { CSSProperties, forwardRef, ReactElement, Ref, Fragment } from 'react';
 
-export default function Legend(): JSX.Element {
+const Transition = forwardRef(function Transition(
+  props: TransitionProps & {
+    children: ReactElement;
+  },
+  ref: Ref<unknown>
+) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
+
+export interface LegendProps {
+  isDesktop: boolean;
+  open: boolean;
+  handleClose: () => void;
+}
+
+export default function Legend({ isDesktop, open, handleClose }: LegendProps): JSX.Element {
   const style: CSSProperties = {
     minWidth: '25px',
     minHeight: '25px',
@@ -9,31 +26,67 @@ export default function Legend(): JSX.Element {
     height: '25px'
   };
 
-  return (
-    <Stack direction="row" spacing={2} display="flex" alignItems="center" justifyContent="center">
-      <p>Start Node:</p>
-      <span style={style} className="start-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>End Node:</p>
-      <span style={style} className="end-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Wall Node:</p>
-      <span style={style} className="wall-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Heavy Node:</p>
-      <span style={style} className="heavy-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Visited Node:</p>
-      <span style={style} className="visited-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Heavy Visited Node:</p>
-      <span style={style} className="visited-heavy-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Path Node:</p>
-      <span style={style} className="path-no-animation" />
-      <Divider orientation="vertical" sx={{ height: 30 }} />
-      <p>Heavy Path Node:</p>
-      <span style={style} className="path-heavy-no-animation" />
+  const legendItems = [
+    ['Start Node:', 'start-no-animation'],
+    ['End Node:', 'end-no-animation'],
+    ['Wall Node:', 'wall-no-animation'],
+    ['Heavy Node:', 'heavy-no-animation'],
+    ['Visited Node:', 'visited-no-animation'],
+    ['Heavy Visited Node:', 'visited-heavy-no-animation'],
+    ['Path Node:', 'path-no-animation'],
+    ['Heavy Path Node:', 'path-heavy-no-animation']
+  ];
+
+  const mobileLegend = (
+    <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
+      <AppBar sx={{ position: 'relative' }}>
+        <Toolbar>
+          <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+            <Close />
+          </IconButton>
+          <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+            Legend
+          </Typography>
+          <Button autoFocus color="inherit" onClick={handleClose}>
+            Close
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <Grid container spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
+        {legendItems.map(([text, className]) => {
+          return (
+            <Fragment key={className}>
+              <Grid item xs={10} sm={4} display="flex" sx={{ alignItems: 'center' }}>
+                <p>{text}</p>
+              </Grid>
+
+              <Grid item xs={2} display="flex" sx={{ alignItems: 'center', justifyContent: 'right' }}>
+                <span style={style} className={className} />
+              </Grid>
+            </Fragment>
+          );
+        })}
+      </Grid>
+    </Dialog>
+  );
+
+  const desktopLegend = (
+    <Stack
+      direction="row"
+      spacing={2}
+      sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', justifyContent: 'center' }}
+    >
+      {legendItems.map(([text, className], index) => {
+        return (
+          <Stack direction="row" spacing={2} sx={{ alignItems: 'center', justifyContent: 'center' }} key={className}>
+            <p>{text}</p>
+            <span style={style} className={className} />
+            {index < legendItems.length - 1 && <Divider orientation="vertical" sx={{ height: 30 }} />}
+          </Stack>
+        );
+      })}
     </Stack>
   );
+
+  return isDesktop ? desktopLegend : mobileLegend;
 }

@@ -1,6 +1,30 @@
-import { ArrowDropDown, ArrowDropUp, HelpOutline, InfoOutlined } from '@mui/icons-material';
-import { AppBar, Box, Button, IconButton, Menu, MenuItem, Stack, Toolbar, Tooltip, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import {
+  ArrowDropDown,
+  ArrowDropUp,
+  ClearAllOutlined,
+  ClearOutlined,
+  HelpOutline,
+  InfoOutlined,
+  LegendToggleOutlined,
+  PlayArrow,
+  Stop
+} from '@mui/icons-material';
+import {
+  AppBar,
+  Box,
+  Button,
+  Fab,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
+import { Fragment, useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import logo from '../logo.svg';
 import { LocalStorageService } from '../services/LocalStorageService';
@@ -8,6 +32,7 @@ import { LocalStorageKey } from '../utilities/LocalStorageKey';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
+import Legend from './Legend';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
@@ -26,6 +51,9 @@ export default function ControlBar({
   onResetBoard,
   localStorageService
 }: ControlBarProps): JSX.Element {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
+
   const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
 
   const [showAtStartChecked, setShowAtStartChecked] = useState(
@@ -40,6 +68,7 @@ export default function ControlBar({
   const [openHelpDialog, setOpenHelpDialog] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
+  const [openLegend, setOpenLegend] = useState(false);
 
   const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState<null | HTMLElement>(null);
   const speedMenuOpen = Boolean(speedMenuAnchorEl);
@@ -133,7 +162,7 @@ export default function ControlBar({
     };
   });
 
-  return (
+  const desktopToolBar = (
     <AppBar position="sticky">
       <Toolbar>
         <Stack direction="row" spacing={2} alignItems="center" display="flex" flexGrow={1}>
@@ -205,5 +234,79 @@ export default function ControlBar({
         />
       </Toolbar>
     </AppBar>
+  );
+
+  const mobileToolBar = (
+    <Fragment>
+      <AppBar position="sticky">
+        <Toolbar>
+          <Stack direction="row" spacing={2} alignItems="center" display="flex" flexGrow={1}>
+            <img src={logo} width={40} height={40} alt="logo" />
+            <Typography variant="h5">Algo Visualizer</Typography>
+            <Box sx={{ display: 'flex', flexGrow: 1 }}>
+              <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
+                <IconButton onClick={handleAboutClick}>
+                  <InfoOutlined color="primary" />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Help">
+                <IconButton onClick={handleHelpClick}>
+                  <HelpOutline color="primary" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Stack>
+
+          <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
+          <HelpDialog
+            open={openHelpDialog}
+            onClose={() => setOpenHelpDialog(false)}
+            onShowHelpCheckboxChange={handleHelpCheckbox}
+            showHelpAtStartChecked={showAtStartChecked}
+          />
+        </Toolbar>
+      </AppBar>
+
+      <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
+        <Toolbar>
+          <IconButton onClick={() => onResetBoard.next()} color="primary" aria-label="clear board">
+            <ClearAllOutlined />
+          </IconButton>
+
+          <IconButton onClick={() => onResetPath.next()} color="primary" aria-label="clear path">
+            <ClearOutlined />
+          </IconButton>
+
+          <Fab
+            sx={{
+              zIndex: 1,
+              margin: '0 auto',
+              top: -25,
+              right: 0,
+              left: 0,
+              position: 'absolute',
+              backgroundColor: running ? '#F44336' : '#4CAF50'
+            }}
+            onClick={handleFindPath}
+          >
+            {running ? <Stop /> : <PlayArrow />}
+          </Fab>
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <IconButton onClick={() => setOpenLegend(true)}>
+            <LegendToggleOutlined color="primary" />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+    </Fragment>
+  );
+
+  return (
+    <Fragment>
+      {isDesktop ? desktopToolBar : mobileToolBar}
+      <Legend isDesktop={isDesktop} open={openLegend} handleClose={() => setOpenLegend(false)} />
+    </Fragment>
   );
 }
