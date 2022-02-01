@@ -232,7 +232,7 @@ export default function ControlBar({
             </Tooltip>
 
             <Tooltip title="Github">
-              <IconButton href="https://github.com/rob893/algo-visualizer" target="_blank">
+              <IconButton href="https://github.com/rob893/algo-visualizer" target="_blank" rel="noopener">
                 <GitHub color="primary" />
               </IconButton>
             </Tooltip>
