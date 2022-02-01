@@ -24,6 +24,8 @@ export class InputService {
 
   private readonly element: Listenable;
 
+  private touchDown = false;
+
   public constructor(element: Listenable) {
     this.element = element;
   }
@@ -38,6 +40,10 @@ export class InputService {
     return this.keyDownMap.get(key) ?? false;
   }
 
+  public getTouchDown(): boolean {
+    return this.touchDown;
+  }
+
   public getMouseButton(mouseButton: 0 | 1 | 2 | MouseButton): boolean {
     return this.mouseButtonDownMap.get(mouseButton) ?? false;
   }
@@ -49,6 +55,8 @@ export class InputService {
     this.element.addEventListener('keyup', this.handleEvent);
     this.element.addEventListener('mousedown', this.handleEvent);
     this.element.addEventListener('mouseup', this.handleEvent);
+    this.element.addEventListener('touchstart', this.handleEvent);
+    this.element.addEventListener('touchend', this.handleEvent);
   }
 
   public removeEventListeners(): void {
@@ -56,6 +64,8 @@ export class InputService {
     this.element.removeEventListener('keyup', this.handleEvent);
     this.element.removeEventListener('mousedown', this.handleEvent);
     this.element.removeEventListener('mouseup', this.handleEvent);
+    this.element.removeEventListener('touchstart', this.handleEvent);
+    this.element.removeEventListener('touchend', this.handleEvent);
   }
 
   private handleEvent(event: Event): void {
@@ -71,6 +81,12 @@ export class InputService {
         break;
       case 'mouseup':
         this.mouseButtonDownMap.set((event as MouseEvent).button, false);
+        break;
+      case 'touchstart':
+        this.touchDown = true;
+        break;
+      case 'touchend':
+        this.touchDown = false;
         break;
       default:
         break;

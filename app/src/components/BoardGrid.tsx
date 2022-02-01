@@ -159,10 +159,16 @@ export default function BoardGrid({
   };
 
   const handleOnMouseEnter = (nodeKey: string, { x, y }: Point): void => {
-    if (inputService.getMouseButton(MouseButton.LeftMouseButton) && nodeKey !== start && nodeKey !== end && !running) {
+    if (
+      (inputService.getMouseButton(MouseButton.LeftMouseButton) || inputService.getTouchDown()) &&
+      (currSelection === NodeContextSelection.Heavy || currSelection === NodeContextSelection.Wall) &&
+      nodeKey !== start &&
+      nodeKey !== end &&
+      !running
+    ) {
       const node = universe.getCell(x, y);
 
-      if (inputService.getKey('Shift')) {
+      if (inputService.getKey('Shift') || currSelection === NodeContextSelection.Heavy) {
         setHeavy(node, nodeKey);
       } else if (node.passable) {
         setWall(node, nodeKey);

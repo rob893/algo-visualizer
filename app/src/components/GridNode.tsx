@@ -21,12 +21,14 @@ const GridNode = memo(
           minWidth: `${nodeWidth}px`,
           minHeight: `${nodeHeight}px`,
           width: `${nodeWidth}px`,
-          height: `${nodeHeight}px`
+          height: `${nodeHeight}px`,
+          touchAction: 'none'
         }}
         className={className}
         id={nodeKey}
-        onMouseEnter={() => onMouseEnter(nodeKey, point)}
         onClick={() => onClick(nodeKey, point)}
+        onPointerDown={e => (e.target as any).releasePointerCapture(e.pointerId)}
+        onPointerEnter={() => onMouseEnter(nodeKey, point)}
       ></td>
     );
   }
