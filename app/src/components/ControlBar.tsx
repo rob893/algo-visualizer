@@ -7,6 +7,7 @@ import {
   HelpOutline,
   InfoOutlined,
   LegendToggleOutlined,
+  MoreVert,
   PlayArrow,
   Settings,
   Stop
@@ -15,8 +16,12 @@ import {
   AppBar,
   Box,
   Button,
+  Divider,
   Fab,
   IconButton,
+  Link,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
   Stack,
@@ -38,6 +43,7 @@ import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
 import Legend from './Legend';
 import SettingsDialog from './SettingsDialog';
+import { green, red } from '@mui/material/colors';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
@@ -83,6 +89,9 @@ export default function ControlBar({
 
   const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
   const algoMenuOpen = Boolean(algoMenuAnchorEl);
+
+  const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const moreMenuOpen = Boolean(moreMenuAnchorEl);
 
   const [selection, setSelection] = useState(NodeContextSelection.Wall);
 
@@ -259,17 +268,58 @@ export default function ControlBar({
             <img src={logo} width={40} height={40} alt="logo" />
             <Typography variant="h5">Algo Visualizer</Typography>
             <Box sx={{ display: 'flex', flexGrow: 1 }}>
-              <Tooltip title="Help" sx={{ marginLeft: 'auto' }}>
-                <IconButton onClick={handleHelpClick}>
-                  <HelpOutline color="primary" />
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip title="Settings">
+              <Tooltip title="Settings" sx={{ marginLeft: 'auto' }}>
                 <IconButton onClick={() => setOpenSettingsDialog(true)}>
                   <Settings color="primary" />
                 </IconButton>
               </Tooltip>
+
+              <Tooltip title="More">
+                <IconButton onClick={e => setMoreMenuAnchorEl(e.currentTarget)}>
+                  <MoreVert color="primary" />
+                </IconButton>
+              </Tooltip>
+              <Menu open={moreMenuOpen} anchorEl={moreMenuAnchorEl} onClose={() => setMoreMenuAnchorEl(null)}>
+                <MenuItem onClick={handleAboutClick}>
+                  <ListItemIcon>
+                    <InfoOutlined fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>About</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={handleHelpClick}>
+                  <ListItemIcon>
+                    <HelpOutline fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Help</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => setOpenLegend(true)}>
+                  <ListItemIcon>
+                    <LegendToggleOutlined fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Legend</ListItemText>
+                </MenuItem>
+                <MenuItem onClick={() => setOpenSettingsDialog(true)}>
+                  <ListItemIcon>
+                    <Settings fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Settings</ListItemText>
+                </MenuItem>
+                <Divider />
+                <Link
+                  href="https://github.com/rob893/algo-visualizer"
+                  target="_blank"
+                  rel="noopener"
+                  color="inherit"
+                  sx={{ textDecoration: 'none', outline: 'none' }}
+                >
+                  <MenuItem>
+                    <ListItemIcon>
+                      <GitHub fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>Github</ListItemText>
+                  </MenuItem>
+                </Link>
+              </Menu>
             </Box>
           </Stack>
 
@@ -308,9 +358,13 @@ export default function ControlBar({
               right: 0,
               left: 0,
               position: 'absolute',
-              backgroundColor: running ? '#F44336' : '#4CAF50'
+              backgroundColor: running ? red[500] : green[500],
+              '&:hover': {
+                backgroundColor: running ? red[700] : green[700]
+              }
             }}
             onClick={handleFindPath}
+            disableFocusRipple={true}
           >
             {running ? <Stop /> : <PlayArrow />}
           </Fab>
