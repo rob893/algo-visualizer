@@ -5,7 +5,7 @@ import { inputService, MouseButton } from '../services/InputService';
 import { drawPath, getKey, getPoint, getRandomInt, Point, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
-import { Selection } from './ControlBar';
+import { NodeContextSelection } from '../models/enums';
 import GridNode from './GridNode';
 
 export interface GridProps {
@@ -17,7 +17,7 @@ export interface GridProps {
   onGenerateMaze: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
-  onSelectionChange: Subject<Selection>;
+  onSelectionChange: Subject<NodeContextSelection>;
   universe: Universe;
 }
 
@@ -33,7 +33,7 @@ export default function BoardGrid({
   onSelectionChange,
   universe
 }: GridProps): JSX.Element {
-  let currSelection = Selection.Wall;
+  let currSelection = NodeContextSelection.Wall;
   let running = false;
   let start = `${Math.floor(gridWidth / 2 - gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
   let end = `${Math.floor(gridWidth / 2 + gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
@@ -49,7 +49,7 @@ export default function BoardGrid({
     }
   }
 
-  const handleSelectionChange = (newSelection: Selection): void => {
+  const handleSelectionChange = (newSelection: NodeContextSelection): void => {
     currSelection = newSelection;
   };
 
@@ -170,9 +170,9 @@ export default function BoardGrid({
     }
   };
 
-  const actionMap = new Map<Selection, (node: Node, nodeKey: string) => void>([
+  const actionMap = new Map<NodeContextSelection, (node: Node, nodeKey: string) => void>([
     [
-      Selection.Wall,
+      NodeContextSelection.Wall,
       (node: Node, nodeKey: string): void => {
         if (node.passable) {
           setWall(node, nodeKey);
@@ -182,7 +182,7 @@ export default function BoardGrid({
       }
     ],
     [
-      Selection.Heavy,
+      NodeContextSelection.Heavy,
       (node: Node, nodeKey: string): void => {
         if (node.weight > 0) {
           setDefault(node, nodeKey);
@@ -192,7 +192,7 @@ export default function BoardGrid({
       }
     ],
     [
-      Selection.Start,
+      NodeContextSelection.Start,
       (node: Node, nodeKey: string): void => {
         const prevStartPoint = getPoint(start);
         const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
@@ -202,7 +202,7 @@ export default function BoardGrid({
       }
     ],
     [
-      Selection.End,
+      NodeContextSelection.End,
       (node: Node, nodeKey: string): void => {
         const prevEndPoint = getPoint(end);
         const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);

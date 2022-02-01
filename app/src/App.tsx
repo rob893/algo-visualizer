@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import './App.css';
-import ControlBar, { Selection } from './components/ControlBar';
+import ControlBar from './components/ControlBar';
 import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
 import { PathFindingAlgorithm } from './wasm/algo_visualizer';
@@ -8,6 +8,7 @@ import { localStorageService } from './services/LocalStorageService';
 import { Fragment, useEffect } from 'react';
 import { inputService } from './services/InputService';
 import { useViewport } from './hooks/useViewport';
+import { NodeContextSelection } from './models/enums';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -43,7 +44,7 @@ export default function App(): JSX.Element {
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
   const onGenerateMaze = new Subject<number>();
-  const onSelectionChange = new Subject<Selection>();
+  const onSelectionChange = new Subject<NodeContextSelection>();
 
   useEffect(() => {
     inputService.addEventListeners();

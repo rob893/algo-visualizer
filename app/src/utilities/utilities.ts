@@ -1,4 +1,37 @@
+import { AnimationSpeed } from '../models/enums';
 import { PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
+
+export function getAlgoNameText(algo: PathFindingAlgorithm): string {
+  switch (algo) {
+    case PathFindingAlgorithm.Astar:
+      return 'A* Search';
+    case PathFindingAlgorithm.Dijkstra:
+      return "Dijkstra's";
+    case PathFindingAlgorithm.BFS:
+      return 'Breadth First';
+    case PathFindingAlgorithm.DFS:
+      return 'Depth First';
+    default:
+      return "Dijkstra's";
+  }
+}
+
+export function getSpeedText(speed: AnimationSpeed): string {
+  switch (speed) {
+    case AnimationSpeed.VeryFast:
+      return 'Very Fast';
+    case AnimationSpeed.Fast:
+      return 'Fast';
+    case AnimationSpeed.Normal:
+      return 'Normal';
+    case AnimationSpeed.Slow:
+      return 'Slow';
+    case AnimationSpeed.VerySlow:
+      return 'Very Slow';
+    default:
+      return 'Normal';
+  }
+}
 
 export async function wait(ms: number): Promise<void> {
   return new Promise(res => {

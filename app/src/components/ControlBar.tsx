@@ -8,6 +8,7 @@ import {
   InfoOutlined,
   LegendToggleOutlined,
   PlayArrow,
+  Settings,
   Stop
 } from '@mui/icons-material';
 import {
@@ -28,27 +29,23 @@ import {
 import { Fragment, useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import logo from '../logo.svg';
+import { NodeContextSelection, AnimationSpeed } from '../models/enums';
 import { LocalStorageService } from '../services/LocalStorageService';
-import { LocalStorageKey } from '../utilities/LocalStorageKey';
+import { LocalStorageKey } from '../models/enums';
+import { getSpeedText, getAlgoNameText } from '../utilities/utilities';
 import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
 import Legend from './Legend';
+import SettingsDialog from './SettingsDialog';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
   onResetPath: Subject<void>;
   onGenerateMaze: Subject<number>;
   onResetBoard: Subject<void>;
-  onSelectionChange: Subject<Selection>;
+  onSelectionChange: Subject<NodeContextSelection>;
   localStorageService: LocalStorageService;
-}
-
-export enum Selection {
-  Wall = 0,
-  Heavy = 1,
-  Start = 2,
-  End = 3
 }
 
 let context = { cancel: false, speed: 50 };
@@ -69,12 +66,13 @@ export default function ControlBar({
   const [showAtStartChecked, setShowAtStartChecked] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
-  const [speed, setSpeed] = useState(50);
+  const [speed, setSpeed] = useState(AnimationSpeed.Normal);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
-  const [speedText, setSpeedText] = useState('Normal');
-  const [algoText, setAlgoText] = useState("Dijkstra's");
+  const [speedText, setSpeedText] = useState(getSpeedText(AnimationSpeed.Normal));
+  const [algoText, setAlgoText] = useState(getAlgoNameText(PathFindingAlgorithm.Dijkstra));
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
+  const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
   const [openHelpDialog, setOpenHelpDialog] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
@@ -86,7 +84,7 @@ export default function ControlBar({
   const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
   const algoMenuOpen = Boolean(algoMenuAnchorEl);
 
-  const [selection, setSelection] = useState(Selection.Wall);
+  const [selection, setSelection] = useState(NodeContextSelection.Wall);
 
   const selections = ['Wall', 'Heavy', 'Start', 'End'];
 
@@ -112,51 +110,14 @@ export default function ControlBar({
   const handleAlgoChange = (newAlgo: PathFindingAlgorithm): void => {
     setCurrAlgo(newAlgo);
     setAlgoMenuAnchorEl(null);
-
-    switch (newAlgo) {
-      case PathFindingAlgorithm.Astar:
-        setAlgoText('A* Search');
-        break;
-      case PathFindingAlgorithm.Dijkstra:
-        setAlgoText("Dijkstra's");
-        break;
-      case PathFindingAlgorithm.BFS:
-        setAlgoText('Breadth First');
-        break;
-      case PathFindingAlgorithm.DFS:
-        setAlgoText('Depth First');
-        break;
-      default:
-        setAlgoText("Dijkstra's");
-        break;
-    }
+    setAlgoText(getAlgoNameText(newAlgo));
   };
 
-  const handleSpeedChange = (newSpeed: number): void => {
+  const handleSpeedChange = (newSpeed: AnimationSpeed): void => {
     setSpeed(newSpeed);
     setSpeedMenuAnchorEl(null);
     context.speed = newSpeed;
-
-    switch (newSpeed) {
-      case 10:
-        setSpeedText('Very Fast');
-        break;
-      case 25:
-        setSpeedText('Fast');
-        break;
-      case 50:
-        setSpeedText('Normal');
-        break;
-      case 100:
-        setSpeedText('Slow');
-        break;
-      case 200:
-        setSpeedText('Very Slow');
-        break;
-      default:
-        setSpeedText('Normal');
-        break;
-    }
+    setSpeedText(getSpeedText(newSpeed));
   };
 
   const handleSelection = (): void => {
@@ -206,10 +167,18 @@ export default function ControlBar({
             {algoText}
           </Button>
           <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>A* Search</MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>Dijkstra's</MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.BFS)}>Breadth First</MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.DFS)}>Depth First</MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>
+              {getAlgoNameText(PathFindingAlgorithm.Astar)}
+            </MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>
+              {getAlgoNameText(PathFindingAlgorithm.Dijkstra)}
+            </MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.BFS)}>
+              {getAlgoNameText(PathFindingAlgorithm.BFS)}
+            </MenuItem>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.DFS)}>
+              {getAlgoNameText(PathFindingAlgorithm.DFS)}
+            </MenuItem>
           </Menu>
 
           <Button
@@ -219,11 +188,21 @@ export default function ControlBar({
             Speed: {speedText}
           </Button>
           <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleSpeedChange(200)}>Very Slow</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(100)}>Slow</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(50)}>Normal</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(25)}>Fast</MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(10)}>Very Fast</MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VerySlow)}>
+              {getSpeedText(AnimationSpeed.VerySlow)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Slow)}>
+              {getSpeedText(AnimationSpeed.Slow)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Normal)}>
+              {getSpeedText(AnimationSpeed.Normal)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Fast)}>
+              {getSpeedText(AnimationSpeed.Fast)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VeryFast)}>
+              {getSpeedText(AnimationSpeed.VeryFast)}
+            </MenuItem>
           </Menu>
 
           <Button disabled={running} onClick={() => onResetBoard.next()}>
@@ -274,21 +253,21 @@ export default function ControlBar({
 
   const mobileToolBar = (
     <Fragment>
-      <AppBar position="sticky">
+      <AppBar position="sticky" sx={{ marginBottom: 2 }}>
         <Toolbar>
           <Stack direction="row" spacing={2} alignItems="center" display="flex" flexGrow={1}>
             <img src={logo} width={40} height={40} alt="logo" />
             <Typography variant="h5">Algo Visualizer</Typography>
             <Box sx={{ display: 'flex', flexGrow: 1 }}>
-              <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
-                <IconButton onClick={handleAboutClick}>
-                  <InfoOutlined color="primary" />
+              <Tooltip title="Help" sx={{ marginLeft: 'auto' }}>
+                <IconButton onClick={handleHelpClick}>
+                  <HelpOutline color="primary" />
                 </IconButton>
               </Tooltip>
 
-              <Tooltip title="Help">
-                <IconButton onClick={handleHelpClick}>
-                  <HelpOutline color="primary" />
+              <Tooltip title="Settings">
+                <IconButton onClick={() => setOpenSettingsDialog(true)}>
+                  <Settings color="primary" />
                 </IconButton>
               </Tooltip>
             </Box>
@@ -301,6 +280,12 @@ export default function ControlBar({
             onClose={() => setOpenHelpDialog(false)}
             onShowHelpCheckboxChange={handleHelpCheckbox}
             showHelpAtStartChecked={showAtStartChecked}
+          />
+          <SettingsDialog
+            open={openSettingsDialog}
+            onClose={() => setOpenSettingsDialog(false)}
+            onAlgoChosen={handleAlgoChange}
+            onSpeedChosen={handleSpeedChange}
           />
         </Toolbar>
       </AppBar>

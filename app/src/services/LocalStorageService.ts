@@ -1,4 +1,4 @@
-import { LocalStorageKey } from '../utilities/LocalStorageKey';
+import { LocalStorageKey } from '../models/enums';
 
 export interface LocalStorageServiceOptions {
   environment?: string;
