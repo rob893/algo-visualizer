@@ -176,11 +176,14 @@ export default function ControlBar({
             {algoText}
           </Button>
           <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>
+              {getAlgoNameText(PathFindingAlgorithm.Dijkstra)}
+            </MenuItem>
             <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>
               {getAlgoNameText(PathFindingAlgorithm.Astar)}
             </MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>
-              {getAlgoNameText(PathFindingAlgorithm.Dijkstra)}
+            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.GreedyBFS)}>
+              {getAlgoNameText(PathFindingAlgorithm.GreedyBFS)}
             </MenuItem>
             <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.BFS)}>
               {getAlgoNameText(PathFindingAlgorithm.BFS)}

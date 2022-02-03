@@ -35,6 +35,7 @@ pub enum PathFindingAlgorithm {
     Dijkstra,
     BFS,
     DFS,
+    GreedyBFS,
 }
 
 #[wasm_bindgen]
@@ -100,6 +101,47 @@ impl Universe {
                     visited.insert(neighbor);
                     came_from.insert(neighbor, current);
                     frontier.push_back(neighbor);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    fn greedy_bfs(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
+        let mut result = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut came_from: HashMap<&Node, &Node> = HashMap::new();
+        let mut visited: HashSet<&Node> = HashSet::new();
+
+        frontier.enqueue(start_node, 0);
+        visited.insert(start_node);
+
+        while frontier.count() > 0 {
+            let current = frontier.dequeue().unwrap();
+
+            result.processed.push(current.clone());
+
+            if current == end_node {
+                return Universe::construct_path(result, came_from, end_node);
+            }
+
+            for neighbor in self.get_neighbors(current.x, current.y) {
+                if !visited.contains(neighbor) {
+                    visited.insert(neighbor);
+                    came_from.insert(neighbor, current);
+                    frontier.enqueue(
+                        neighbor,
+                        -1 * (Universe::heuristic(neighbor, end_node) + neighbor.weight),
+                    );
                 }
             }
         }
@@ -229,7 +271,7 @@ impl Universe {
             }
 
             for next in self.get_neighbors(current.x, current.y) {
-                let tentative_g_score = *g_score.get(current).unwrap() + next.weight as i32;
+                let tentative_g_score = 1 + *g_score.get(current).unwrap() + next.weight as i32;
 
                 if tentative_g_score < *g_score.get(next).unwrap_or(&i32::MAX) {
                     g_score.insert(next, tentative_g_score);
@@ -361,6 +403,7 @@ impl Universe {
             PathFindingAlgorithm::Astar => self.astar(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::BFS => self.bfs(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::DFS => self.dfs(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::GreedyBFS => self.greedy_bfs(start_x, start_y, end_x, end_y),
         };
 
         return JsValue::from_serde(&path).unwrap().unchecked_into();

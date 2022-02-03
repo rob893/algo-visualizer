@@ -65,6 +65,7 @@ export default function SettingsDialog({
         >
           <MenuItem value={PathFindingAlgorithm.Dijkstra}>{getAlgoNameText(PathFindingAlgorithm.Dijkstra)}</MenuItem>
           <MenuItem value={PathFindingAlgorithm.Astar}>{getAlgoNameText(PathFindingAlgorithm.Astar)}</MenuItem>
+          <MenuItem value={PathFindingAlgorithm.GreedyBFS}>{getAlgoNameText(PathFindingAlgorithm.GreedyBFS)}</MenuItem>
           <MenuItem value={PathFindingAlgorithm.BFS}>{getAlgoNameText(PathFindingAlgorithm.BFS)}</MenuItem>
           <MenuItem value={PathFindingAlgorithm.DFS}>{getAlgoNameText(PathFindingAlgorithm.DFS)}</MenuItem>
         </Select>

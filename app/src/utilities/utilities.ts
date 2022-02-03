@@ -7,6 +7,8 @@ export function getAlgoNameText(algo: PathFindingAlgorithm): string {
       return 'A* Search';
     case PathFindingAlgorithm.Dijkstra:
       return "Dijkstra's";
+    case PathFindingAlgorithm.GreedyBFS:
+      return 'Greedy Best First';
     case PathFindingAlgorithm.BFS:
       return 'Breadth First';
     case PathFindingAlgorithm.DFS:
