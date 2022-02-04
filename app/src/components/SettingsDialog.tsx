@@ -117,10 +117,16 @@ export default function SettingsDialog({
 
           <Grid item xs={12}>
             <InputLabel>Play Type</InputLabel>
-            <ToggleButtonGroup color="primary" value={playType} exclusive onChange={handlePlayTypeChange}>
+            <ToggleButtonGroup
+              color="primary"
+              value={playType}
+              exclusive
+              fullWidth={true}
+              onChange={handlePlayTypeChange}
+            >
               <ToggleButton value={PlayType.Path}>Path</ToggleButton>
-              <ToggleButton value={PlayType.Wall}>Maze: Wall</ToggleButton>
-              <ToggleButton value={PlayType.Heavy}>Maze: Heavy</ToggleButton>
+              <ToggleButton value={PlayType.Wall}>Walls</ToggleButton>
+              <ToggleButton value={PlayType.Heavy}>Weights</ToggleButton>
             </ToggleButtonGroup>
           </Grid>
         </Grid>

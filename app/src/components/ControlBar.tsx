@@ -25,6 +25,8 @@ import {
   Menu,
   MenuItem,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Toolbar,
   Tooltip,
   Typography,
@@ -155,6 +157,19 @@ export default function ControlBar({
     setSelection(newSelection);
   };
 
+  const getPlayButtonText = (): string => {
+    switch (playType) {
+      case PlayType.Path:
+        return 'Visualize Path!';
+      case PlayType.Wall:
+        return 'Draw Walls!';
+      case PlayType.Heavy:
+        return 'Draw Weights!';
+      default:
+        return 'Visualize Path!';
+    }
+  };
+
   const handleHelpCheckbox = (checked: boolean): void => {
     localStorageService.setItem(LocalStorageKey.ShowHelpAtStart, `${checked}`);
     setShowAtStartChecked(checked);
@@ -185,8 +200,20 @@ export default function ControlBar({
             variant="contained"
             color={running ? 'error' : 'success'}
           >
-            {running ? 'Cancel' : 'Visualize Path!'}
+            {running ? 'Cancel' : getPlayButtonText()}
           </Button>
+
+          <ToggleButtonGroup
+            color="primary"
+            value={playType}
+            size="small"
+            exclusive
+            onChange={(_, type) => handlePlayTypeChange(type)}
+          >
+            <ToggleButton value={PlayType.Path}>Path</ToggleButton>
+            <ToggleButton value={PlayType.Wall}>Walls</ToggleButton>
+            <ToggleButton value={PlayType.Heavy}>Weights</ToggleButton>
+          </ToggleButtonGroup>
 
           <Button
             disabled={running}
@@ -237,31 +264,15 @@ export default function ControlBar({
             </MenuItem>
           </Menu>
 
+          <Button disabled={running} endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}>
+            Maze: Random
+          </Button>
+
           <Button disabled={running} onClick={() => onResetBoard.next()}>
             Clear Board
           </Button>
           <Button disabled={running} onClick={() => onResetPath.next()}>
             Clear Path
-          </Button>
-          <Button
-            disabled={running}
-            onClick={() => {
-              setRunning(true);
-              context = { cancel: false, speed };
-              onGenerateMaze.next({ playType: PlayType.Wall, context });
-            }}
-          >
-            Generate Walls
-          </Button>
-          <Button
-            disabled={running}
-            onClick={() => {
-              setRunning(true);
-              context = { cancel: false, speed };
-              onGenerateMaze.next({ playType: PlayType.Heavy, context });
-            }}
-          >
-            Generate Weights
           </Button>
 
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
