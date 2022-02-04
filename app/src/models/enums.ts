@@ -13,6 +13,12 @@ export enum AnimationSpeed {
   VeryFast = 10
 }
 
+export enum PlayType {
+  Path = 'path',
+  Wall = 'wall',
+  Heavy = 'heavy'
+}
+
 export enum LocalStorageKey {
   ShowHelpAtStart = 'show-help-at-start'
 }

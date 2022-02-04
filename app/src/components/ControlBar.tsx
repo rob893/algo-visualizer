@@ -34,7 +34,7 @@ import {
 import { Fragment, useEffect, useState } from 'react';
 import { Subject } from 'rxjs';
 import logo from '../logo.svg';
-import { NodeContextSelection, AnimationSpeed } from '../models/enums';
+import { NodeContextSelection, AnimationSpeed, PlayType } from '../models/enums';
 import { LocalStorageService } from '../services/LocalStorageService';
 import { LocalStorageKey } from '../models/enums';
 import { getSpeedText, getAlgoNameText } from '../utilities/utilities';
@@ -44,11 +44,12 @@ import HelpDialog from './HelpDialog';
 import Legend from './Legend';
 import SettingsDialog from './SettingsDialog';
 import { green, red } from '@mui/material/colors';
+import { PlayContext } from '../models/models';
 
 export interface ControlBarProps {
-  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
   onResetPath: Subject<void>;
-  onGenerateMaze: Subject<number>;
+  onGenerateMaze: Subject<{ playType: PlayType; context: PlayContext }>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
   localStorageService: LocalStorageService;
@@ -83,6 +84,7 @@ export default function ControlBar({
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
   const [openLegend, setOpenLegend] = useState(false);
+  const [playType, setPlayType] = useState(PlayType.Path);
 
   const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState<null | HTMLElement>(null);
   const speedMenuOpen = Boolean(speedMenuAnchorEl);
@@ -105,14 +107,28 @@ export default function ControlBar({
     setOpenHelpDialog(true);
   };
 
-  const handleFindPath = (): void => {
+  const handlePlay = (): void => {
     if (running) {
       context.cancel = true;
       setRunning(false);
     } else {
       setRunning(true);
       context = { cancel: false, speed };
-      onFindPath.next({ algo, context });
+
+      switch (playType) {
+        case PlayType.Path:
+          onFindPath.next({ algo, context });
+          break;
+        case PlayType.Wall:
+          onGenerateMaze.next({ playType: PlayType.Wall, context });
+          break;
+        case PlayType.Heavy:
+          onGenerateMaze.next({ playType: PlayType.Heavy, context });
+          break;
+        default:
+          onFindPath.next({ algo, context });
+          break;
+      }
     }
   };
 
@@ -120,6 +136,10 @@ export default function ControlBar({
     setCurrAlgo(newAlgo);
     setAlgoMenuAnchorEl(null);
     setAlgoText(getAlgoNameText(newAlgo));
+  };
+
+  const handlePlayTypeChange = (newPlayType: PlayType): void => {
+    setPlayType(newPlayType);
   };
 
   const handleSpeedChange = (newSpeed: AnimationSpeed): void => {
@@ -161,7 +181,7 @@ export default function ControlBar({
 
           <Button
             sx={{ width: 150, height: 36.5 }}
-            onClick={handleFindPath}
+            onClick={handlePlay}
             variant="contained"
             color={running ? 'error' : 'success'}
           >
@@ -223,10 +243,24 @@ export default function ControlBar({
           <Button disabled={running} onClick={() => onResetPath.next()}>
             Clear Path
           </Button>
-          <Button disabled={running} onClick={() => onGenerateMaze.next(0)}>
+          <Button
+            disabled={running}
+            onClick={() => {
+              setRunning(true);
+              context = { cancel: false, speed };
+              onGenerateMaze.next({ playType: PlayType.Wall, context });
+            }}
+          >
             Generate Walls
           </Button>
-          <Button disabled={running} onClick={() => onGenerateMaze.next(1)}>
+          <Button
+            disabled={running}
+            onClick={() => {
+              setRunning(true);
+              context = { cancel: false, speed };
+              onGenerateMaze.next({ playType: PlayType.Heavy, context });
+            }}
+          >
             Generate Weights
           </Button>
 
@@ -339,6 +373,7 @@ export default function ControlBar({
             onClose={() => setOpenSettingsDialog(false)}
             onAlgoChosen={handleAlgoChange}
             onSpeedChosen={handleSpeedChange}
+            onPlayTypeChosen={handlePlayTypeChange}
           />
         </Toolbar>
       </AppBar>
@@ -366,7 +401,7 @@ export default function ControlBar({
                 backgroundColor: running ? red[700] : green[700]
               }
             }}
-            onClick={handleFindPath}
+            onClick={handlePlay}
             disableFocusRipple={true}
           >
             {running ? <Stop /> : <PlayArrow />}

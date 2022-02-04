@@ -5,16 +5,17 @@ import { inputService, MouseButton } from '../services/InputService';
 import { drawPath, getKey, getPoint, getRandomInt, Point, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
-import { NodeContextSelection } from '../models/enums';
+import { NodeContextSelection, PlayType } from '../models/enums';
 import GridNode from './GridNode';
+import { PlayContext } from '../models/models';
 
 export interface GridProps {
   gridWidth: number;
   gridHeight: number;
   nodeWidth: number;
   nodeHeight: number;
-  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: { cancel: boolean; speed: number } } | boolean>;
-  onGenerateMaze: Subject<number>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
+  onGenerateMaze: Subject<{ playType: PlayType; context: PlayContext }>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
@@ -122,7 +123,13 @@ export default function BoardGrid({
     setClass(nodeKey, 'end');
   };
 
-  const handleRandomizeWalls = async (num: number): Promise<void> => {
+  const handleRandomizeWalls = async ({
+    playType,
+    context
+  }: {
+    playType: PlayType;
+    context: PlayContext;
+  }): Promise<void> => {
     const computePoint = async (nodeKey: string): Promise<void> => {
       const { x, y } = getPoint(nodeKey);
       const node = universe.getCell(x, y);
@@ -134,7 +141,7 @@ export default function BoardGrid({
       const rand = getRandomInt(100);
 
       if (rand >= 70) {
-        if (num === 0) {
+        if (playType === PlayType.Wall) {
           setWall(node, nodeKey);
         } else {
           setHeavy(node, nodeKey);
@@ -146,6 +153,10 @@ export default function BoardGrid({
 
     for (let y = 0; y < gridKeys.length / 2; y++) {
       for (let x = 0; x < gridKeys[0].length; x++) {
+        if (context.cancel) {
+          return;
+        }
+
         const topNodeKey = gridKeys[y][x];
         const promises = [computePoint(topNodeKey)];
 
@@ -156,6 +167,8 @@ export default function BoardGrid({
         await Promise.all(promises);
       }
     }
+
+    onFindPath.next(true);
   };
 
   const handleOnMouseEnter = (nodeKey: string, { x, y }: Point): void => {
@@ -261,10 +274,7 @@ export default function BoardGrid({
       | boolean
       | {
           algo: PathFindingAlgorithm;
-          context: {
-            cancel: boolean;
-            speed: number;
-          };
+          context: PlayContext;
         }
   ): Promise<void> => {
     if (typeof event === 'boolean') {
