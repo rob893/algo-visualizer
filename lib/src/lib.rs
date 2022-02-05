@@ -1,4 +1,5 @@
 use priority_queue::priority_queue::PriorityQueue;
+use rand::Rng;
 use serde::Serialize;
 use std::{
     collections::{HashMap, HashSet, VecDeque},
@@ -27,6 +28,9 @@ interface IPathResponse {
 extern "C" {
     #[wasm_bindgen(typescript_type = "IPathResponse")]
     pub type IPathResponse;
+
+    #[wasm_bindgen(typescript_type = "INode[]")]
+    pub type IMazeResponse;
 }
 
 #[wasm_bindgen]
@@ -36,6 +40,14 @@ pub enum PathFindingAlgorithm {
     BFS,
     DFS,
     GreedyBFS,
+}
+
+#[wasm_bindgen]
+pub enum MazeType {
+    Random25,
+    Random50,
+    Random75,
+    RecursiveDivision,
 }
 
 #[wasm_bindgen]
@@ -60,6 +72,12 @@ pub struct Universe {
     nodes: Vec<Node>,
 }
 
+#[derive(PartialEq, Eq, Clone, Copy)]
+enum Orientation {
+    Horizontal,
+    Vertical,
+}
+
 impl Universe {
     fn get_index(&self, x: i32, y: i32) -> usize {
         (y * self.width as i32 + x) as usize
@@ -68,6 +86,195 @@ impl Universe {
     fn get_cell_ref(&self, x: i32, y: i32) -> &Node {
         let index = self.get_index(x, y);
         return &self.nodes[index];
+    }
+
+    fn random_nodes<'a>(&self, result: &'a mut Vec<Node>, percentage: i32) {
+        let mut rng = rand::thread_rng();
+
+        for node in &self.nodes {
+            let rand = rng.gen_range(0..100);
+
+            if rand < percentage {
+                result.push(node.clone());
+            }
+        }
+    }
+
+    fn recursive_division_maze<'a>(
+        &self,
+        result: &'a mut Vec<Node>,
+        row_start: i32,
+        row_end: i32,
+        col_start: i32,
+        col_end: i32,
+        orientation: Orientation,
+        surrounding_walls: bool,
+    ) {
+        if row_end < row_start || col_end < col_start {
+            return;
+        }
+
+        if surrounding_walls {
+            for row in 0..self.height as i32 {
+                let left_node = self.get_cell(0, row).clone();
+                let right_node = self.get_cell((self.width - 1) as i32, row).clone();
+
+                result.push(left_node);
+                result.push(right_node);
+            }
+
+            for col in 0..self.width as i32 {
+                let top_node = self.get_cell(col, 0).clone();
+                let bottom_node = self.get_cell(col, (self.height - 1) as i32).clone();
+
+                result.push(top_node);
+                result.push(bottom_node);
+            }
+        }
+
+        let mut possible_rows: Vec<i32> = Vec::new();
+
+        for i in (if orientation == Orientation::Horizontal {
+            row_start
+        } else {
+            row_start - 1
+        }..if orientation == Orientation::Horizontal {
+            row_end + 1
+        } else {
+            row_end + 2
+        })
+            .step_by(2)
+        {
+            possible_rows.push(i);
+        }
+
+        let mut possible_cols: Vec<i32> = Vec::new();
+
+        for i in (if orientation == Orientation::Horizontal {
+            col_start - 1
+        } else {
+            col_start
+        }..if orientation == Orientation::Horizontal {
+            col_end + 2
+        } else {
+            col_end + 1
+        })
+            .step_by(2)
+        {
+            possible_cols.push(i);
+        }
+
+        let mut rng = rand::thread_rng();
+
+        let rand_row_index = rng.gen_range(0..possible_rows.len());
+        let rand_col_index = rng.gen_range(0..possible_cols.len());
+
+        let rand_row = possible_rows[rand_row_index];
+        let rand_col = possible_cols[rand_col_index];
+
+        if orientation == Orientation::Horizontal {
+            for col in 0..self.width as i32 {
+                if col != rand_col && col >= col_start - 1 && col <= col_end + 1 {
+                    let node = self.get_cell(col as i32, rand_row as i32).clone();
+                    result.push(node);
+                }
+            }
+
+            if rand_row - 2 - row_start > col_end - col_start {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    rand_row - 2,
+                    col_start,
+                    col_end,
+                    orientation,
+                    false,
+                );
+            } else {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    rand_row - 2,
+                    col_start,
+                    col_end,
+                    Orientation::Vertical,
+                    false,
+                );
+            }
+
+            if row_end - (rand_row + 2) > col_end - col_start {
+                self.recursive_division_maze(
+                    result,
+                    rand_row + 2,
+                    row_end,
+                    col_start,
+                    col_end,
+                    orientation,
+                    false,
+                );
+            } else {
+                self.recursive_division_maze(
+                    result,
+                    rand_row + 2,
+                    row_end,
+                    col_start,
+                    col_end,
+                    Orientation::Vertical,
+                    false,
+                );
+            }
+        } else {
+            for row in 0..self.height as i32 {
+                if row != rand_row && row >= row_start - 1 && row <= row_end + 1 {
+                    let node = self.get_cell(rand_col as i32, row as i32).clone();
+                    result.push(node);
+                }
+            }
+
+            if row_end - row_start > rand_col - 2 - col_start {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    row_end,
+                    col_start,
+                    rand_col - 2,
+                    Orientation::Horizontal,
+                    false,
+                );
+            } else {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    row_end,
+                    col_start,
+                    rand_col - 2,
+                    orientation,
+                    false,
+                );
+            }
+
+            if row_end - row_start > col_end - (rand_col + 2) {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    row_end,
+                    rand_col + 2,
+                    col_end,
+                    Orientation::Horizontal,
+                    false,
+                );
+            } else {
+                self.recursive_division_maze(
+                    result,
+                    row_start,
+                    row_end,
+                    rand_col + 2,
+                    col_end,
+                    orientation,
+                    false,
+                );
+            }
+        }
     }
 
     fn bfs(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
@@ -186,27 +393,12 @@ impl Universe {
         return result;
     }
 
-    // fn get_closest_node(nodes: &Vec<&Node>, times: &HashMap<&Node, i32>) -> usize { // Used for vec impl
-    //     let mut curr_closest_index = 0;
-
-    //     for i in 0..nodes.len() {
-    //         if times.get(nodes[curr_closest_index]).unwrap_or(&i32::MAX)
-    //             > times.get(nodes[i]).unwrap_or(&i32::MAX)
-    //         {
-    //             curr_closest_index = i;
-    //         }
-    //     }
-
-    //     return curr_closest_index;
-    // }
-
     fn dijkstra(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
         let mut result = PathResult {
             path: Vec::new(),
             processed: Vec::new(),
         };
 
-        // let mut frontier: Vec<&Node> = self.nodes.iter().collect(); // Used for vec impl
         let mut frontier: PriorityQueue<&Node> = PriorityQueue::new();
 
         let start_node = self.get_cell_ref(start_x, start_y);
@@ -219,8 +411,6 @@ impl Universe {
         frontier.enqueue(start_node, 0);
 
         while frontier.count() > 0 {
-            // let index = Universe::get_closest_node(&frontier, &times); // Used for vec impl
-            // let current = frontier.swap_remove(index);
             let current = frontier.dequeue().unwrap();
 
             result.processed.push(current.clone());
@@ -389,6 +579,27 @@ impl Universe {
         return self.nodes[index];
     }
 
+    #[wasm_bindgen(js_name = generateMaze)]
+    pub fn generate_maze(&self, maze_type: MazeType) -> IMazeResponse {
+        let mut maze: Vec<Node> = Vec::new();
+        match maze_type {
+            MazeType::Random25 => self.random_nodes(&mut maze, 25),
+            MazeType::Random50 => self.random_nodes(&mut maze, 50),
+            MazeType::Random75 => self.random_nodes(&mut maze, 75),
+            MazeType::RecursiveDivision => self.recursive_division_maze(
+                &mut maze,
+                2,
+                self.height as i32 - 3,
+                2,
+                self.width as i32 - 3,
+                Orientation::Horizontal,
+                true,
+            ),
+        };
+
+        return JsValue::from_serde(&maze).unwrap().unchecked_into();
+    }
+
     #[wasm_bindgen(js_name = findPath)]
     pub fn find_path(
         &self,
@@ -456,5 +667,27 @@ mod tests {
         let path = universe.astar(0, 0, 4, 3);
         println!("visited {}", path.processed.len());
         assert_eq!(path.path.len(), 10);
+    }
+
+    #[test]
+    fn recursive_division_maze_works() {
+        let h: i32 = 25;
+        let w: i32 = 62;
+        let universe = Universe::new(w as u32, h as u32);
+
+        assert_eq!(universe.nodes.len(), (w * h) as usize);
+
+        let mut maze: Vec<Node> = Vec::new();
+        universe.recursive_division_maze(
+            &mut maze,
+            2,
+            h - 3,
+            2,
+            w - 3,
+            Orientation::Horizontal,
+            true,
+        );
+
+        assert_eq!(maze.len() > 0, true);
     }
 }

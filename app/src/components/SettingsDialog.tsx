@@ -90,6 +90,20 @@ export default function SettingsDialog({
           </Grid>
 
           <Grid item xs={12} sm={4}>
+            <InputLabel id="maze-select-label">Maze</InputLabel>
+            <Select
+              labelId="maze-select-label"
+              id="maze-select"
+              value="Recursive Division"
+              label="Maze"
+              fullWidth={true}
+            >
+              <MenuItem value="Recursive Division">Recursive Division</MenuItem>
+              <MenuItem value="Random">Random</MenuItem>
+            </Select>
+          </Grid>
+
+          <Grid item xs={12} sm={4}>
             <InputLabel id="speed-select-label">Speed</InputLabel>
             <Select
               labelId="speed-select-label"
@@ -104,14 +118,6 @@ export default function SettingsDialog({
               <MenuItem value={AnimationSpeed.Normal}>{getSpeedText(AnimationSpeed.Normal)}</MenuItem>
               <MenuItem value={AnimationSpeed.Fast}>{getSpeedText(AnimationSpeed.Fast)}</MenuItem>
               <MenuItem value={AnimationSpeed.VeryFast}>{getSpeedText(AnimationSpeed.VeryFast)}</MenuItem>
-            </Select>
-          </Grid>
-
-          <Grid item xs={12} sm={4}>
-            <InputLabel id="maze-select-label">Maze</InputLabel>
-            <Select labelId="maze-select-label" id="maze-select" value="Random" label="Maze" fullWidth={true}>
-              <MenuItem value="Random">Random</MenuItem>
-              <MenuItem value="Recursive Division">Recursive Division</MenuItem>
             </Select>
           </Grid>
 

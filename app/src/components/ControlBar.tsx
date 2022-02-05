@@ -216,6 +216,30 @@ export default function ControlBar({
           </ToggleButtonGroup>
 
           <Button
+            onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
+            endIcon={speedMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
+          >
+            Speed: {speedText}
+          </Button>
+          <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VerySlow)}>
+              {getSpeedText(AnimationSpeed.VerySlow)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Slow)}>
+              {getSpeedText(AnimationSpeed.Slow)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Normal)}>
+              {getSpeedText(AnimationSpeed.Normal)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Fast)}>
+              {getSpeedText(AnimationSpeed.Fast)}
+            </MenuItem>
+            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VeryFast)}>
+              {getSpeedText(AnimationSpeed.VeryFast)}
+            </MenuItem>
+          </Menu>
+
+          <Button
             disabled={running}
             onClick={e => setAlgoMenuAnchorEl(e.currentTarget)}
             endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
@@ -240,32 +264,8 @@ export default function ControlBar({
             </MenuItem>
           </Menu>
 
-          <Button
-            onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
-            endIcon={speedMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-          >
-            Speed: {speedText}
-          </Button>
-          <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VerySlow)}>
-              {getSpeedText(AnimationSpeed.VerySlow)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Slow)}>
-              {getSpeedText(AnimationSpeed.Slow)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Normal)}>
-              {getSpeedText(AnimationSpeed.Normal)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Fast)}>
-              {getSpeedText(AnimationSpeed.Fast)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VeryFast)}>
-              {getSpeedText(AnimationSpeed.VeryFast)}
-            </MenuItem>
-          </Menu>
-
           <Button disabled={running} endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}>
-            Maze: Random
+            Maze: Recursive Division
           </Button>
 
           <Button disabled={running} onClick={() => onResetBoard.next()}>

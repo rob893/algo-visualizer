@@ -2,9 +2,9 @@ import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
-import { drawPath, getKey, getPoint, getRandomInt, Point, wait } from '../utilities/utilities';
+import { drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
 import { Universe } from '../wasm/algo_visualizer';
-import { Node, PathFindingAlgorithm } from '../wasm/algo_visualizer';
+import { Node, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
 import { NodeContextSelection, PlayType } from '../models/enums';
 import GridNode from './GridNode';
 import { PlayContext } from '../models/models';
@@ -130,42 +130,27 @@ export default function BoardGrid({
     playType: PlayType;
     context: PlayContext;
   }): Promise<void> => {
-    const computePoint = async (nodeKey: string): Promise<void> => {
-      const { x, y } = getPoint(nodeKey);
-      const node = universe.getCell(x, y);
+    const maze = universe.generateMaze(MazeType.RecursiveDivision);
 
-      if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
+    for (const { x, y } of maze) {
+      if (context.cancel) {
         return;
       }
 
-      const rand = getRandomInt(100);
+      const node = universe.getCell(x, y);
+      const nodeKey = getKey(x, y);
 
-      if (rand >= 70) {
-        if (playType === PlayType.Wall) {
-          setWall(node, nodeKey);
-        } else {
-          setHeavy(node, nodeKey);
-        }
-
-        await wait(5);
+      if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
+        continue;
       }
-    };
 
-    for (let y = 0; y < gridKeys.length / 2; y++) {
-      for (let x = 0; x < gridKeys[0].length; x++) {
-        if (context.cancel) {
-          return;
-        }
-
-        const topNodeKey = gridKeys[y][x];
-        const promises = [computePoint(topNodeKey)];
-
-        if (y !== gridKeys.length - 1 - y) {
-          promises.push(computePoint(gridKeys[gridKeys.length - 1 - y][gridKeys[y].length - 1 - x]));
-        }
-
-        await Promise.all(promises);
+      if (playType === PlayType.Wall) {
+        setWall(node, nodeKey);
+      } else {
+        setHeavy(node, nodeKey);
       }
+
+      await wait(context.speed / 2);
     }
 
     onFindPath.next(true);
