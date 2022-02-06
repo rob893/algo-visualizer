@@ -3,8 +3,8 @@ import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
 import { chunk, drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
-import { INode, Universe } from '../wasm/algo_visualizer';
-import { Node, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
+import { IGridNode, Universe } from '../wasm/algo_visualizer';
+import { GridNode as WasmGridNode, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
 import { NodeContextSelection, PlayType } from '../models/enums';
 import GridNode from './GridNode';
 import { PlayContext } from '../models/models';
@@ -91,32 +91,32 @@ export default function BoardGrid({
     }
   };
 
-  const setWall = (node: Node, nodeKey: string): void => {
+  const setWall = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, false);
     setClass(nodeKey, 'wall');
   };
 
-  const setDefault = (node: Node, nodeKey: string): void => {
+  const setDefault = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     setClass(nodeKey, '');
   };
 
-  const setHeavy = (node: Node, nodeKey: string): void => {
+  const setHeavy = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 15);
     universe.setPassable(node.x, node.y, true);
     setClass(nodeKey, 'heavy');
   };
 
-  const setStartPoint = (node: Node, nodeKey: string): void => {
+  const setStartPoint = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     start = nodeKey;
     setClass(nodeKey, 'start');
   };
 
-  const setEndPoint = (node: Node, nodeKey: string): void => {
+  const setEndPoint = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     end = nodeKey;
@@ -135,7 +135,7 @@ export default function BoardGrid({
     const maze = universe.generateMaze(mazeType);
     const chunks = chunk(maze, 500);
 
-    const processNode = ({ x, y }: INode): void => {
+    const processNode = ({ x, y }: IGridNode): void => {
       const node = universe.getCell(x, y);
       const nodeKey = getKey(x, y);
 
@@ -150,7 +150,7 @@ export default function BoardGrid({
       }
     };
 
-    const processChunk = async (chunk: INode[]): Promise<void> => {
+    const processChunk = async (chunk: IGridNode[]): Promise<void> => {
       for (let i = 0, j = chunk.length - 1; i < j; i++, j--) {
         if (context.cancel) {
           return;
@@ -186,10 +186,10 @@ export default function BoardGrid({
     }
   };
 
-  const actionMap = new Map<NodeContextSelection, (node: Node, nodeKey: string) => void>([
+  const actionMap = new Map<NodeContextSelection, (node: WasmGridNode, nodeKey: string) => void>([
     [
       NodeContextSelection.Wall,
-      (node: Node, nodeKey: string): void => {
+      (node: WasmGridNode, nodeKey: string): void => {
         if (node.passable) {
           setWall(node, nodeKey);
         } else {
@@ -199,7 +199,7 @@ export default function BoardGrid({
     ],
     [
       NodeContextSelection.Heavy,
-      (node: Node, nodeKey: string): void => {
+      (node: WasmGridNode, nodeKey: string): void => {
         if (node.weight > 0) {
           setDefault(node, nodeKey);
         } else {
@@ -209,7 +209,7 @@ export default function BoardGrid({
     ],
     [
       NodeContextSelection.Start,
-      (node: Node, nodeKey: string): void => {
+      (node: WasmGridNode, nodeKey: string): void => {
         const prevStartPoint = getPoint(start);
         const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
 
@@ -219,7 +219,7 @@ export default function BoardGrid({
     ],
     [
       NodeContextSelection.End,
-      (node: Node, nodeKey: string): void => {
+      (node: WasmGridNode, nodeKey: string): void => {
         const prevEndPoint = getPoint(end);
         const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
 
