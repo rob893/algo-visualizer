@@ -21,22 +21,34 @@ import { PlayContext } from './models/models';
  * I am sure there is a more 'react' way to do it but  ¯\_(ツ)_/¯
  */
 export default function App(): JSX.Element {
-  const nodeHeight = 25;
-  const nodeWidth = 25;
-
   const { width: innerWidth, height: innerHeight } = useViewport();
 
-  const calculateGridWidth = (): number => Math.floor(innerWidth / nodeWidth) - 2;
-  const calculateGridHeight = (): number => {
-    const appBarHeight = 120;
-    const expectedHeight = Math.floor((innerHeight - appBarHeight) / nodeHeight);
-    const minusNodeBreakpoint = expectedHeight * nodeHeight + appBarHeight;
+  const defaultNodeHeight = 25;
+  const defaultNodeWidth = 25;
+  const scaleHeightBreakpoint = 25;
+  const scaleWidthBreakpoint = 62;
 
-    return innerHeight - minusNodeBreakpoint < nodeHeight / 3 ? expectedHeight - 1 : expectedHeight;
+  const calculateGridWidth = (nodeW: number): number => Math.floor(innerWidth / nodeW) - 2;
+  const calculateGridHeight = (nodeH: number): number => {
+    const appBarHeight = 120;
+    const expectedHeight = Math.floor((innerHeight - appBarHeight) / nodeH);
+    const minusNodeBreakpoint = expectedHeight * nodeH + appBarHeight;
+
+    return innerHeight - minusNodeBreakpoint < nodeH / 3 ? expectedHeight - 1 : expectedHeight;
   };
 
-  const gridWidth = calculateGridWidth();
-  const gridHeight = calculateGridHeight();
+  const scale = Math.min(
+    (calculateGridHeight(defaultNodeHeight) / scaleHeightBreakpoint +
+      calculateGridWidth(defaultNodeWidth) / scaleWidthBreakpoint) /
+      2,
+    1.5
+  );
+
+  const nodeHeight = Math.max(defaultNodeHeight, defaultNodeHeight * scale);
+  const nodeWidth = Math.max(defaultNodeWidth, defaultNodeWidth * scale);
+
+  const gridHeight = calculateGridHeight(nodeHeight);
+  const gridWidth = calculateGridWidth(nodeWidth);
   const universe = wasmService.resize(gridWidth, gridHeight);
 
   const onFindPath = new Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>();
