@@ -3,7 +3,7 @@ import './App.css';
 import ControlBar from './components/ControlBar';
 import BoardGrid from './components/BoardGrid';
 import { wasmService } from './services/WasmService';
-import { PathFindingAlgorithm } from './wasm/algo_visualizer';
+import { MazeType, PathFindingAlgorithm } from './wasm/algo_visualizer';
 import { localStorageService } from './services/LocalStorageService';
 import { Fragment, useEffect } from 'react';
 import { inputService } from './services/InputService';
@@ -42,7 +42,7 @@ export default function App(): JSX.Element {
   const onFindPath = new Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
-  const onGenerateMaze = new Subject<{ playType: PlayType; context: PlayContext }>();
+  const onGenerateMaze = new Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>();
   const onSelectionChange = new Subject<NodeContextSelection>();
 
   useEffect(() => {

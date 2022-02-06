@@ -15,7 +15,7 @@ export interface GridProps {
   nodeWidth: number;
   nodeHeight: number;
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
-  onGenerateMaze: Subject<{ playType: PlayType; context: PlayContext }>;
+  onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
@@ -125,12 +125,14 @@ export default function BoardGrid({
 
   const handleRandomizeWalls = async ({
     playType,
+    mazeType,
     context
   }: {
     playType: PlayType;
+    mazeType: MazeType;
     context: PlayContext;
   }): Promise<void> => {
-    const maze = universe.generateMaze(MazeType.RecursiveDivision);
+    const maze = universe.generateMaze(mazeType);
 
     for (const { x, y } of maze) {
       if (context.cancel) {

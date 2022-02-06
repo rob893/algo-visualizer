@@ -1,5 +1,5 @@
 import { AnimationSpeed } from '../models/enums';
-import { PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
+import { MazeType, PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
 
 export function getAlgoNameText(algo: PathFindingAlgorithm): string {
   switch (algo) {
@@ -32,6 +32,21 @@ export function getSpeedText(speed: AnimationSpeed): string {
       return 'Very Slow';
     default:
       return 'Normal';
+  }
+}
+
+export function getMazeTypeText(mazeType: MazeType): string {
+  switch (mazeType) {
+    case MazeType.RecursiveDivision:
+      return 'Recursive Division';
+    case MazeType.Random25:
+      return 'Random 25%';
+    case MazeType.Random50:
+      return 'Random 50%';
+    case MazeType.Random75:
+      return 'Random 75%';
+    default:
+      return 'Recursive Division';
   }
 }
 

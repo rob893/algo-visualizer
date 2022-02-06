@@ -39,8 +39,8 @@ import logo from '../logo.svg';
 import { NodeContextSelection, AnimationSpeed, PlayType } from '../models/enums';
 import { LocalStorageService } from '../services/LocalStorageService';
 import { LocalStorageKey } from '../models/enums';
-import { getSpeedText, getAlgoNameText } from '../utilities/utilities';
-import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
+import { getSpeedText, getAlgoNameText, getMazeTypeText } from '../utilities/utilities';
+import { MazeType, PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
 import Legend from './Legend';
@@ -51,7 +51,7 @@ import { PlayContext } from '../models/models';
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
   onResetPath: Subject<void>;
-  onGenerateMaze: Subject<{ playType: PlayType; context: PlayContext }>;
+  onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
   localStorageService: LocalStorageService;
@@ -79,6 +79,8 @@ export default function ControlBar({
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speedText, setSpeedText] = useState(getSpeedText(AnimationSpeed.Normal));
   const [algoText, setAlgoText] = useState(getAlgoNameText(PathFindingAlgorithm.Dijkstra));
+  const [mazeType, setMazeType] = useState(MazeType.RecursiveDivision);
+  const [mazeTypeText, setMazeTypeText] = useState(getMazeTypeText(mazeType));
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
   const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
@@ -93,6 +95,9 @@ export default function ControlBar({
 
   const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
   const algoMenuOpen = Boolean(algoMenuAnchorEl);
+
+  const [mazeMenuAnchorEl, setMazeMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const mazeMenuOpen = Boolean(mazeMenuAnchorEl);
 
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<null | HTMLElement>(null);
   const moreMenuOpen = Boolean(moreMenuAnchorEl);
@@ -122,10 +127,10 @@ export default function ControlBar({
           onFindPath.next({ algo, context });
           break;
         case PlayType.Wall:
-          onGenerateMaze.next({ playType: PlayType.Wall, context });
+          onGenerateMaze.next({ playType: PlayType.Wall, mazeType, context });
           break;
         case PlayType.Heavy:
-          onGenerateMaze.next({ playType: PlayType.Heavy, context });
+          onGenerateMaze.next({ playType: PlayType.Heavy, mazeType, context });
           break;
         default:
           onFindPath.next({ algo, context });
@@ -138,6 +143,12 @@ export default function ControlBar({
     setCurrAlgo(newAlgo);
     setAlgoMenuAnchorEl(null);
     setAlgoText(getAlgoNameText(newAlgo));
+  };
+
+  const handleMazeTypeChange = (newMazeType: MazeType): void => {
+    setMazeType(newMazeType);
+    setMazeMenuAnchorEl(null);
+    setMazeTypeText(getMazeTypeText(newMazeType));
   };
 
   const handlePlayTypeChange = (newPlayType: PlayType): void => {
@@ -264,9 +275,27 @@ export default function ControlBar({
             </MenuItem>
           </Menu>
 
-          <Button disabled={running} endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}>
-            Maze: Recursive Division
+          <Button
+            disabled={running}
+            onClick={e => setMazeMenuAnchorEl(e.currentTarget)}
+            endIcon={mazeMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
+          >
+            {mazeTypeText}
           </Button>
+          <Menu open={mazeMenuOpen} anchorEl={mazeMenuAnchorEl} onClose={() => setMazeMenuAnchorEl(null)}>
+            <MenuItem onClick={() => handleMazeTypeChange(MazeType.RecursiveDivision)}>
+              {getMazeTypeText(MazeType.RecursiveDivision)}
+            </MenuItem>
+            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random25)}>
+              {getMazeTypeText(MazeType.Random25)}
+            </MenuItem>
+            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random50)}>
+              {getMazeTypeText(MazeType.Random50)}
+            </MenuItem>
+            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random75)}>
+              {getMazeTypeText(MazeType.Random75)}
+            </MenuItem>
+          </Menu>
 
           <Button disabled={running} onClick={() => onResetBoard.next()}>
             Clear Board
@@ -385,6 +414,7 @@ export default function ControlBar({
             onAlgoChosen={handleAlgoChange}
             onSpeedChosen={handleSpeedChange}
             onPlayTypeChosen={handlePlayTypeChange}
+            onMazeTypeChosen={handleMazeTypeChange}
           />
         </Toolbar>
       </AppBar>

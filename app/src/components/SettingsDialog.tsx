@@ -14,8 +14,8 @@ import {
 } from '@mui/material';
 import { useState, MouseEvent } from 'react';
 import { AnimationSpeed, PlayType } from '../models/enums';
-import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
-import { getAlgoNameText, getSpeedText } from '../utilities/utilities';
+import { MazeType, PathFindingAlgorithm } from '../wasm/algo_visualizer';
+import { getAlgoNameText, getMazeTypeText, getSpeedText } from '../utilities/utilities';
 
 export interface SettingsDialogProps {
   open: boolean;
@@ -23,6 +23,7 @@ export interface SettingsDialogProps {
   onAlgoChosen: (algo: PathFindingAlgorithm) => void;
   onSpeedChosen: (speed: AnimationSpeed) => void;
   onPlayTypeChosen: (playType: PlayType) => void;
+  onMazeTypeChosen: (mazeType: MazeType) => void;
 }
 
 export default function SettingsDialog({
@@ -30,11 +31,13 @@ export default function SettingsDialog({
   onClose,
   onAlgoChosen,
   onSpeedChosen,
-  onPlayTypeChosen
+  onPlayTypeChosen,
+  onMazeTypeChosen
 }: SettingsDialogProps): JSX.Element {
   const [algo, setAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speed, setSpeed] = useState(AnimationSpeed.Normal);
   const [playType, setPlayType] = useState(PlayType.Path);
+  const [mazeType, setMazeType] = useState(MazeType.RecursiveDivision);
 
   const handleAlgoChange = (event: SelectChangeEvent): void => {
     setAlgo(Number(event.target.value));
@@ -42,6 +45,10 @@ export default function SettingsDialog({
 
   const handleSpeedChange = (event: SelectChangeEvent): void => {
     setSpeed(Number(event.target.value));
+  };
+
+  const handleMazeTypeChange = (event: SelectChangeEvent): void => {
+    setMazeType(Number(event.target.value));
   };
 
   const handlePlayTypeChange = (_: MouseEvent<HTMLElement>, newType: PlayType): void => {
@@ -52,6 +59,7 @@ export default function SettingsDialog({
     onAlgoChosen(algo);
     onSpeedChosen(speed);
     onPlayTypeChosen(playType);
+    onMazeTypeChosen(mazeType);
     onClose();
   };
 
@@ -94,12 +102,15 @@ export default function SettingsDialog({
             <Select
               labelId="maze-select-label"
               id="maze-select"
-              value="Recursive Division"
+              value={mazeType.toString()}
               label="Maze"
               fullWidth={true}
+              onChange={handleMazeTypeChange}
             >
-              <MenuItem value="Recursive Division">Recursive Division</MenuItem>
-              <MenuItem value="Random">Random</MenuItem>
+              <MenuItem value={MazeType.RecursiveDivision}>{getMazeTypeText(MazeType.RecursiveDivision)}</MenuItem>
+              <MenuItem value={MazeType.Random25}>{getMazeTypeText(MazeType.Random25)}</MenuItem>
+              <MenuItem value={MazeType.Random50}>{getMazeTypeText(MazeType.Random50)}</MenuItem>
+              <MenuItem value={MazeType.Random75}>{getMazeTypeText(MazeType.Random75)}</MenuItem>
             </Select>
           </Grid>
 
