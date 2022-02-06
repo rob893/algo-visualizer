@@ -304,7 +304,7 @@ export default function BoardGrid({
   handleReset();
 
   return (
-    <Box display="flex" justifyContent="center">
+    <Box display="flex" justifyContent="center" overflow="hidden">
       <table id="grid">
         <tbody>
           {gridKeys.map((row, y) => {
