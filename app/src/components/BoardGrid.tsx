@@ -2,8 +2,8 @@ import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
-import { drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
-import { Universe } from '../wasm/algo_visualizer';
+import { chunk, drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
+import { INode, Universe } from '../wasm/algo_visualizer';
 import { Node, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
 import { NodeContextSelection, PlayType } from '../models/enums';
 import GridNode from './GridNode';
@@ -133,17 +133,14 @@ export default function BoardGrid({
     context: PlayContext;
   }): Promise<void> => {
     const maze = universe.generateMaze(mazeType);
+    const chunks = chunk(maze, 500);
 
-    for (const { x, y } of maze) {
-      if (context.cancel) {
-        return;
-      }
-
+    const processNode = ({ x, y }: INode): void => {
       const node = universe.getCell(x, y);
       const nodeKey = getKey(x, y);
 
       if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
-        continue;
+        return;
       }
 
       if (playType === PlayType.Wall) {
@@ -151,9 +148,22 @@ export default function BoardGrid({
       } else {
         setHeavy(node, nodeKey);
       }
+    };
 
-      await wait(context.speed / 2);
-    }
+    const processChunk = async (chunk: INode[]): Promise<void> => {
+      for (let i = 0, j = chunk.length - 1; i < j; i++, j--) {
+        if (context.cancel) {
+          return;
+        }
+
+        processNode(chunk[i]);
+        processNode(chunk[j]);
+
+        await wait(context.speed / 2);
+      }
+    };
+
+    await Promise.all(chunks.map(chunk => processChunk(chunk)));
 
     onFindPath.next(true);
   };

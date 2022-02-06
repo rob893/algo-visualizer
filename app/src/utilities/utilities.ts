@@ -1,6 +1,22 @@
 import { AnimationSpeed } from '../models/enums';
 import { MazeType, PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
 
+export function chunk<T>(arr: T[], chunkSize: number): T[][] {
+  if (chunkSize <= 0) {
+    throw new Error();
+  }
+
+  const copy = [...arr];
+
+  const res: T[][] = [];
+
+  for (let i = 0; i < copy.length; i += chunkSize) {
+    res.push(copy.slice(i, i + chunkSize));
+  }
+
+  return res;
+}
+
 export function getAlgoNameText(algo: PathFindingAlgorithm): string {
   switch (algo) {
     case PathFindingAlgorithm.Astar:
