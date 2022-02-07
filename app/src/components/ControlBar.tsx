@@ -19,12 +19,14 @@ import {
   Divider,
   Fab,
   IconButton,
+  InputLabel,
   Link,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   Stack,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Toolbar,
@@ -86,6 +88,7 @@ export default function ControlBar({
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
   const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
+  const [weight, setWeight] = useState('15');
   const [openHelpDialog, setOpenHelpDialog] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
@@ -298,6 +301,22 @@ export default function ControlBar({
               {getMazeTypeText(MazeType.Random75)}
             </MenuItem>
           </Menu>
+
+          <TextField
+            id="weight-value"
+            variant="outlined"
+            type="number"
+            label="Weight Value"
+            sx={{ width: 100 }}
+            value={weight}
+            onChange={e => {
+              setWeight(e.target.value);
+              const asNum = Number(e.target.value);
+              if (!Number.isNaN(asNum) && asNum > 0) {
+                onWeightChange.next(asNum);
+              }
+            }}
+          />
 
           <Button disabled={running} onClick={() => onResetBoard.next()}>
             Clear Board
