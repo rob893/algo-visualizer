@@ -16,6 +16,7 @@ export interface GridProps {
   nodeHeight: number;
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
+  onWeightChange: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
@@ -29,12 +30,14 @@ export default function BoardGrid({
   nodeHeight,
   onFindPath,
   onGenerateMaze,
+  onWeightChange,
   onResetPath,
   onResetBoard,
   onSelectionChange,
   universe
 }: GridProps): JSX.Element {
   let currSelection = NodeContextSelection.Wall;
+  let weight = 15;
   let running = false;
   let start = `${Math.floor(gridWidth / 2 - gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
   let end = `${Math.floor(gridWidth / 2 + gridWidth / 4)},${Math.floor(gridHeight / 2)}`;
@@ -104,7 +107,7 @@ export default function BoardGrid({
   };
 
   const setHeavy = (node: WasmGridNode, nodeKey: string): void => {
-    universe.setWeight(node.x, node.y, 15);
+    universe.setWeight(node.x, node.y, weight);
     universe.setPassable(node.x, node.y, true);
     setClass(nodeKey, 'heavy');
   };
@@ -285,12 +288,26 @@ export default function BoardGrid({
     onFindPath.next(true);
   };
 
+  const handleWeightChange = (newWeight: number): void => {
+    weight = newWeight;
+
+    gridKeys.flat().forEach(key => {
+      const { x, y } = getPoint(key);
+      const node = universe.getCell(x, y);
+
+      if (node.weight > 0) {
+        universe.setWeight(x, y, weight);
+      }
+    });
+  };
+
   useEffect(() => {
     const pathSub = onFindPath.subscribe(handleOnFindPath);
     const resetBoardSub = onResetBoard.subscribe(handleReset);
     const resetPathSub = onResetPath.subscribe(handleResetPath);
     const mazeSub = onGenerateMaze.subscribe(handleRandomizeWalls);
     const selectionSub = onSelectionChange.subscribe(handleSelectionChange);
+    const weightSub = onWeightChange.subscribe(handleWeightChange);
 
     return () => {
       pathSub.unsubscribe();
@@ -298,6 +315,7 @@ export default function BoardGrid({
       resetPathSub.unsubscribe();
       mazeSub.unsubscribe();
       selectionSub.unsubscribe();
+      weightSub.unsubscribe();
     };
   });
 

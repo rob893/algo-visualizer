@@ -9,6 +9,7 @@ import {
   MenuItem,
   Select,
   SelectChangeEvent,
+  TextField,
   ToggleButton,
   ToggleButtonGroup
 } from '@mui/material';
@@ -24,6 +25,7 @@ export interface SettingsDialogProps {
   onSpeedChosen: (speed: AnimationSpeed) => void;
   onPlayTypeChosen: (playType: PlayType) => void;
   onMazeTypeChosen: (mazeType: MazeType) => void;
+  onWeightChosen: (newWeight: number) => void;
 }
 
 export default function SettingsDialog({
@@ -32,12 +34,15 @@ export default function SettingsDialog({
   onAlgoChosen,
   onSpeedChosen,
   onPlayTypeChosen,
-  onMazeTypeChosen
+  onMazeTypeChosen,
+  onWeightChosen
 }: SettingsDialogProps): JSX.Element {
   const [algo, setAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [speed, setSpeed] = useState(AnimationSpeed.Normal);
   const [playType, setPlayType] = useState(PlayType.Path);
   const [mazeType, setMazeType] = useState(MazeType.RecursiveDivision);
+  const [weight, setWeight] = useState(15);
+  const [tempWeightText, setTempWeightText] = useState(weight.toString());
 
   const handleAlgoChange = (event: SelectChangeEvent): void => {
     setAlgo(Number(event.target.value));
@@ -51,6 +56,10 @@ export default function SettingsDialog({
     setMazeType(Number(event.target.value));
   };
 
+  const handleWeightChange = (event: { target: { value: string } }): void => {
+    setTempWeightText(event.target.value);
+  };
+
   const handlePlayTypeChange = (_: MouseEvent<HTMLElement>, newType: PlayType): void => {
     setPlayType(newType);
   };
@@ -60,13 +69,26 @@ export default function SettingsDialog({
     onSpeedChosen(speed);
     onPlayTypeChosen(playType);
     onMazeTypeChosen(mazeType);
+
+    const weightAsNum = Number(tempWeightText);
+
+    if (!Number.isNaN(weightAsNum) && weightAsNum >= 1) {
+      setWeight(weightAsNum);
+      onWeightChosen(weightAsNum);
+    }
+
+    onClose();
+  };
+
+  const handleOnClose = (): void => {
+    setTempWeightText(weight.toString());
     onClose();
   };
 
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleOnClose}
       aria-labelledby="settings-dialog-title"
       aria-describedby="settings-dialog-description"
       fullWidth={true}
@@ -114,7 +136,7 @@ export default function SettingsDialog({
             </Select>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={6} sm={4}>
             <InputLabel id="speed-select-label">Speed</InputLabel>
             <Select
               labelId="speed-select-label"
@@ -130,6 +152,18 @@ export default function SettingsDialog({
               <MenuItem value={AnimationSpeed.Fast}>{getSpeedText(AnimationSpeed.Fast)}</MenuItem>
               <MenuItem value={AnimationSpeed.VeryFast}>{getSpeedText(AnimationSpeed.VeryFast)}</MenuItem>
             </Select>
+          </Grid>
+
+          <Grid item xs={6} sm={4}>
+            <InputLabel id="weight-value-label">Weight Value</InputLabel>
+            <TextField
+              id="weight-value"
+              variant="outlined"
+              type="number"
+              fullWidth={true}
+              value={tempWeightText}
+              onChange={handleWeightChange}
+            />
           </Grid>
 
           <Grid item xs={12}>
@@ -149,7 +183,7 @@ export default function SettingsDialog({
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => onClose()}>Discard</Button>
+        <Button onClick={handleOnClose}>Discard</Button>
         <Button onClick={handleSave}>Save</Button>
       </DialogActions>
     </Dialog>

@@ -51,6 +51,7 @@ import { PlayContext } from '../models/models';
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
   onResetPath: Subject<void>;
+  onWeightChange: Subject<number>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
   onResetBoard: Subject<void>;
   onSelectionChange: Subject<NodeContextSelection>;
@@ -63,6 +64,7 @@ export default function ControlBar({
   onFindPath,
   onResetPath,
   onGenerateMaze,
+  onWeightChange,
   onResetBoard,
   onSelectionChange,
   localStorageService
@@ -415,6 +417,7 @@ export default function ControlBar({
             onSpeedChosen={handleSpeedChange}
             onPlayTypeChosen={handlePlayTypeChange}
             onMazeTypeChosen={handleMazeTypeChange}
+            onWeightChosen={w => onWeightChange.next(w)}
           />
         </Toolbar>
       </AppBar>

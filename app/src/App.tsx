@@ -54,6 +54,7 @@ export default function App(): JSX.Element {
   const onFindPath = new Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
+  const onWeightChange = new Subject<number>();
   const onGenerateMaze = new Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>();
   const onSelectionChange = new Subject<NodeContextSelection>();
 
@@ -71,6 +72,7 @@ export default function App(): JSX.Element {
         onFindPath={onFindPath}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
+        onWeightChange={onWeightChange}
         onGenerateMaze={onGenerateMaze}
         onSelectionChange={onSelectionChange}
         localStorageService={localStorageService}
@@ -81,6 +83,7 @@ export default function App(): JSX.Element {
         nodeWidth={nodeWidth}
         nodeHeight={nodeHeight}
         onFindPath={onFindPath}
+        onWeightChange={onWeightChange}
         onGenerateMaze={onGenerateMaze}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}

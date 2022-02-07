@@ -1,7 +1,24 @@
-import { ClearAllOutlined, ClearOutlined, LegendToggleOutlined } from '@mui/icons-material';
+import { ClearAllOutlined, ClearOutlined, InfoOutlined, LegendToggleOutlined, Settings } from '@mui/icons-material';
 import { Typography } from '@mui/material';
 
 export default function ControlsGuide({ isDesktop }: { isDesktop: boolean }): JSX.Element {
+  const common = (
+    <>
+      <li>
+        Press the play button to visualize the pathfinding algorithm or draw a wall or weight maze.
+        <ul>
+          <li>
+            If 'Path' is the selected play type, the selected pathfinding algorithm will be played, otherwise, the
+            selected maze algorithm will be played.
+          </li>
+        </ul>
+      </li>
+      <li>
+        Read more about this project and the various algorithms in the about <InfoOutlined color="primary" /> section.
+      </li>
+    </>
+  );
+
   const desktopControls = (
     <div>
       <Typography variant="subtitle1">Controls</Typography>
@@ -20,6 +37,7 @@ export default function ControlsGuide({ isDesktop }: { isDesktop: boolean }): JS
             <li>Continue to hold 'Shift' and with mouse button clicked and drag to draw weighted paths.</li>
           </ul>
         </li>
+        {common}
       </ul>
     </div>
   );
@@ -41,6 +59,11 @@ export default function ControlsGuide({ isDesktop }: { isDesktop: boolean }): JS
         <li>
           Tap <ClearOutlined color="primary" /> to clear the drawn path.
         </li>
+        <li>
+          Change various settings (pathfinding algorithm, maze algorithm, speed, play type, etc.) through the settings{' '}
+          <Settings color="primary" /> menu.
+        </li>
+        {common}
       </ul>
     </div>
   );
