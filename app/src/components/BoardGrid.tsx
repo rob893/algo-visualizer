@@ -79,8 +79,8 @@ export default function BoardGrid({
       if (ele) {
         if (ele.className === 'visited' || ele.className === 'path') {
           ele.className = '';
-        } else if (ele.className === 'visited-heavy' || ele.className === 'path-heavy') {
-          ele.className = 'heavy';
+        } else if (ele.className === 'visited-weight' || ele.className === 'path-weight') {
+          ele.className = 'weight';
         }
       }
     });
@@ -106,10 +106,10 @@ export default function BoardGrid({
     setClass(nodeKey, '');
   };
 
-  const setHeavy = (node: WasmGridNode, nodeKey: string): void => {
+  const setWeighted = (node: WasmGridNode, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, weight);
     universe.setPassable(node.x, node.y, true);
-    setClass(nodeKey, 'heavy');
+    setClass(nodeKey, 'weight');
   };
 
   const setStartPoint = (node: WasmGridNode, nodeKey: string): void => {
@@ -149,7 +149,7 @@ export default function BoardGrid({
       if (playType === PlayType.Wall) {
         setWall(node, nodeKey);
       } else {
-        setHeavy(node, nodeKey);
+        setWeighted(node, nodeKey);
       }
     };
 
@@ -174,15 +174,15 @@ export default function BoardGrid({
   const handleOnMouseEnter = (nodeKey: string, { x, y }: Point): void => {
     if (
       (inputService.getMouseButton(MouseButton.LeftMouseButton) || inputService.getTouchDown()) &&
-      (currSelection === NodeContextSelection.Heavy || currSelection === NodeContextSelection.Wall) &&
+      (currSelection === NodeContextSelection.Weight || currSelection === NodeContextSelection.Wall) &&
       nodeKey !== start &&
       nodeKey !== end &&
       !running
     ) {
       const node = universe.getCell(x, y);
 
-      if (inputService.getKey('Shift') || currSelection === NodeContextSelection.Heavy) {
-        setHeavy(node, nodeKey);
+      if (inputService.getKey('Shift') || currSelection === NodeContextSelection.Weight) {
+        setWeighted(node, nodeKey);
       } else if (node.passable) {
         setWall(node, nodeKey);
       }
@@ -201,12 +201,12 @@ export default function BoardGrid({
       }
     ],
     [
-      NodeContextSelection.Heavy,
+      NodeContextSelection.Weight,
       (node: WasmGridNode, nodeKey: string): void => {
         if (node.weight > 0) {
           setDefault(node, nodeKey);
         } else {
-          setHeavy(node, nodeKey);
+          setWeighted(node, nodeKey);
         }
       }
     ],
@@ -243,7 +243,7 @@ export default function BoardGrid({
       if (node.weight > 0) {
         setDefault(node, nodeKey);
       } else {
-        setHeavy(node, nodeKey);
+        setWeighted(node, nodeKey);
       }
     } else if (inputService.getKey('s')) {
       const prevStartPoint = getPoint(start);

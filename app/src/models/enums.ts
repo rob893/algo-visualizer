@@ -1,6 +1,6 @@
 export enum NodeContextSelection {
   Wall = 0,
-  Heavy = 1,
+  Weight = 1,
   Start = 2,
   End = 3
 }
@@ -16,7 +16,7 @@ export enum AnimationSpeed {
 export enum PlayType {
   Path = 'path',
   Wall = 'wall',
-  Heavy = 'heavy'
+  Weight = 'weight'
 }
 
 export enum LocalStorageKey {

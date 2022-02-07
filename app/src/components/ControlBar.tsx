@@ -89,7 +89,7 @@ export default function ControlBar({
 
   const [selection, setSelection] = useState(NodeContextSelection.Wall);
 
-  const selections = ['Wall', 'Heavy', 'Start', 'End'];
+  const selections = ['Wall', 'Weight', 'Start', 'End'];
 
   const handleAboutClick = (): void => {
     setOpenAboutDialog(true);
@@ -114,8 +114,8 @@ export default function ControlBar({
         case PlayType.Wall:
           onGenerateMaze.next({ playType: PlayType.Wall, mazeType, context });
           break;
-        case PlayType.Heavy:
-          onGenerateMaze.next({ playType: PlayType.Heavy, mazeType, context });
+        case PlayType.Weight:
+          onGenerateMaze.next({ playType: PlayType.Weight, mazeType, context });
           break;
         default:
           onFindPath.next({ algo, context });
@@ -153,7 +153,7 @@ export default function ControlBar({
         return 'Visualize Path!';
       case PlayType.Wall:
         return 'Draw Walls!';
-      case PlayType.Heavy:
+      case PlayType.Weight:
         return 'Draw Weights!';
       default:
         return 'Visualize Path!';

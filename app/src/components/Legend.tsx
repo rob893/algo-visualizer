@@ -30,11 +30,11 @@ export default function Legend({ isDesktop, open, handleClose }: LegendProps): J
     ['Start Node:', 'start-no-animation'],
     ['End Node:', 'end-no-animation'],
     ['Wall Node:', 'wall-no-animation'],
-    ['Heavy Node:', 'heavy-no-animation'],
+    ['Weighted Node:', 'weight-no-animation'],
     ['Visited Node:', 'visited-no-animation'],
-    ['Heavy Visited Node:', 'visited-heavy-no-animation'],
+    ['Weighted Visited Node:', 'visited-weight-no-animation'],
     ['Path Node:', 'path-no-animation'],
-    ['Heavy Path Node:', 'path-heavy-no-animation']
+    ['Weighted Path Node:', 'path-weight-no-animation']
   ];
 
   const mobileLegend = (

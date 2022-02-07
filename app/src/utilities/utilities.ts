@@ -124,7 +124,7 @@ export async function drawPath(
 
       if (prev.className !== 'start' && prev.className !== 'end') {
         if (visitedNode.weight > 0) {
-          prev.className = 'visited-heavy';
+          prev.className = 'visited-weight';
         } else {
           prev.className = 'visited';
         }
@@ -150,7 +150,7 @@ export async function drawPath(
 
       if (prev.className !== 'start' && prev.className !== 'end') {
         if (pathNode.weight > 0) {
-          prev.className = 'path-heavy';
+          prev.className = 'path-weight';
         } else {
           prev.className = 'path';
         }

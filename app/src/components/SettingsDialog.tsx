@@ -177,7 +177,7 @@ export default function SettingsDialog({
             >
               <ToggleButton value={PlayType.Path}>Path</ToggleButton>
               <ToggleButton value={PlayType.Wall}>Walls</ToggleButton>
-              <ToggleButton value={PlayType.Heavy}>Weights</ToggleButton>
+              <ToggleButton value={PlayType.Weight}>Weights</ToggleButton>
             </ToggleButtonGroup>
           </Grid>
         </Grid>
