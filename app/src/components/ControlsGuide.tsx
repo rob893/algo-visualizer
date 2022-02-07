@@ -37,6 +37,10 @@ export default function ControlsGuide({ isDesktop }: { isDesktop: boolean }): JS
             <li>Continue to hold 'Shift' and with mouse button clicked and drag to draw weighted paths.</li>
           </ul>
         </li>
+        <li>
+          Change various settings (pathfinding algorithm, maze algorithm, speed, play type, etc.) through the settings
+          menu.
+        </li>
         {common}
       </ul>
     </div>

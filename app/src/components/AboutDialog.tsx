@@ -46,7 +46,7 @@ export default function AboutDialog({ open, onClose }: AboutDialogProps): JSX.El
       aria-labelledby="about-dialog-title"
       aria-describedby="about-dialog-description"
       fullWidth={true}
-      maxWidth="sm"
+      maxWidth="md"
     >
       <DialogTitle id="about-dialog-title">About</DialogTitle>
       <DialogContent>

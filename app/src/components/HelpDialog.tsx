@@ -25,7 +25,7 @@ export default function HelpDialog({
       aria-labelledby="help-dialog-title"
       aria-describedby="help-dialog-description"
       fullWidth={true}
-      maxWidth="sm"
+      maxWidth="md"
     >
       <DialogTitle id="help-dialog-title">{title}</DialogTitle>
       <DialogContent>

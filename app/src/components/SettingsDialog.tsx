@@ -97,8 +97,8 @@ export default function SettingsDialog({
       <DialogTitle id="settings-dialog-title">Settings</DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={4}>
-            <InputLabel id="algorithm-select-label">Algorithm</InputLabel>
+          <Grid item xs={12} sm={6}>
+            <InputLabel id="algorithm-select-label">Pathfinding Algorithm</InputLabel>
             <Select
               labelId="algorithm-select-label"
               id="algorithm-select"
@@ -119,8 +119,8 @@ export default function SettingsDialog({
             </Select>
           </Grid>
 
-          <Grid item xs={12} sm={4}>
-            <InputLabel id="maze-select-label">Maze</InputLabel>
+          <Grid item xs={12} sm={6}>
+            <InputLabel id="maze-select-label">Maze Algorithm</InputLabel>
             <Select
               labelId="maze-select-label"
               id="maze-select"
@@ -136,7 +136,7 @@ export default function SettingsDialog({
             </Select>
           </Grid>
 
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={6}>
             <InputLabel id="speed-select-label">Speed</InputLabel>
             <Select
               labelId="speed-select-label"
@@ -154,7 +154,7 @@ export default function SettingsDialog({
             </Select>
           </Grid>
 
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={6}>
             <InputLabel id="weight-value-label">Weight Value</InputLabel>
             <TextField
               id="weight-value"

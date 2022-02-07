@@ -1,6 +1,4 @@
 import {
-  ArrowDropDown,
-  ArrowDropUp,
   ClearAllOutlined,
   ClearOutlined,
   GitHub,
@@ -25,9 +23,6 @@ import {
   Menu,
   MenuItem,
   Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Toolbar,
   Tooltip,
   Typography,
@@ -40,7 +35,6 @@ import logo from '../logo.svg';
 import { NodeContextSelection, AnimationSpeed, PlayType } from '../models/enums';
 import { LocalStorageService } from '../services/LocalStorageService';
 import { LocalStorageKey } from '../models/enums';
-import { getSpeedText, getAlgoNameText, getMazeTypeText } from '../utilities/utilities';
 import { MazeType, PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import AboutDialog from './AboutDialog';
 import HelpDialog from './HelpDialog';
@@ -80,28 +74,15 @@ export default function ControlBar({
   );
   const [speed, setSpeed] = useState(AnimationSpeed.Normal);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
-  const [speedText, setSpeedText] = useState(getSpeedText(AnimationSpeed.Normal));
-  const [algoText, setAlgoText] = useState(getAlgoNameText(PathFindingAlgorithm.Dijkstra));
   const [mazeType, setMazeType] = useState(MazeType.RecursiveDivision);
-  const [mazeTypeText, setMazeTypeText] = useState(getMazeTypeText(mazeType));
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
   const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
-  const [weight, setWeight] = useState('15');
   const [openHelpDialog, setOpenHelpDialog] = useState(
     showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
   );
   const [openLegend, setOpenLegend] = useState(false);
   const [playType, setPlayType] = useState(PlayType.Path);
-
-  const [speedMenuAnchorEl, setSpeedMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const speedMenuOpen = Boolean(speedMenuAnchorEl);
-
-  const [algoMenuAnchorEl, setAlgoMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const algoMenuOpen = Boolean(algoMenuAnchorEl);
-
-  const [mazeMenuAnchorEl, setMazeMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const mazeMenuOpen = Boolean(mazeMenuAnchorEl);
 
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<null | HTMLElement>(null);
   const moreMenuOpen = Boolean(moreMenuAnchorEl);
@@ -145,14 +126,10 @@ export default function ControlBar({
 
   const handleAlgoChange = (newAlgo: PathFindingAlgorithm): void => {
     setCurrAlgo(newAlgo);
-    setAlgoMenuAnchorEl(null);
-    setAlgoText(getAlgoNameText(newAlgo));
   };
 
   const handleMazeTypeChange = (newMazeType: MazeType): void => {
     setMazeType(newMazeType);
-    setMazeMenuAnchorEl(null);
-    setMazeTypeText(getMazeTypeText(newMazeType));
   };
 
   const handlePlayTypeChange = (newPlayType: PlayType): void => {
@@ -161,9 +138,7 @@ export default function ControlBar({
 
   const handleSpeedChange = (newSpeed: AnimationSpeed): void => {
     setSpeed(newSpeed);
-    setSpeedMenuAnchorEl(null);
     context.speed = newSpeed;
-    setSpeedText(getSpeedText(newSpeed));
   };
 
   const handleSelection = (): void => {
@@ -218,103 +193,18 @@ export default function ControlBar({
             {running ? 'Cancel' : getPlayButtonText()}
           </Button>
 
-          <ToggleButtonGroup
-            color="primary"
-            value={playType}
-            size="small"
-            exclusive
-            onChange={(_, type) => handlePlayTypeChange(type)}
-          >
-            <ToggleButton value={PlayType.Path}>Path</ToggleButton>
-            <ToggleButton value={PlayType.Wall}>Walls</ToggleButton>
-            <ToggleButton value={PlayType.Heavy}>Weights</ToggleButton>
-          </ToggleButtonGroup>
-
-          <Button
-            onClick={e => setSpeedMenuAnchorEl(e.currentTarget)}
-            endIcon={speedMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-          >
-            Speed: {speedText}
+          <Button disabled={running} onClick={() => setOpenSettingsDialog(true)}>
+            Settings
           </Button>
-          <Menu open={speedMenuOpen} anchorEl={speedMenuAnchorEl} onClose={() => setSpeedMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VerySlow)}>
-              {getSpeedText(AnimationSpeed.VerySlow)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Slow)}>
-              {getSpeedText(AnimationSpeed.Slow)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Normal)}>
-              {getSpeedText(AnimationSpeed.Normal)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.Fast)}>
-              {getSpeedText(AnimationSpeed.Fast)}
-            </MenuItem>
-            <MenuItem onClick={() => handleSpeedChange(AnimationSpeed.VeryFast)}>
-              {getSpeedText(AnimationSpeed.VeryFast)}
-            </MenuItem>
-          </Menu>
 
-          <Button
-            disabled={running}
-            onClick={e => setAlgoMenuAnchorEl(e.currentTarget)}
-            endIcon={algoMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-          >
-            {algoText}
-          </Button>
-          <Menu open={algoMenuOpen} anchorEl={algoMenuAnchorEl} onClose={() => setAlgoMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Dijkstra)}>
-              {getAlgoNameText(PathFindingAlgorithm.Dijkstra)}
-            </MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.Astar)}>
-              {getAlgoNameText(PathFindingAlgorithm.Astar)}
-            </MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.GreedyBFS)}>
-              {getAlgoNameText(PathFindingAlgorithm.GreedyBFS)}
-            </MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.BFS)}>
-              {getAlgoNameText(PathFindingAlgorithm.BFS)}
-            </MenuItem>
-            <MenuItem onClick={() => handleAlgoChange(PathFindingAlgorithm.DFS)}>
-              {getAlgoNameText(PathFindingAlgorithm.DFS)}
-            </MenuItem>
-          </Menu>
-
-          <Button
-            disabled={running}
-            onClick={e => setMazeMenuAnchorEl(e.currentTarget)}
-            endIcon={mazeMenuOpen ? <ArrowDropUp /> : <ArrowDropDown />}
-          >
-            {mazeTypeText}
-          </Button>
-          <Menu open={mazeMenuOpen} anchorEl={mazeMenuAnchorEl} onClose={() => setMazeMenuAnchorEl(null)}>
-            <MenuItem onClick={() => handleMazeTypeChange(MazeType.RecursiveDivision)}>
-              {getMazeTypeText(MazeType.RecursiveDivision)}
-            </MenuItem>
-            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random25)}>
-              {getMazeTypeText(MazeType.Random25)}
-            </MenuItem>
-            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random50)}>
-              {getMazeTypeText(MazeType.Random50)}
-            </MenuItem>
-            <MenuItem onClick={() => handleMazeTypeChange(MazeType.Random75)}>
-              {getMazeTypeText(MazeType.Random75)}
-            </MenuItem>
-          </Menu>
-
-          <TextField
-            id="weight-value"
-            variant="outlined"
-            type="number"
-            label="Weight Value"
-            sx={{ width: 100 }}
-            value={weight}
-            onChange={e => {
-              setWeight(e.target.value);
-              const asNum = Number(e.target.value);
-              if (!Number.isNaN(asNum) && asNum > 0) {
-                onWeightChange.next(asNum);
-              }
-            }}
+          <SettingsDialog
+            open={openSettingsDialog}
+            onClose={() => setOpenSettingsDialog(false)}
+            onAlgoChosen={handleAlgoChange}
+            onSpeedChosen={handleSpeedChange}
+            onPlayTypeChosen={handlePlayTypeChange}
+            onMazeTypeChosen={handleMazeTypeChange}
+            onWeightChosen={w => onWeightChange.next(w)}
           />
 
           <Button disabled={running} onClick={() => onResetBoard.next()}>
