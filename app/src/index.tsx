@@ -38,6 +38,3 @@ wasmService
   .catch(e => {
     console.log('WASM failed to init', e);
   });
-
-// eslint-disable-next-line no-restricted-globals
-screen.orientation.lock('natural').catch(e => console.warn(e));
