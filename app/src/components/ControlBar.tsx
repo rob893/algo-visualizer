@@ -19,7 +19,6 @@ import {
   Divider,
   Fab,
   IconButton,
-  InputLabel,
   Link,
   ListItemIcon,
   ListItemText,
