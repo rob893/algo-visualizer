@@ -7,8 +7,17 @@ export const ViewportProvider: FC = ({ children }) => {
   const [height, setHeight] = useState(window.innerHeight);
 
   const handleResize = (): void => {
-    setWidth(window.innerWidth);
-    setHeight(window.innerHeight);
+    const newInnerWidth = window.innerWidth;
+    const newInnerHeight = window.innerHeight;
+
+    // eslint-disable-next-line no-restricted-globals
+    if (!screen.orientation) {
+      setWidth(newInnerWidth);
+      setHeight(newInnerHeight);
+    } else if (newInnerHeight !== height && newInnerWidth !== width) {
+      setWidth(newInnerWidth);
+      setHeight(newInnerHeight);
+    }
   };
 
   useEffect(() => {
@@ -17,7 +26,7 @@ export const ViewportProvider: FC = ({ children }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  });
   return <ViewportContext.Provider value={{ width, height }}>{children}</ViewportContext.Provider>;
 };
 
