@@ -109,8 +109,8 @@ td {
 }
 
 .current {
-  background: radial-gradient(rgba(76, 175, 80, 0.25), rgba(76, 175, 80, 0.5));
-  border: 1px double rgba(76, 175, 80, 1);
+  background: var(--start-background-gradient);
+  border: 1px double var(--start-border-color);
 }
 
 .visited {
