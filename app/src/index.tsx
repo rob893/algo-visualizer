@@ -9,6 +9,10 @@ import { wasmService } from './services/WasmService';
 import theme from './theme';
 import { ViewportProvider } from './contexts/ViewportContext';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { localStorageService } from './services/LocalStorageService';
+import { LocalStorageKey } from './models/enums';
+import { ColorSettings } from './models/models';
+import { loadColorScheme } from './utilities/utilities';
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
@@ -38,3 +42,9 @@ wasmService
   .catch(e => {
     console.log('WASM failed to init', e);
   });
+
+const savedColorSettings = localStorageService.getParsedItem<ColorSettings>(LocalStorageKey.ColorSettings);
+
+if (savedColorSettings) {
+  loadColorScheme(savedColorSettings);
+}

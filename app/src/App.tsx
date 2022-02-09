@@ -8,9 +8,8 @@ import { localStorageService } from './services/LocalStorageService';
 import { Fragment, useEffect } from 'react';
 import { inputService } from './services/InputService';
 import { useViewport } from './hooks/useViewport';
-import { LocalStorageKey, NodeContextSelection, PlayType } from './models/enums';
-import { ColorSettings, PlayContext } from './models/models';
-import { loadColorScheme } from './utilities/utilities';
+import { NodeContextSelection, PlayType } from './models/enums';
+import { PlayContext } from './models/models';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -22,12 +21,6 @@ import { loadColorScheme } from './utilities/utilities';
  * I am sure there is a more 'react' way to do it but  ¯\_(ツ)_/¯
  */
 export default function App(): JSX.Element {
-  const savedColorSettings = localStorageService.getParsedItem<ColorSettings>(LocalStorageKey.ColorSettings);
-
-  if (savedColorSettings) {
-    loadColorScheme(savedColorSettings);
-  }
-
   const { width: innerWidth, height: innerHeight } = useViewport();
 
   const defaultNodeHeight = 25;

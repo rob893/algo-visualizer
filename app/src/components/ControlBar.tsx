@@ -278,7 +278,12 @@ export default function ControlBar({
                   <MoreVert color="primary" />
                 </IconButton>
               </Tooltip>
-              <Menu open={moreMenuOpen} anchorEl={moreMenuAnchorEl} onClose={() => setMoreMenuAnchorEl(null)}>
+              <Menu
+                open={moreMenuOpen}
+                anchorEl={moreMenuAnchorEl}
+                onClose={() => setMoreMenuAnchorEl(null)}
+                onClick={() => setMoreMenuAnchorEl(null)}
+              >
                 <MenuItem onClick={handleAboutClick}>
                   <ListItemIcon>
                     <InfoOutlined fontSize="small" />
