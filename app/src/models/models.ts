@@ -9,11 +9,14 @@ export interface NodeTypeColorMapping {
   text: string;
   colorName: string;
   colorGradName: string;
-  colorRgb: { r: number; g: number; b: number };
+  primaryColorRgb: { r: number; g: number; b: number };
+  secondaryColorRgb: { r: number; g: number; b: number };
   tempColor: string;
   tempColorGrad: string;
   menuAnchorEl: HTMLElement | null;
-  secondary?: boolean;
+  useColorGrad: boolean;
+  seperatePrimaryAndSecondary: boolean;
+  secondaryOpen: boolean;
 }
 
 export type ColorSettings = {
