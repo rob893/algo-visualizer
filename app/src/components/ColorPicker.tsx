@@ -50,6 +50,32 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
   };
 
   const defaults: ColorSettings = {
+    unvisited: {
+      text: 'Unvisited Node',
+      colorName: '--unvisited-border-color',
+      colorGradName: '--unvisited-background-gradient',
+      primaryColorRgb: colord('rgba(98, 0, 234, 0.75)').toRgb(),
+      secondaryColorRgb: colord('rgb(98, 0, 234)').toRgb(),
+      tempColor: 'rgba(98, 0, 234, 0.75)',
+      tempColorGrad: 'radial-gradient(rgba(98, 0, 234, 0.75), rgba(98, 0, 234, 0))',
+      menuAnchorEl: null,
+      useColorGrad: true,
+      seperatePrimaryAndSecondary: false,
+      secondaryOpen: false
+    },
+    visisted: {
+      text: 'Visited Node',
+      colorName: '--visited-border-color',
+      colorGradName: '--visited-background-gradient',
+      primaryColorRgb: colord('rgba(0, 188, 212, 1)').toRgb(),
+      secondaryColorRgb: colord('rgb(0, 188, 212)').toRgb(),
+      tempColor: 'rgba(0, 188, 212, 1)',
+      tempColorGrad: 'radial-gradient(rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.5))',
+      menuAnchorEl: null,
+      useColorGrad: true,
+      seperatePrimaryAndSecondary: false,
+      secondaryOpen: false
+    },
     start: {
       text: 'Start Node',
       colorName: '--start-border-color',
@@ -71,32 +97,6 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
       secondaryColorRgb: colord('rgb(118, 255, 5)').toRgb(),
       tempColor: 'rgba(118, 255, 5, 1)',
       tempColorGrad: 'radial-gradient(rgba(118, 255, 5, 0), rgba(118, 255, 5, 0.5))',
-      menuAnchorEl: null,
-      useColorGrad: true,
-      seperatePrimaryAndSecondary: false,
-      secondaryOpen: false
-    },
-    visisted: {
-      text: 'Visited Node',
-      colorName: '--visited-border-color',
-      colorGradName: '--visited-background-gradient',
-      primaryColorRgb: colord('rgba(0, 188, 212, 1)').toRgb(),
-      secondaryColorRgb: colord('rgb(0, 188, 212)').toRgb(),
-      tempColor: 'rgba(0, 188, 212, 1)',
-      tempColorGrad: 'radial-gradient(rgba(0, 188, 212, 0), rgba(0, 188, 212, 0.5))',
-      menuAnchorEl: null,
-      useColorGrad: true,
-      seperatePrimaryAndSecondary: false,
-      secondaryOpen: false
-    },
-    unvisited: {
-      text: 'Unvisited Node',
-      colorName: '--unvisited-border-color',
-      colorGradName: '--unvisited-background-gradient',
-      primaryColorRgb: colord('rgba(98, 0, 234, 0.75)').toRgb(),
-      secondaryColorRgb: colord('rgb(98, 0, 234)').toRgb(),
-      tempColor: 'rgba(98, 0, 234, 0.75)',
-      tempColorGrad: 'radial-gradient(rgba(98, 0, 234, 0.75), rgba(98, 0, 234, 0))',
       menuAnchorEl: null,
       useColorGrad: true,
       seperatePrimaryAndSecondary: false,
@@ -169,6 +169,11 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
     }
   };
 
+  const getColorGrad = (color: string, from: number = 0, to: number = 0.5): string => {
+    const { r, g, b } = colord(color).toRgb();
+    return `radial-gradient(rgba(${r}, ${g}, ${b}, ${from}), rgba(${r}, ${g}, ${b}, ${to}))`;
+  };
+
   const [mapping, setMapping] = useState(fromStorage ?? defaults);
 
   const saveChanges = (): void => {
@@ -234,40 +239,29 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                         <Typography>Primary</Typography>
                       </Stack>
 
-                      <FormGroup>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={settings.useColorGrad}
-                              onChange={event => {
-                                const next: NodeTypeColorMapping = {
-                                  ...settings,
-                                  useColorGrad: event.target.checked
-                                };
-
-                                const copy = { ...mapping };
-                                copy[nodeType as NodeType] = next;
-
-                                setMapping(copy);
-                              }}
-                            />
-                          }
-                          label="Use Color Gradient"
-                        />
-                        {settings.useColorGrad && (
+                      {nodeType !== NodeType.Unvisited && (
+                        <FormGroup>
                           <FormControlLabel
                             control={
                               <Checkbox
-                                checked={settings.seperatePrimaryAndSecondary}
+                                checked={settings.useColorGrad}
                                 onChange={event => {
                                   const next: NodeTypeColorMapping = {
                                     ...settings,
-                                    seperatePrimaryAndSecondary: event.target.checked
+                                    useColorGrad: event.target.checked
                                   };
 
-                                  // if (!next.seperatePrimaryAndSecondary) {
-
-                                  // }
+                                  if (!next.useColorGrad) {
+                                    next.tempColorGrad = next.tempColor;
+                                    next.secondaryColorRgb = next.primaryColorRgb;
+                                    const { r, g, b } = next.primaryColorRgb;
+                                    next.tempColor = `rgba(${r}, ${g}, ${b}, 0)`;
+                                  } else {
+                                    const { r, g, b } = next.primaryColorRgb;
+                                    next.tempColor = `rgba(${r}, ${g}, ${b}, 1)`;
+                                    next.tempColorGrad = getColorGrad(next.tempColor);
+                                    next.secondaryColorRgb = next.primaryColorRgb;
+                                  }
 
                                   const copy = { ...mapping };
                                   copy[nodeType as NodeType] = next;
@@ -276,10 +270,36 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                                 }}
                               />
                             }
-                            label="Seperate Primary and Secondary"
+                            label="Use Color Gradient"
                           />
-                        )}
-                      </FormGroup>
+                          {settings.useColorGrad && (
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={settings.seperatePrimaryAndSecondary}
+                                  onChange={event => {
+                                    const next: NodeTypeColorMapping = {
+                                      ...settings,
+                                      seperatePrimaryAndSecondary: event.target.checked
+                                    };
+
+                                    if (!next.seperatePrimaryAndSecondary) {
+                                      next.tempColorGrad = getColorGrad(next.tempColor);
+                                      next.secondaryColorRgb = next.primaryColorRgb;
+                                    }
+
+                                    const copy = { ...mapping };
+                                    copy[nodeType as NodeType] = next;
+
+                                    setMapping(copy);
+                                  }}
+                                />
+                              }
+                              label="Seperate Primary and Secondary"
+                            />
+                          )}
+                        </FormGroup>
+                      )}
 
                       {settings.seperatePrimaryAndSecondary && (
                         <Stack direction="row" alignItems="center">
@@ -368,7 +388,9 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                             next.tempColorGrad =
                               nodeType === NodeType.Unvisited
                                 ? ''
-                                : `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`;
+                                : settings.useColorGrad
+                                ? `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
+                                : next.tempColor;
                           }
 
                           const copy = { ...mapping };
