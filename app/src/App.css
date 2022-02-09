@@ -19,6 +19,10 @@
   --unvisited-background-gradient: radial-gradient(rgba(98, 0, 234, 0), rgba(98, 0, 234, 0));
 }
 
+html {
+  color-scheme: dark;
+}
+
 table {
   border-collapse: collapse;
 }

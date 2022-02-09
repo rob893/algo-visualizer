@@ -14,7 +14,10 @@ import {
   Box,
   FormControlLabel,
   Checkbox,
-  FormGroup
+  FormGroup,
+  DialogTitle,
+  DialogActions,
+  DialogContent
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { CSSProperties, forwardRef, ReactElement, Ref, useState } from 'react';
@@ -188,8 +191,207 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
     handleClose();
   };
 
+  const content = (
+    <Grid container spacing={2}>
+      {Object.entries(mapping).map(([nodeType, settings]) => {
+        const background = nodeType === NodeType.Unvisited ? '' : settings.tempColorGrad;
+        return (
+          <Grid item key={nodeType} xs={12}>
+            <Card>
+              <Box sx={{ margin: 2 }}>
+                <Stack direction="row" display="flex">
+                  <Stack>
+                    <Typography variant="h6">{settings.text}</Typography>
+                    <Stack direction="row" alignItems="center">
+                      <IconButton
+                        sx={{ alignItems: 'left', justifyContent: 'left' }}
+                        onClick={e => {
+                          const next: NodeTypeColorMapping = {
+                            ...settings,
+                            menuAnchorEl: e.currentTarget
+                          };
+
+                          const copy = { ...mapping };
+                          copy[nodeType as NodeType] = next;
+
+                          setMapping(copy);
+                        }}
+                      >
+                        <Edit color="primary" />
+                      </IconButton>
+                      <Typography>Primary</Typography>
+                    </Stack>
+
+                    {nodeType !== NodeType.Unvisited && (
+                      <FormGroup>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={settings.useColorGrad}
+                              onChange={event => {
+                                const next: NodeTypeColorMapping = {
+                                  ...settings,
+                                  useColorGrad: event.target.checked
+                                };
+
+                                if (!next.useColorGrad) {
+                                  next.tempColorGrad = next.tempColor;
+                                  next.secondaryColorRgb = next.primaryColorRgb;
+                                  const { r, g, b } = next.primaryColorRgb;
+                                  next.tempColor = `rgba(${r}, ${g}, ${b}, 0)`;
+                                } else {
+                                  const { r, g, b } = next.primaryColorRgb;
+                                  next.tempColor = `rgba(${r}, ${g}, ${b}, 1)`;
+                                  next.tempColorGrad = getColorGrad(next.tempColor);
+                                  next.secondaryColorRgb = next.primaryColorRgb;
+                                }
+
+                                const copy = { ...mapping };
+                                copy[nodeType as NodeType] = next;
+
+                                setMapping(copy);
+                              }}
+                            />
+                          }
+                          label="Use Color Gradient"
+                        />
+                        {settings.useColorGrad && (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={settings.seperatePrimaryAndSecondary}
+                                onChange={event => {
+                                  const next: NodeTypeColorMapping = {
+                                    ...settings,
+                                    seperatePrimaryAndSecondary: event.target.checked
+                                  };
+
+                                  if (!next.seperatePrimaryAndSecondary) {
+                                    next.tempColorGrad = getColorGrad(next.tempColor);
+                                    next.secondaryColorRgb = next.primaryColorRgb;
+                                  }
+
+                                  const copy = { ...mapping };
+                                  copy[nodeType as NodeType] = next;
+
+                                  setMapping(copy);
+                                }}
+                              />
+                            }
+                            label="Seperate Primary and Secondary"
+                          />
+                        )}
+                      </FormGroup>
+                    )}
+
+                    {settings.seperatePrimaryAndSecondary && (
+                      <Stack direction="row" alignItems="center">
+                        <IconButton
+                          onClick={e => {
+                            const next: NodeTypeColorMapping = {
+                              ...settings,
+                              menuAnchorEl: e.currentTarget,
+                              secondaryOpen: true
+                            };
+
+                            const copy = { ...mapping };
+                            copy[nodeType as NodeType] = next;
+
+                            setMapping(copy);
+                          }}
+                        >
+                          <Edit color="primary" />
+                        </IconButton>
+                        <Typography>Secondary</Typography>
+                      </Stack>
+                    )}
+                  </Stack>
+
+                  <Stack sx={{ marginLeft: 'auto', alignItems: 'center', justifyContent: 'center' }}>
+                    <span
+                      style={{
+                        ...style,
+                        border: `1px double ${settings.tempColor}`,
+                        background
+                      }}
+                    />
+                  </Stack>
+                </Stack>
+                <Popover
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'left'
+                  }}
+                  open={settings.menuAnchorEl !== null}
+                  anchorEl={settings.menuAnchorEl}
+                  onClose={() => {
+                    const next: NodeTypeColorMapping = {
+                      ...settings,
+                      menuAnchorEl: null,
+                      secondaryOpen: false
+                    };
+
+                    const copy = { ...mapping };
+                    copy[nodeType as NodeType] = next;
+
+                    setMapping(copy);
+                  }}
+                >
+                  <Card>
+                    <RgbColorPicker
+                      color={settings.secondaryOpen ? settings.secondaryColorRgb : settings.primaryColorRgb}
+                      onChange={({ r, g, b }) => {
+                        const next = { ...settings };
+
+                        if (settings.seperatePrimaryAndSecondary) {
+                          if (settings.secondaryOpen) {
+                            next.secondaryColorRgb = { r, g, b };
+                            next.tempColorGrad =
+                              nodeType === NodeType.Unvisited
+                                ? ''
+                                : `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`;
+                          } else {
+                            next.primaryColorRgb = { r, g, b };
+                            next.tempColor =
+                              nodeType === NodeType.Unvisited
+                                ? `rgba(${r}, ${g}, ${b}, 0.75)`
+                                : `rgb(${r}, ${g}, ${b})`;
+                          }
+                        } else {
+                          next.primaryColorRgb = { r, g, b };
+                          next.secondaryColorRgb = { r, g, b };
+                          next.tempColor =
+                            nodeType === NodeType.Unvisited ? `rgba(${r}, ${g}, ${b}, 0.75)` : `rgb(${r}, ${g}, ${b})`;
+                          next.tempColorGrad =
+                            nodeType === NodeType.Unvisited
+                              ? ''
+                              : settings.useColorGrad
+                              ? `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
+                              : next.tempColor;
+                        }
+
+                        const copy = { ...mapping };
+                        copy[nodeType as NodeType] = next;
+
+                        setMapping(copy);
+                      }}
+                    />
+                  </Card>
+                </Popover>
+              </Box>
+            </Card>
+          </Grid>
+        );
+      })}
+    </Grid>
+  );
+
   const mobilePicker = (
-    <Dialog fullScreen open={open} onClose={discardAndClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={open} onClose={discardAndClose} TransitionComponent={Transition} scroll="paper">
       <AppBar sx={{ position: 'relative' }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={discardAndClose} aria-label="close">
@@ -209,206 +411,31 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
           </Button>
         </Toolbar>
       </AppBar>
-      <Grid container spacing={2} sx={{ padding: 2 }}>
-        {Object.entries(mapping).map(([nodeType, settings]) => {
-          const background = nodeType === NodeType.Unvisited ? '' : settings.tempColorGrad;
-          return (
-            <Grid item key={nodeType} xs={12} md={6}>
-              <Card>
-                <Box sx={{ margin: 2 }}>
-                  <Stack direction="row" display="flex">
-                    <Stack>
-                      <Typography variant="h6">{settings.text}</Typography>
-                      <Stack direction="row" alignItems="center">
-                        <IconButton
-                          sx={{ alignItems: 'left', justifyContent: 'left' }}
-                          onClick={e => {
-                            const next: NodeTypeColorMapping = {
-                              ...settings,
-                              menuAnchorEl: e.currentTarget
-                            };
-
-                            const copy = { ...mapping };
-                            copy[nodeType as NodeType] = next;
-
-                            setMapping(copy);
-                          }}
-                        >
-                          <Edit color="primary" />
-                        </IconButton>
-                        <Typography>Primary</Typography>
-                      </Stack>
-
-                      {nodeType !== NodeType.Unvisited && (
-                        <FormGroup>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={settings.useColorGrad}
-                                onChange={event => {
-                                  const next: NodeTypeColorMapping = {
-                                    ...settings,
-                                    useColorGrad: event.target.checked
-                                  };
-
-                                  if (!next.useColorGrad) {
-                                    next.tempColorGrad = next.tempColor;
-                                    next.secondaryColorRgb = next.primaryColorRgb;
-                                    const { r, g, b } = next.primaryColorRgb;
-                                    next.tempColor = `rgba(${r}, ${g}, ${b}, 0)`;
-                                  } else {
-                                    const { r, g, b } = next.primaryColorRgb;
-                                    next.tempColor = `rgba(${r}, ${g}, ${b}, 1)`;
-                                    next.tempColorGrad = getColorGrad(next.tempColor);
-                                    next.secondaryColorRgb = next.primaryColorRgb;
-                                  }
-
-                                  const copy = { ...mapping };
-                                  copy[nodeType as NodeType] = next;
-
-                                  setMapping(copy);
-                                }}
-                              />
-                            }
-                            label="Use Color Gradient"
-                          />
-                          {settings.useColorGrad && (
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={settings.seperatePrimaryAndSecondary}
-                                  onChange={event => {
-                                    const next: NodeTypeColorMapping = {
-                                      ...settings,
-                                      seperatePrimaryAndSecondary: event.target.checked
-                                    };
-
-                                    if (!next.seperatePrimaryAndSecondary) {
-                                      next.tempColorGrad = getColorGrad(next.tempColor);
-                                      next.secondaryColorRgb = next.primaryColorRgb;
-                                    }
-
-                                    const copy = { ...mapping };
-                                    copy[nodeType as NodeType] = next;
-
-                                    setMapping(copy);
-                                  }}
-                                />
-                              }
-                              label="Seperate Primary and Secondary"
-                            />
-                          )}
-                        </FormGroup>
-                      )}
-
-                      {settings.seperatePrimaryAndSecondary && (
-                        <Stack direction="row" alignItems="center">
-                          <IconButton
-                            onClick={e => {
-                              const next: NodeTypeColorMapping = {
-                                ...settings,
-                                menuAnchorEl: e.currentTarget,
-                                secondaryOpen: true
-                              };
-
-                              const copy = { ...mapping };
-                              copy[nodeType as NodeType] = next;
-
-                              setMapping(copy);
-                            }}
-                          >
-                            <Edit color="primary" />
-                          </IconButton>
-                          <Typography>Secondary</Typography>
-                        </Stack>
-                      )}
-                    </Stack>
-
-                    <Stack sx={{ marginLeft: 'auto', alignItems: 'center', justifyContent: 'center' }}>
-                      <span
-                        style={{
-                          ...style,
-                          border: `1px double ${settings.tempColor}`,
-                          background
-                        }}
-                      />
-                    </Stack>
-                  </Stack>
-                  <Popover
-                    anchorOrigin={{
-                      vertical: 'bottom',
-                      horizontal: 'left'
-                    }}
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'left'
-                    }}
-                    open={settings.menuAnchorEl !== null}
-                    anchorEl={settings.menuAnchorEl}
-                    onClose={() => {
-                      const next: NodeTypeColorMapping = {
-                        ...settings,
-                        menuAnchorEl: null,
-                        secondaryOpen: false
-                      };
-
-                      const copy = { ...mapping };
-                      copy[nodeType as NodeType] = next;
-
-                      setMapping(copy);
-                    }}
-                  >
-                    <Card>
-                      <RgbColorPicker
-                        color={settings.secondaryOpen ? settings.secondaryColorRgb : settings.primaryColorRgb}
-                        onChange={({ r, g, b }) => {
-                          const next = { ...settings };
-
-                          if (settings.seperatePrimaryAndSecondary) {
-                            if (settings.secondaryOpen) {
-                              next.secondaryColorRgb = { r, g, b };
-                              next.tempColorGrad =
-                                nodeType === NodeType.Unvisited
-                                  ? ''
-                                  : `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`;
-                            } else {
-                              next.primaryColorRgb = { r, g, b };
-                              next.tempColor =
-                                nodeType === NodeType.Unvisited
-                                  ? `rgba(${r}, ${g}, ${b}, 0.75)`
-                                  : `rgb(${r}, ${g}, ${b})`;
-                            }
-                          } else {
-                            next.primaryColorRgb = { r, g, b };
-                            next.secondaryColorRgb = { r, g, b };
-                            next.tempColor =
-                              nodeType === NodeType.Unvisited
-                                ? `rgba(${r}, ${g}, ${b}, 0.75)`
-                                : `rgb(${r}, ${g}, ${b})`;
-                            next.tempColorGrad =
-                              nodeType === NodeType.Unvisited
-                                ? ''
-                                : settings.useColorGrad
-                                ? `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
-                                : next.tempColor;
-                          }
-
-                          const copy = { ...mapping };
-                          copy[nodeType as NodeType] = next;
-
-                          setMapping(copy);
-                        }}
-                      />
-                    </Card>
-                  </Popover>
-                </Box>
-              </Card>
-            </Grid>
-          );
-        })}
-      </Grid>
+      <DialogContent sx={{ padding: 2 }}>{content}</DialogContent>
     </Dialog>
   );
 
-  return mobilePicker;
+  const desktopPicker = (
+    <Dialog fullWidth={true} maxWidth="sm" open={open} onClose={discardAndClose} scroll="paper">
+      <DialogTitle>Colors</DialogTitle>
+
+      <DialogContent dividers={true} sx={{ padding: 2 }}>
+        {content}
+      </DialogContent>
+
+      <DialogActions>
+        <Button autoFocus color="primary" onClick={() => setMapping(defaults)}>
+          Defaults
+        </Button>
+        <Button autoFocus color="primary" onClick={discardAndClose}>
+          Discard
+        </Button>
+        <Button autoFocus color="primary" onClick={saveChanges}>
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
+  return isDesktop ? desktopPicker : mobilePicker;
 }
