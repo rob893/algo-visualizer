@@ -222,21 +222,6 @@ export default function ControlBar({
 
           <ColorPicker isDesktop={isDesktop} open={colorOpen} handleClose={() => setColorOpen(false)} />
 
-          {/* <RgbColorPicker
-            onChange={({ r, g, b }) => {
-              const root: HTMLElement | null = document.querySelector(':root');
-              if (!root) {
-                return;
-              }
-
-              root.style.setProperty('--wall-border-color', `rgb(${r}, ${g}, ${b})`);
-              // root.style.setProperty(
-              //   '--wall-background-gradient',
-              //   `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
-              // );
-            }}
-          /> */}
-
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
             <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
               <IconButton onClick={handleAboutClick}>
