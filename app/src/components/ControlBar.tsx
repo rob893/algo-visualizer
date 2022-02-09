@@ -1,7 +1,7 @@
 import {
   ClearAllOutlined,
   ClearOutlined,
-  Edit,
+  FormatColorFill,
   GitHub,
   HelpOutline,
   InfoOutlined,
@@ -218,8 +218,6 @@ export default function ControlBar({
             Clear Path
           </Button>
 
-          <Button onClick={() => setColorOpen(true)}>Colors!</Button>
-
           <ColorPicker isDesktop={isDesktop} open={colorOpen} handleClose={() => setColorOpen(false)} />
 
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
@@ -232,6 +230,12 @@ export default function ControlBar({
             <Tooltip title="Help">
               <IconButton onClick={handleHelpClick}>
                 <HelpOutline color="primary" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Colors">
+              <IconButton onClick={() => setColorOpen(true)}>
+                <FormatColorFill color="primary" />
               </IconButton>
             </Tooltip>
 
@@ -295,7 +299,7 @@ export default function ControlBar({
                 </MenuItem>
                 <MenuItem onClick={() => setColorOpen(true)}>
                   <ListItemIcon>
-                    <Edit fontSize="small" />
+                    <FormatColorFill fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Colors</ListItemText>
                 </MenuItem>
