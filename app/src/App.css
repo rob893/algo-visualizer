@@ -15,6 +15,8 @@
   --path-weight-background-gradient: radial-gradient(rgba(125, 151, 67, 0), rgba(125, 151, 67, 0.5));
   --visited-weight-border-color: rgba(185, 115, 83, 1);
   --visited-weight-background-gradient: radial-gradient(rgba(185, 115, 83, 0), rgba(185, 115, 83, 0.5));
+  --unvisited-border-color: rgba(98, 0, 234, 0.75);
+  --unvisited-background-gradient: radial-gradient(rgba(98, 0, 234, 0), rgba(98, 0, 234, 0));
 }
 
 table {
@@ -22,7 +24,7 @@ table {
 }
 
 td {
-  border: 1px solid rgba(98, 0, 234, 0.75);
+  border: 1px solid var(--unvisited-border-color);
 }
 
 .wall-no-animation {

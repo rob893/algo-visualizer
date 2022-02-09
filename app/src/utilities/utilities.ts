@@ -1,4 +1,5 @@
 import { AnimationSpeed } from '../models/enums';
+import { ColorSettings } from '../models/models';
 import { MazeType, PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
 
 export function chunk<T>(arr: T[], chunkSize: number): T[][] {
@@ -49,6 +50,19 @@ export function getSpeedText(speed: AnimationSpeed): string {
     default:
       return 'Normal';
   }
+}
+
+export function loadColorScheme(colorSettings: ColorSettings): void {
+  const root: HTMLElement | null = document.querySelector(':root');
+
+  if (!root) {
+    return;
+  }
+
+  Object.values(colorSettings).forEach(({ colorName, colorGradName, tempColor, tempColorGrad }) => {
+    root.style.setProperty(colorName, tempColor);
+    root.style.setProperty(colorGradName, tempColorGrad);
+  });
 }
 
 export function getMazeTypeText(mazeType: MazeType): string {
