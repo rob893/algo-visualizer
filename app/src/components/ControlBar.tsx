@@ -1,6 +1,7 @@
 import {
   ClearAllOutlined,
   ClearOutlined,
+  Edit,
   GitHub,
   HelpOutline,
   InfoOutlined,
@@ -42,6 +43,7 @@ import Legend from './Legend';
 import SettingsDialog from './SettingsDialog';
 import { green, red } from '@mui/material/colors';
 import { PlayContext } from '../models/models';
+import ColorPicker from './ColorPicker';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
@@ -88,6 +90,8 @@ export default function ControlBar({
   const moreMenuOpen = Boolean(moreMenuAnchorEl);
 
   const [selection, setSelection] = useState(NodeContextSelection.Wall);
+
+  const [colorOpen, setColorOpen] = useState(false);
 
   const selections = ['Wall', 'Weight', 'Start', 'End'];
 
@@ -214,6 +218,25 @@ export default function ControlBar({
             Clear Path
           </Button>
 
+          <Button onClick={() => setColorOpen(true)}>Colors!</Button>
+
+          <ColorPicker isDesktop={isDesktop} open={colorOpen} handleClose={() => setColorOpen(false)} />
+
+          {/* <RgbColorPicker
+            onChange={({ r, g, b }) => {
+              const root: HTMLElement | null = document.querySelector(':root');
+              if (!root) {
+                return;
+              }
+
+              root.style.setProperty('--wall-border-color', `rgb(${r}, ${g}, ${b})`);
+              // root.style.setProperty(
+              //   '--wall-background-gradient',
+              //   `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
+              // );
+            }}
+          /> */}
+
           <Box sx={{ display: 'flex', flexGrow: 1 }}>
             <Tooltip title="About" sx={{ marginLeft: 'auto' }}>
               <IconButton onClick={handleAboutClick}>
@@ -285,6 +308,12 @@ export default function ControlBar({
                   </ListItemIcon>
                   <ListItemText>Legend</ListItemText>
                 </MenuItem>
+                <MenuItem onClick={() => setColorOpen(true)}>
+                  <ListItemIcon>
+                    <Edit fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Colors</ListItemText>
+                </MenuItem>
                 <MenuItem onClick={() => setOpenSettingsDialog(true)}>
                   <ListItemIcon>
                     <Settings fontSize="small" />
@@ -309,6 +338,8 @@ export default function ControlBar({
               </Menu>
             </Box>
           </Stack>
+
+          <ColorPicker isDesktop={isDesktop} open={colorOpen} handleClose={() => setColorOpen(false)} />
 
           <AboutDialog open={openAboutDialog} onClose={() => setOpenAboutDialog(false)} />
           <HelpDialog

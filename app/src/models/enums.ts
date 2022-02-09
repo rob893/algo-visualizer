@@ -19,6 +19,18 @@ export enum PlayType {
   Weight = 'weight'
 }
 
+export enum NodeType {
+  Start = 'start',
+  End = 'end',
+  Visited = 'visisted',
+  Unvisited = 'unvisited',
+  Wall = 'wall',
+  Weight = 'weight',
+  Path = 'path',
+  WeightedPath = 'weighted-path',
+  WeightedVisited = 'weighted-visited'
+}
+
 export enum LocalStorageKey {
   ShowHelpAtStart = 'show-help-at-start'
 }
