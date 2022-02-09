@@ -13,6 +13,7 @@ export interface NodeTypeColorMapping {
   tempColor: string;
   tempColorGrad: string;
   menuAnchorEl: HTMLElement | null;
+  secondary?: boolean;
 }
 
 export type ColorSettings = {
