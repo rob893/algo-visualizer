@@ -1,4 +1,4 @@
-import { Close, Edit } from '@mui/icons-material';
+import { Close, Edit, RestartAlt } from '@mui/icons-material';
 import {
   AppBar,
   Button,
@@ -202,6 +202,22 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                 <Stack direction="row" display="flex">
                   <Stack>
                     <Typography variant="h6">{settings.text}</Typography>
+
+                    <Stack direction="row" alignItems="center">
+                      <IconButton
+                        sx={{ alignItems: 'left', justifyContent: 'left' }}
+                        onClick={() => {
+                          const copy = { ...mapping };
+                          copy[nodeType as NodeType] = defaults[nodeType as NodeType];
+
+                          setMapping(copy);
+                        }}
+                      >
+                        <RestartAlt color="primary" />
+                      </IconButton>
+                      <Typography>Reset</Typography>
+                    </Stack>
+
                     <Stack direction="row" alignItems="center">
                       <IconButton
                         sx={{ alignItems: 'left', justifyContent: 'left' }}
@@ -225,6 +241,7 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                     {nodeType !== NodeType.Unvisited && (
                       <FormGroup>
                         <FormControlLabel
+                          sx={{ margin: 0 }}
                           control={
                             <Checkbox
                               checked={settings.useColorGrad}
@@ -257,6 +274,7 @@ export default function ColorPicker({ isDesktop, open, handleClose }: ColorPicke
                         />
                         {settings.useColorGrad && (
                           <FormControlLabel
+                            sx={{ margin: 0 }}
                             control={
                               <Checkbox
                                 checked={settings.seperatePrimaryAndSecondary}
