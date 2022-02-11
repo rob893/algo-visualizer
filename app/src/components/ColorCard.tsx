@@ -10,7 +10,7 @@ import {
   Checkbox,
   FormGroup
 } from '@mui/material';
-import { CSSProperties, memo, useEffect, useState, MouseEvent as ReactMouseEvent, ChangeEvent } from 'react';
+import { CSSProperties, memo, useState, MouseEvent as ReactMouseEvent, ChangeEvent } from 'react';
 import { colord, RgbColor } from 'colord';
 import { RgbColorPicker } from 'react-colorful';
 import { NodeType } from '../models/enums';
@@ -23,12 +23,33 @@ export interface ColorCardProps {
   onSettingsCommitted: (nodeType: NodeType, settings: NodeTypeColorMapping) => void;
 }
 
+function areSettingsEqual(a: NodeTypeColorMapping, b: NodeTypeColorMapping): boolean {
+  const { colorGradName, colorName, tempColor, tempColorGrad, seperatePrimaryAndSecondary, useColorGrad } = a;
+
+  return (
+    colorGradName === b.colorGradName &&
+    colorName === b.colorName &&
+    tempColor === b.tempColor &&
+    tempColorGrad === b.tempColorGrad &&
+    seperatePrimaryAndSecondary === b.seperatePrimaryAndSecondary &&
+    useColorGrad === b.useColorGrad
+  );
+}
+
+function isEqual(a: ColorCardProps, b: ColorCardProps): boolean {
+  const { nodeType: aNodeType, initialSettings: aSettings } = a;
+
+  const { nodeType: bNodeType, initialSettings: bSettings } = b;
+
+  return aNodeType === bNodeType && areSettingsEqual(aSettings, bSettings);
+}
+
 function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPicked }: ColorCardProps): JSX.Element {
   const [settings, setSettings] = useState(initialSettings);
 
-  useEffect(() => {
+  if (!areSettingsEqual(settings, initialSettings)) {
     setSettings(initialSettings);
-  }, [initialSettings]);
+  }
 
   const style: CSSProperties = {
     minWidth: '75px',
@@ -233,4 +254,4 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
   );
 }
 
-export default memo(ColorCard);
+export default memo(ColorCard, isEqual);
