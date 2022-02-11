@@ -47,7 +47,7 @@ function isEqual(a: ColorCardProps, b: ColorCardProps): boolean {
 function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPicked }: ColorCardProps): JSX.Element {
   const [settings, setSettings] = useState(initialSettings);
 
-  if (!areSettingsEqual(settings, initialSettings)) {
+  if (!areSettingsEqual(settings, initialSettings) && !settings.menuAnchorEl) {
     setSettings(initialSettings);
   }
 
