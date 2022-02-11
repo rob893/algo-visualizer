@@ -10,46 +10,112 @@ import {
   Checkbox,
   FormGroup
 } from '@mui/material';
-import { CSSProperties, memo, useState, MouseEvent as ReactMouseEvent, ChangeEvent } from 'react';
+import { CSSProperties, memo, useState, MouseEvent as ReactMouseEvent } from 'react';
 import { colord, RgbColor } from 'colord';
 import { RgbColorPicker } from 'react-colorful';
 import { NodeType } from '../models/enums';
-import { NodeTypeColorMapping } from '../models/models';
-import { defaultColorSettings } from '../utilities/defaultColorSettings';
 
 export interface ColorCardProps {
   nodeType: NodeType;
-  initialSettings: NodeTypeColorMapping;
-  onSettingsCommitted: (nodeType: NodeType, settings: NodeTypeColorMapping) => void;
+  title: string;
+  tempColor: string;
+  tempColorGrad: string;
+  useColorGrad: boolean;
+  seperateColors: boolean;
+  onResetToDefault: () => void;
+  onUseColorGradChange: (useColorGrad: boolean) => void;
+  onSeperateColorsChange: (seperateColors: boolean) => void;
+  onPrimaryColorChange: (...params: any[]) => void;
+  onSecondaryColorChange: (...params: any[]) => void;
 }
 
-function areSettingsEqual(a: NodeTypeColorMapping, b: NodeTypeColorMapping): boolean {
-  const { colorGradName, colorName, tempColor, tempColorGrad, seperatePrimaryAndSecondary, useColorGrad } = a;
-
+function arePropsEqual(a: ColorCardProps, b: ColorCardProps): boolean {
   return (
-    colorGradName === b.colorGradName &&
-    colorName === b.colorName &&
-    tempColor === b.tempColor &&
-    tempColorGrad === b.tempColorGrad &&
-    seperatePrimaryAndSecondary === b.seperatePrimaryAndSecondary &&
-    useColorGrad === b.useColorGrad
+    a.nodeType === b.nodeType &&
+    a.title === b.title &&
+    a.tempColor === b.tempColor &&
+    a.tempColorGrad === b.tempColorGrad &&
+    a.useColorGrad === b.useColorGrad &&
+    a.seperateColors === b.seperateColors
   );
 }
 
-function isEqual(a: ColorCardProps, b: ColorCardProps): boolean {
-  const { nodeType: aNodeType, initialSettings: aSettings } = a;
-
-  const { nodeType: bNodeType, initialSettings: bSettings } = b;
-
-  return aNodeType === bNodeType && areSettingsEqual(aSettings, bSettings);
+interface ColorCardPickerState {
+  primaryPickerEl: HTMLElement | null;
+  secondaryPickerEl: HTMLElement | null;
+  primaryColorPickerColor: string;
+  primaryColorRgb: RgbColor;
+  secondaryColorPickerColor: string;
+  secondaryColorRgb: RgbColor;
 }
 
-function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPicked }: ColorCardProps): JSX.Element {
-  const [settings, setSettings] = useState(initialSettings);
+function ColorPickerPopover({
+  anchorEl,
+  color,
+  onClose,
+  onChange
+}: {
+  anchorEl: HTMLElement | null;
+  color: RgbColor;
+  onClose: () => void;
+  onChange: (newColor: RgbColor) => void;
+}): JSX.Element {
+  return (
+    <Popover
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'left'
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'left'
+      }}
+      open={anchorEl !== null}
+      anchorEl={anchorEl}
+      onClose={onClose}
+    >
+      <Card>
+        <RgbColorPicker color={color} onChange={onChange} />
+      </Card>
+    </Popover>
+  );
+}
 
-  if (!areSettingsEqual(settings, initialSettings) && !settings.menuAnchorEl) {
-    setSettings(initialSettings);
-  }
+function ColorCard({
+  nodeType,
+  title,
+  tempColor,
+  tempColorGrad,
+  useColorGrad,
+  seperateColors,
+  onResetToDefault,
+  onUseColorGradChange,
+  onSeperateColorsChange,
+  onSecondaryColorChange,
+  onPrimaryColorChange
+}: ColorCardProps): JSX.Element {
+  const getFirstRGBAFromRadialGradient = (grad: string): string => {
+    const endIndex = grad.indexOf('),');
+    return grad.substring(16, endIndex + 1);
+  };
+
+  const [pickerSettings, setPickerSettings] = useState<ColorCardPickerState>({
+    primaryPickerEl: null as HTMLElement | null,
+    secondaryPickerEl: null as HTMLElement | null,
+    primaryColorPickerColor: tempColor,
+    primaryColorRgb: colord(tempColor).toRgb(),
+    secondaryColorPickerColor: tempColorGrad,
+    secondaryColorRgb: colord(getFirstRGBAFromRadialGradient(tempColorGrad)).toRgb()
+  });
+
+  const {
+    primaryPickerEl,
+    secondaryPickerEl,
+    primaryColorPickerColor,
+    secondaryColorPickerColor,
+    primaryColorRgb,
+    secondaryColorRgb
+  } = pickerSettings;
 
   const style: CSSProperties = {
     minWidth: '75px',
@@ -57,113 +123,65 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
     width: '75px',
     height: '75px'
   };
-  const background = nodeType === NodeType.Unvisited ? '' : settings.tempColorGrad;
 
-  const getColorGrad = (color: string, from: number = 0, to: number = 0.5): string => {
-    const { r, g, b } = colord(color).toRgb();
-    return `radial-gradient(rgba(${r}, ${g}, ${b}, ${from}), rgba(${r}, ${g}, ${b}, ${to}))`;
-  };
-
-  const handleReset = (): void => {
-    const copy = { ...defaultColorSettings[nodeType] };
-    setSettings(copy);
-    onColorPicked(nodeType, copy);
-  };
+  const background =
+    nodeType === NodeType.Unvisited
+      ? ''
+      : secondaryPickerEl || primaryPickerEl
+      ? secondaryColorPickerColor
+      : tempColorGrad;
 
   const handleOpenPrimaryColorPicker = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>): void => {
-    const next: NodeTypeColorMapping = {
-      ...settings,
-      menuAnchorEl: e.currentTarget
-    };
-
-    setSettings(next);
+    const copy: ColorCardPickerState = { ...pickerSettings, primaryPickerEl: e.currentTarget, secondaryPickerEl: null };
+    setPickerSettings(copy);
   };
 
   const handleOpenSecondaryColorPicker = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>): void => {
-    const next: NodeTypeColorMapping = {
-      ...settings,
-      menuAnchorEl: e.currentTarget,
-      secondaryOpen: true
-    };
-
-    setSettings(next);
+    const copy: ColorCardPickerState = { ...pickerSettings, primaryPickerEl: null, secondaryPickerEl: e.currentTarget };
+    setPickerSettings(copy);
   };
 
-  const handleUseColorGradCheckbox = (event: ChangeEvent<HTMLInputElement>): void => {
-    const next: NodeTypeColorMapping = {
-      ...settings,
-      useColorGrad: event.target.checked
-    };
+  const handlePopoverClose = (isPrimary: boolean): void => {
+    const copy: ColorCardPickerState = { ...pickerSettings, primaryPickerEl: null, secondaryPickerEl: null };
 
-    if (!next.useColorGrad) {
-      next.tempColorGrad = next.tempColor;
-      next.secondaryColorRgb = next.primaryColorRgb;
-      const { r, g, b } = next.primaryColorRgb;
-      next.tempColor = `rgba(${r}, ${g}, ${b}, 0)`;
+    if (isPrimary) {
+      onPrimaryColorChange(copy.primaryColorPickerColor);
     } else {
-      const { r, g, b } = next.primaryColorRgb;
-      next.tempColor = `rgba(${r}, ${g}, ${b}, 1)`;
-      next.tempColorGrad = getColorGrad(next.tempColor);
-      next.secondaryColorRgb = next.primaryColorRgb;
+      onSecondaryColorChange(copy.secondaryColorPickerColor);
     }
 
-    setSettings(next);
-    onColorPicked(nodeType, next);
+    setPickerSettings(copy);
   };
 
-  const handleSeperateColorsCheckbox = (event: ChangeEvent<HTMLInputElement>): void => {
-    const next: NodeTypeColorMapping = {
-      ...settings,
-      seperatePrimaryAndSecondary: event.target.checked
-    };
+  const handleColorPickerChange = ({ r, g, b }: RgbColor, isPrimary: boolean): void => {
+    const copy = { ...pickerSettings };
 
-    if (!next.seperatePrimaryAndSecondary) {
-      next.tempColorGrad = getColorGrad(next.tempColor);
-      next.secondaryColorRgb = next.primaryColorRgb;
-    }
-
-    setSettings(next);
-    onColorPicked(nodeType, next);
-  };
-
-  const handlePopoverClose = (): void => {
-    const next: NodeTypeColorMapping = {
-      ...settings,
-      menuAnchorEl: null,
-      secondaryOpen: false
-    };
-
-    setSettings(next);
-    onColorPicked(nodeType, next);
-  };
-
-  const handleColorPickerChange = ({ r, g, b }: RgbColor): void => {
-    const next = { ...settings };
-
-    if (settings.seperatePrimaryAndSecondary) {
-      if (settings.secondaryOpen) {
-        next.secondaryColorRgb = { r, g, b };
-        next.tempColorGrad =
+    if (seperateColors) {
+      if (!isPrimary) {
+        copy.secondaryColorRgb = { r, g, b };
+        copy.secondaryColorPickerColor =
           nodeType === NodeType.Unvisited
             ? ''
             : `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`;
       } else {
-        next.primaryColorRgb = { r, g, b };
-        next.tempColor = nodeType === NodeType.Unvisited ? `rgba(${r}, ${g}, ${b}, 0.75)` : `rgb(${r}, ${g}, ${b})`;
+        copy.primaryColorRgb = { r, g, b };
+        copy.primaryColorPickerColor =
+          nodeType === NodeType.Unvisited ? `rgba(${r}, ${g}, ${b}, 0.75)` : `rgb(${r}, ${g}, ${b})`;
       }
     } else {
-      next.primaryColorRgb = { r, g, b };
-      next.secondaryColorRgb = { r, g, b };
-      next.tempColor = nodeType === NodeType.Unvisited ? `rgba(${r}, ${g}, ${b}, 0.75)` : `rgb(${r}, ${g}, ${b})`;
-      next.tempColorGrad =
+      copy.primaryColorRgb = { r, g, b };
+      copy.secondaryColorRgb = { r, g, b };
+      copy.primaryColorPickerColor =
+        nodeType === NodeType.Unvisited ? `rgba(${r}, ${g}, ${b}, 0.75)` : `rgb(${r}, ${g}, ${b})`;
+      copy.secondaryColorPickerColor =
         nodeType === NodeType.Unvisited
           ? ''
-          : settings.useColorGrad
+          : useColorGrad
           ? `radial-gradient(rgba(${r}, ${g}, ${b}, 0), rgba(${r}, ${g}, ${b}, 0.5))`
-          : next.tempColor;
+          : copy.primaryColorPickerColor;
     }
 
-    setSettings(next);
+    setPickerSettings(copy);
   };
 
   return (
@@ -171,10 +189,10 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
       <Box sx={{ margin: 2 }}>
         <Stack direction="row" display="flex">
           <Stack>
-            <Typography variant="h6">{settings.text}</Typography>
+            <Typography variant="h6">{title}</Typography>
 
             <Stack direction="row" alignItems="center">
-              <IconButton sx={{ alignItems: 'left', justifyContent: 'left' }} onClick={handleReset}>
+              <IconButton sx={{ alignItems: 'left', justifyContent: 'left' }} onClick={onResetToDefault}>
                 <RestartAlt color="primary" />
               </IconButton>
               <Typography>Reset</Typography>
@@ -191,16 +209,18 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
               <FormGroup>
                 <FormControlLabel
                   sx={{ margin: 0 }}
-                  control={<Checkbox checked={settings.useColorGrad} onChange={handleUseColorGradCheckbox} />}
+                  control={
+                    <Checkbox checked={useColorGrad} onChange={e => onUseColorGradChange(e.currentTarget.checked)} />
+                  }
                   label="Use Color Gradient"
                 />
-                {settings.useColorGrad && (
+                {useColorGrad && (
                   <FormControlLabel
                     sx={{ margin: 0 }}
                     control={
                       <Checkbox
-                        checked={settings.seperatePrimaryAndSecondary}
-                        onChange={handleSeperateColorsCheckbox}
+                        checked={seperateColors}
+                        onChange={e => onSeperateColorsChange(e.currentTarget.checked)}
                       />
                     }
                     label="Seperate Primary and Secondary"
@@ -209,7 +229,7 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
               </FormGroup>
             )}
 
-            {settings.seperatePrimaryAndSecondary && (
+            {seperateColors && (
               <Stack direction="row" alignItems="center">
                 <IconButton onClick={handleOpenSecondaryColorPicker}>
                   <Edit color="primary" />
@@ -223,35 +243,28 @@ function ColorCard({ nodeType, initialSettings, onSettingsCommitted: onColorPick
             <span
               style={{
                 ...style,
-                border: `1px double ${settings.tempColor}`,
+                border: `1px double ${primaryPickerEl ? primaryColorPickerColor : tempColor}`,
                 background
               }}
             />
           </Stack>
         </Stack>
-        <Popover
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left'
-          }}
-          open={settings.menuAnchorEl !== null}
-          anchorEl={settings.menuAnchorEl}
-          onClose={handlePopoverClose}
-        >
-          <Card>
-            <RgbColorPicker
-              color={settings.secondaryOpen ? settings.secondaryColorRgb : settings.primaryColorRgb}
-              onChange={handleColorPickerChange}
-            />
-          </Card>
-        </Popover>
+
+        <ColorPickerPopover
+          anchorEl={primaryPickerEl}
+          color={primaryColorRgb}
+          onChange={c => handleColorPickerChange(c, true)}
+          onClose={() => handlePopoverClose(true)}
+        />
+        <ColorPickerPopover
+          anchorEl={secondaryPickerEl}
+          color={secondaryColorRgb}
+          onChange={c => handleColorPickerChange(c, false)}
+          onClose={() => handlePopoverClose(false)}
+        />
       </Box>
     </Card>
   );
 }
 
-export default memo(ColorCard, isEqual);
+export default memo(ColorCard, arePropsEqual);
