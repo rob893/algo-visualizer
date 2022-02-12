@@ -10,15 +10,6 @@ export interface GridNodeProps {
   onMouseEnter: (nodeKey: string, point: Point) => void;
 }
 
-function arePropsEqual(a: GridNodeProps, b: GridNodeProps): boolean {
-  return (
-    a.nodeKey === b.nodeKey &&
-    a.className === b.className &&
-    a.nodeWidth === b.nodeWidth &&
-    a.nodeHeight === b.nodeHeight
-  );
-}
-
 function GridNode({ nodeKey, className, nodeWidth, nodeHeight, onClick, onMouseEnter }: GridNodeProps): JSX.Element {
   const point = getPoint(nodeKey);
 
@@ -41,4 +32,4 @@ function GridNode({ nodeKey, className, nodeWidth, nodeHeight, onClick, onMouseE
   );
 }
 
-export default memo(GridNode, arePropsEqual);
+export default memo(GridNode);

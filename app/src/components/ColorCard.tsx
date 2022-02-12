@@ -10,7 +10,7 @@ import {
   Checkbox,
   FormGroup
 } from '@mui/material';
-import { CSSProperties, memo, useState, MouseEvent as ReactMouseEvent } from 'react';
+import { CSSProperties, useState, MouseEvent as ReactMouseEvent } from 'react';
 import { colord, RgbColor } from 'colord';
 import { RgbColorPicker } from 'react-colorful';
 import { NodeType } from '../models/enums';
@@ -27,17 +27,6 @@ export interface ColorCardProps {
   onSeperateColorsChange: (seperateColors: boolean) => void;
   onPrimaryColorChange: (...params: any[]) => void;
   onSecondaryColorChange: (...params: any[]) => void;
-}
-
-function arePropsEqual(a: ColorCardProps, b: ColorCardProps): boolean {
-  return (
-    a.nodeType === b.nodeType &&
-    a.title === b.title &&
-    a.tempColor === b.tempColor &&
-    a.tempColorGrad === b.tempColorGrad &&
-    a.useColorGrad === b.useColorGrad &&
-    a.seperateColors === b.seperateColors
-  );
 }
 
 interface ColorCardPickerState {
@@ -267,4 +256,4 @@ function ColorCard({
   );
 }
 
-export default memo(ColorCard, arePropsEqual);
+export default ColorCard;
