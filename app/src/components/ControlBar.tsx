@@ -44,6 +44,7 @@ import SettingsDialog from './SettingsDialog';
 import { green, red } from '@mui/material/colors';
 import { PlayContext } from '../models/models';
 import ColorPicker from './ColorPicker';
+import { getAlgoNameText } from '../utilities/utilities';
 
 export interface ControlBarProps {
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
@@ -154,7 +155,7 @@ export default function ControlBar({
   const getPlayButtonText = (): string => {
     switch (playType) {
       case PlayType.Path:
-        return 'Visualize Path!';
+        return `Visualize ${getAlgoNameText(algo, true)}!`;
       case PlayType.Wall:
         return 'Draw Walls!';
       case PlayType.Weight:
@@ -189,7 +190,7 @@ export default function ControlBar({
           <Typography variant="h5">Algo Visualizer</Typography>
 
           <Button
-            sx={{ width: 150, height: 36.5 }}
+            sx={{ width: 190, height: 36.5 }}
             onClick={handlePlay}
             variant="contained"
             color={running ? 'error' : 'success'}

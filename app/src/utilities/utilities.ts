@@ -18,20 +18,20 @@ export function chunk<T>(arr: T[], chunkSize: number): T[][] {
   return res;
 }
 
-export function getAlgoNameText(algo: PathFindingAlgorithm): string {
+export function getAlgoNameText(algo: PathFindingAlgorithm, shortened: boolean = false): string {
   switch (algo) {
     case PathFindingAlgorithm.Astar:
-      return 'A* Search';
+      return shortened ? 'A*' : 'A* Search';
     case PathFindingAlgorithm.Dijkstra:
-      return "Dijkstra's";
+      return shortened ? "Dijkstra's" : "Dijkstra's Algorithm";
     case PathFindingAlgorithm.GreedyBFS:
-      return 'Greedy Best First';
+      return shortened ? 'Greedy' : 'Greedy Best-First Search';
     case PathFindingAlgorithm.BFS:
-      return 'Breadth First';
+      return shortened ? 'BFS' : 'Breadth First Search';
     case PathFindingAlgorithm.DFS:
-      return 'Depth First';
+      return shortened ? 'DFS' : 'Depth First Search';
     default:
-      return "Dijkstra's";
+      return shortened ? "Dijkstra's" : "Dijkstra's Algorithm";
   }
 }
 

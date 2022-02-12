@@ -135,6 +135,7 @@ export default function BoardGrid({
     mazeType: MazeType;
     context: PlayContext;
   }): Promise<void> => {
+    const useChunk = false; // For use if I want to :)
     const maze = universe.generateMaze(mazeType);
     const chunks = chunk(maze, 500);
 
@@ -166,7 +167,19 @@ export default function BoardGrid({
       }
     };
 
-    await Promise.all(chunks.map(chunk => processChunk(chunk)));
+    if (useChunk) {
+      await Promise.all(chunks.map(chunk => processChunk(chunk)));
+    } else {
+      for (const node of maze) {
+        if (context.cancel) {
+          return;
+        }
+
+        processNode(node);
+
+        await wait(context.speed / 2);
+      }
+    }
 
     onFindPath.next(true);
   };
