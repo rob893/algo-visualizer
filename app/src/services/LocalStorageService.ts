@@ -32,7 +32,7 @@ export class LocalStorageService {
     const fromCache = this.cache.get(computedKey);
 
     if (fromCache !== undefined) {
-      return fromCache;
+      return typeof fromCache === 'string' ? fromCache : JSON.stringify(fromCache);
     }
 
     const item = this.storage.getItem(computedKey);
@@ -65,6 +65,14 @@ export class LocalStorageService {
     this.cache.set(computedKey, parsed);
 
     return parsed;
+  }
+
+  public loadEntriesIntoCache(keys?: LocalStorageKey[]): void {
+    const keysToLoad = keys ?? Object.values(LocalStorageKey);
+
+    for (const key of keysToLoad) {
+      this.getParsedItem(key);
+    }
   }
 
   public setItem<T>(key: LocalStorageKey, value: T): void {

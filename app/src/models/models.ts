@@ -1,3 +1,4 @@
+import { PathFindingAlgorithm } from '../wasm/algo_visualizer';
 import { NodeType } from './enums';
 
 export interface PlayContext {
@@ -21,9 +22,15 @@ export type ColorSettings = {
 
 export interface PathFindingAlgorithmRun {
   algorithmName: string;
+  algorithm: PathFindingAlgorithm;
   pathNodeCount: number;
   pathCost: number;
   processedNodeCount: number;
   timeTaken: number;
-  timestamp: Date;
+  timestamp: number;
+  start: string;
+  end: string;
+  weight: number;
+  walls: string[];
+  weights: string[];
 }

@@ -19,6 +19,7 @@ import { loadColorScheme } from './utilities/utilities';
 // Learn more about service workers: https://cra.link/PWA
 serviceWorkerRegistration.register();
 
+console.log('Initializing WASM...');
 wasmService
   .init()
   .then(() => {
@@ -43,8 +44,17 @@ wasmService
     console.log('WASM failed to init', e);
   });
 
+console.log('Loading local storage entries into cache...');
+const t0 = performance.now();
+localStorageService.loadEntriesIntoCache();
+console.log(`Local storage entries loaded into cache in ${performance.now() - t0}ms.`);
+
+const ct0 = performance.now();
+console.log('Loading initial color settings...');
 const savedColorSettings = localStorageService.getParsedItem<ColorSettings>(LocalStorageKey.ColorSettings);
 
 if (savedColorSettings) {
   loadColorScheme(savedColorSettings);
 }
+
+console.log(`Initial color settings loaded in ${performance.now() - ct0}ms`);

@@ -38,9 +38,10 @@ export interface ColorPickerProps {
 }
 
 export default function ColorPicker({ isDesktop, open, handleClose }: ColorPickerProps): JSX.Element {
-  const fromStorage = localStorageService.getParsedItem<ColorSettings>(LocalStorageKey.ColorSettings);
-
-  const [mapping, setMapping] = useState(fromStorage ?? defaultColorSettings);
+  const [mapping, setMapping] = useState(() => {
+    const fromStorage = localStorageService.getParsedItem<ColorSettings>(LocalStorageKey.ColorSettings);
+    return fromStorage ?? defaultColorSettings;
+  });
 
   const getColorGrad = (color: string, from: number = 0, to: number = 0.5): string => {
     const { r, g, b } = colord(color).toRgb();

@@ -17,6 +17,7 @@ export interface GridProps {
   nodeHeight: number;
   onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | PathFindingAlgorithmRun | boolean>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
+  onRestoreRunHistory: Subject<PathFindingAlgorithmRun>;
   onWeightChange: Subject<number>;
   onResetPath: Subject<void>;
   onResetBoard: Subject<void>;
@@ -31,6 +32,7 @@ export default function BoardGrid({
   nodeHeight,
   onFindPath,
   onGenerateMaze,
+  onRestoreRunHistory,
   onWeightChange,
   onResetPath,
   onResetBoard,
@@ -95,32 +97,32 @@ export default function BoardGrid({
     }
   };
 
-  const setWall = (node: WasmGridNode, nodeKey: string): void => {
+  const setWall = (node: WasmGridNode | Point, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, false);
     setClass(nodeKey, 'wall');
   };
 
-  const setDefault = (node: WasmGridNode, nodeKey: string): void => {
+  const setDefault = (node: WasmGridNode | Point, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     setClass(nodeKey, '');
   };
 
-  const setWeighted = (node: WasmGridNode, nodeKey: string): void => {
-    universe.setWeight(node.x, node.y, weight);
+  const setWeighted = (node: WasmGridNode | Point, nodeKey: string, overrideWeight?: number): void => {
+    universe.setWeight(node.x, node.y, overrideWeight ?? weight);
     universe.setPassable(node.x, node.y, true);
     setClass(nodeKey, 'weight');
   };
 
-  const setStartPoint = (node: WasmGridNode, nodeKey: string): void => {
+  const setStartPoint = (node: WasmGridNode | Point, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     start = nodeKey;
     setClass(nodeKey, 'start');
   };
 
-  const setEndPoint = (node: WasmGridNode, nodeKey: string): void => {
+  const setEndPoint = (node: WasmGridNode | Point, nodeKey: string): void => {
     universe.setWeight(node.x, node.y, 0);
     universe.setPassable(node.x, node.y, true);
     end = nodeKey;
@@ -141,7 +143,7 @@ export default function BoardGrid({
     const chunks = chunk(maze, 500);
 
     const processNode = ({ x, y }: IGridNode): void => {
-      const node = universe.getCell(x, y);
+      const node = universe.getNode(x, y);
       const nodeKey = getKey(x, y);
 
       if (nodeKey === start || nodeKey === end || !node.passable || node.weight > 0) {
@@ -193,7 +195,7 @@ export default function BoardGrid({
       nodeKey !== end &&
       !running
     ) {
-      const node = universe.getCell(x, y);
+      const node = universe.getNode(x, y);
 
       if (inputService.getKey('Shift') || currSelection === NodeContextSelection.Weight) {
         setWeighted(node, nodeKey);
@@ -203,32 +205,36 @@ export default function BoardGrid({
     }
   };
 
-  const actionMap = new Map<NodeContextSelection, (node: WasmGridNode, nodeKey: string) => void>([
+  const actionMap = new Map<NodeContextSelection, (node: Point | WasmGridNode, nodeKey: string) => void>([
     [
       NodeContextSelection.Wall,
-      (node: WasmGridNode, nodeKey: string): void => {
-        if (node.passable) {
-          setWall(node, nodeKey);
+      (node: Point | WasmGridNode, nodeKey: string): void => {
+        const wasmNode =
+          (node as WasmGridNode).passable !== undefined ? (node as WasmGridNode) : universe.getNode(node.x, node.y);
+        if (wasmNode.passable) {
+          setWall(wasmNode, nodeKey);
         } else {
-          setDefault(node, nodeKey);
+          setDefault(wasmNode, nodeKey);
         }
       }
     ],
     [
       NodeContextSelection.Weight,
-      (node: WasmGridNode, nodeKey: string): void => {
-        if (node.weight > 0) {
-          setDefault(node, nodeKey);
+      (node: Point | WasmGridNode, nodeKey: string): void => {
+        const wasmNode =
+          (node as WasmGridNode).passable !== undefined ? (node as WasmGridNode) : universe.getNode(node.x, node.y);
+        if (wasmNode.weight > 0) {
+          setDefault(wasmNode, nodeKey);
         } else {
-          setWeighted(node, nodeKey);
+          setWeighted(wasmNode, nodeKey);
         }
       }
     ],
     [
       NodeContextSelection.Start,
-      (node: WasmGridNode, nodeKey: string): void => {
+      (node: Point | WasmGridNode, nodeKey: string): void => {
         const prevStartPoint = getPoint(start);
-        const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
+        const prevStartNode = universe.getNode(prevStartPoint.x, prevStartPoint.y);
 
         setDefault(prevStartNode, start);
         setStartPoint(node, nodeKey);
@@ -236,9 +242,9 @@ export default function BoardGrid({
     ],
     [
       NodeContextSelection.End,
-      (node: WasmGridNode, nodeKey: string): void => {
+      (node: Point | WasmGridNode, nodeKey: string): void => {
         const prevEndPoint = getPoint(end);
-        const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
+        const prevEndNode = universe.getNode(prevEndPoint.x, prevEndPoint.y);
 
         setDefault(prevEndNode, end);
         setEndPoint(node, nodeKey);
@@ -246,12 +252,54 @@ export default function BoardGrid({
     ]
   ]);
 
+  const handleRestoreRunHistoryState = (runHistory: PathFindingAlgorithmRun): void => {
+    handleReset();
+
+    const { start, end, walls, weights, weight } = runHistory;
+
+    for (const [point, key] of walls
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
+      setWall(point, key);
+    }
+
+    for (const [point, key] of weights
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
+      setWeighted(point, key, weight);
+    }
+
+    const { x: sx, y: sy } = getPoint(start);
+    const newStart = {
+      x: sx >= universe.width ? universe.width - 1 : sx,
+      y: sy >= universe.height ? universe.height - 1 : sy
+    };
+
+    const startAction = actionMap.get(NodeContextSelection.Start);
+
+    if (startAction) {
+      startAction(newStart, getKey(newStart));
+    }
+
+    const { x: ex, y: ey } = getPoint(end);
+    const newEnd = {
+      x: ex >= universe.width ? (universe.width - 1 === newStart.x ? universe.width - 2 : universe.width - 1) : ex,
+      y: ey >= universe.height ? universe.height - 1 : ey
+    };
+
+    const endAction = actionMap.get(NodeContextSelection.End);
+
+    if (endAction) {
+      endAction(newEnd, getKey(newEnd));
+    }
+  };
+
   const handleOnClick = (nodeKey: string, { x, y }: Point): void => {
     if (running) {
       return;
     }
 
-    const node = universe.getCell(x, y);
+    const node = universe.getNode(x, y);
 
     if (inputService.getKey('Shift')) {
       if (node.weight > 0) {
@@ -260,17 +308,23 @@ export default function BoardGrid({
         setWeighted(node, nodeKey);
       }
     } else if (inputService.getKey('s')) {
-      const prevStartPoint = getPoint(start);
-      const prevStartNode = universe.getCell(prevStartPoint.x, prevStartPoint.y);
+      const action = actionMap.get(NodeContextSelection.Start);
 
-      setDefault(prevStartNode, start);
-      setStartPoint(node, nodeKey);
+      if (!action) {
+        console.error(`${currSelection} is an invalid selection.`);
+        return;
+      }
+
+      action(node, nodeKey);
     } else if (inputService.getKey('e')) {
-      const prevEndPoint = getPoint(end);
-      const prevEndNode = universe.getCell(prevEndPoint.x, prevEndPoint.y);
+      const action = actionMap.get(NodeContextSelection.End);
 
-      setDefault(prevEndNode, end);
-      setEndPoint(node, nodeKey);
+      if (!action) {
+        console.error(`${currSelection} is an invalid selection.`);
+        return;
+      }
+
+      action(node, nodeKey);
     } else {
       const action = actionMap.get(currSelection);
 
@@ -309,7 +363,7 @@ export default function BoardGrid({
 
     gridKeys.flat().forEach(key => {
       const { x, y } = getPoint(key);
-      const node = universe.getCell(x, y);
+      const node = universe.getNode(x, y);
 
       if (node.weight > 0) {
         universe.setWeight(x, y, weight);
@@ -324,6 +378,7 @@ export default function BoardGrid({
     const mazeSub = onGenerateMaze.subscribe(handleGenerateMaze);
     const selectionSub = onSelectionChange.subscribe(handleSelectionChange);
     const weightSub = onWeightChange.subscribe(handleWeightChange);
+    const restoreSub = onRestoreRunHistory.subscribe(handleRestoreRunHistoryState);
 
     return () => {
       pathSub.unsubscribe();
@@ -332,6 +387,7 @@ export default function BoardGrid({
       mazeSub.unsubscribe();
       selectionSub.unsubscribe();
       weightSub.unsubscribe();
+      restoreSub.unsubscribe();
     };
   });
 

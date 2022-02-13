@@ -59,6 +59,7 @@ export default function App(): JSX.Element {
   const onWeightChange = new Subject<number>();
   const onGenerateMaze = new Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>();
   const onSelectionChange = new Subject<NodeContextSelection>();
+  const onRestoreRunHistory = new Subject<PathFindingAlgorithmRun>();
 
   useEffect(() => {
     inputService.addEventListeners();
@@ -76,6 +77,7 @@ export default function App(): JSX.Element {
         onResetPath={onResetPath}
         onWeightChange={onWeightChange}
         onGenerateMaze={onGenerateMaze}
+        onRestoreRunHistory={onRestoreRunHistory}
         onSelectionChange={onSelectionChange}
         localStorageService={localStorageService}
       />
@@ -87,6 +89,7 @@ export default function App(): JSX.Element {
         onFindPath={onFindPath}
         onWeightChange={onWeightChange}
         onGenerateMaze={onGenerateMaze}
+        onRestoreRunHistory={onRestoreRunHistory}
         onResetBoard={onResetBoard}
         onResetPath={onResetPath}
         onSelectionChange={onSelectionChange}

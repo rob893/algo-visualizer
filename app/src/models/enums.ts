@@ -33,5 +33,6 @@ export enum NodeType {
 
 export enum LocalStorageKey {
   ShowHelpAtStart = 'show-help-at-start',
-  ColorSettings = 'color-settings'
+  ColorSettings = 'color-settings',
+  RunHistory = 'run-history'
 }

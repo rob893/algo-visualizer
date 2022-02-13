@@ -23,6 +23,17 @@ interface IPathResponse {
 }
 "#;
 
+#[wasm_bindgen(typescript_custom_section)]
+const IGRID_SNAPSHOT: &'static str = r#"
+interface IGridSnapshot {
+    width: number;
+    height: number;
+    weight: number;
+    walls: string[];
+    weights: string[];
+}
+"#;
+
 #[wasm_bindgen]
 extern "C" {
     #[wasm_bindgen(typescript_type = "IPathResponse")]
@@ -30,4 +41,7 @@ extern "C" {
 
     #[wasm_bindgen(typescript_type = "IGridNode[]")]
     pub type IMazeResponse;
+
+    #[wasm_bindgen(typescript_type = "IGridSnapshot")]
+    pub type IGridSnapshot;
 }

@@ -121,13 +121,20 @@ export async function drawPath(
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
   const timeTaken = performance.now() - t0;
+
+  const snapshot = universe.getSnapshot();
+
   const stats: PathFindingAlgorithmRun = {
     algorithmName: getAlgoNameText(algo),
+    algorithm: algo,
     pathNodeCount: res.path.length,
     pathCost: res.path.length + res.path.reduce((prev, curr) => prev + curr.weight, 0),
     processedNodeCount: res.processed.length,
     timeTaken,
-    timestamp: new Date()
+    timestamp: new Date().getTime(),
+    start: `${sx},${sy}`,
+    end: `${ex},${ey}`,
+    ...snapshot
   };
 
   let prev: HTMLElement | null = null;

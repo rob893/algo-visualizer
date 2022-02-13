@@ -55,6 +55,7 @@ export interface ControlBarProps {
   onWeightChange: Subject<number>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
   onResetBoard: Subject<void>;
+  onRestoreRunHistory: Subject<PathFindingAlgorithmRun>;
   onSelectionChange: Subject<NodeContextSelection>;
   localStorageService: LocalStorageService;
 }
@@ -66,6 +67,7 @@ export default function ControlBar({
   onResetPath,
   onGenerateMaze,
   onWeightChange,
+  onRestoreRunHistory,
   onResetBoard,
   onSelectionChange,
   localStorageService
@@ -73,23 +75,25 @@ export default function ControlBar({
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
-  const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
-
-  const [showAtStartChecked, setShowAtStartChecked] = useState(
-    showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
-  );
+  const [showAtStartChecked, setShowAtStartChecked] = useState(() => {
+    const showHelpAtStartFromStorage = localStorageService.getItem(LocalStorageKey.ShowHelpAtStart);
+    return showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true';
+  });
   const [speed, setSpeed] = useState(AnimationSpeed.Normal);
   const [algo, setCurrAlgo] = useState(PathFindingAlgorithm.Dijkstra);
   const [mazeType, setMazeType] = useState(MazeType.RecursiveDivision);
   const [running, setRunning] = useState(false);
   const [openAboutDialog, setOpenAboutDialog] = useState(false);
   const [openSettingsDialog, setOpenSettingsDialog] = useState(false);
-  const [openHelpDialog, setOpenHelpDialog] = useState(
-    showHelpAtStartFromStorage === null || showHelpAtStartFromStorage === 'true'
-  );
+  const [openHelpDialog, setOpenHelpDialog] = useState(showAtStartChecked);
   const [openLegend, setOpenLegend] = useState(false);
   const [playType, setPlayType] = useState(PlayType.Path);
-  const [runHistory, setRunHistory] = useState<PathFindingAlgorithmRun[]>([]);
+  const [runHistory, setRunHistory] = useState<PathFindingAlgorithmRun[]>(() => {
+    const runHistoryFromStorage = localStorageService.getParsedItem<PathFindingAlgorithmRun[]>(
+      LocalStorageKey.RunHistory
+    );
+    return runHistoryFromStorage ?? [];
+  });
   const [runHistoryOpen, setRunHistoryOpen] = useState(false);
 
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -107,6 +111,11 @@ export default function ControlBar({
 
   const handleHelpClick = (): void => {
     setOpenHelpDialog(true);
+  };
+
+  const handleClearRunHistory = (): void => {
+    localStorageService.removeItem(LocalStorageKey.RunHistory);
+    setRunHistory([]);
   };
 
   const handlePlay = (): void => {
@@ -178,8 +187,10 @@ export default function ControlBar({
   useEffect(() => {
     const pathSub = onFindPath.subscribe(event => {
       if (isPathFindingAlgorithmRun(event)) {
-        setRunHistory([event, ...runHistory]);
+        const newHistory = [event, ...runHistory].slice(0, 15);
+        setRunHistory(newHistory);
         setRunning(false);
+        localStorageService.setItem(LocalStorageKey.RunHistory, newHistory);
       } else if (typeof event === 'boolean') {
         setRunning(false);
       }
@@ -274,7 +285,8 @@ export default function ControlBar({
           open={runHistoryOpen}
           runHistory={runHistory}
           onClose={() => setRunHistoryOpen(false)}
-          onClearHistory={() => setRunHistory([])}
+          onClearHistory={handleClearRunHistory}
+          onRestoreHistory={run => onRestoreRunHistory.next(run)}
         />
       </Toolbar>
     </AppBar>
@@ -390,7 +402,8 @@ export default function ControlBar({
             open={runHistoryOpen}
             runHistory={runHistory}
             onClose={() => setRunHistoryOpen(false)}
-            onClearHistory={() => setRunHistory([])}
+            onClearHistory={handleClearRunHistory}
+            onRestoreHistory={run => onRestoreRunHistory.next(run)}
           />
         </Toolbar>
       </AppBar>

@@ -2,9 +2,9 @@ use rand::Rng;
 use std::collections::{HashMap, HashSet, VecDeque};
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 
-use crate::{IMazeResponse, IPathResponse, PriorityQueue};
+use crate::{IGridSnapshot, IMazeResponse, IPathResponse, PriorityQueue};
 
-use super::{GridNode, MazeType, Orientation, PathFindingAlgorithm, PathResult};
+use super::{GridNode, GridSnapshot, MazeType, Orientation, PathFindingAlgorithm, PathResult};
 
 #[wasm_bindgen]
 pub struct Universe {
@@ -63,10 +63,19 @@ impl Universe {
         }
     }
 
-    #[wasm_bindgen(js_name = getCell)]
-    pub fn get_cell(&self, x: i32, y: i32) -> GridNode {
+    #[wasm_bindgen(js_name = getNode)]
+    pub fn get_node(&self, x: i32, y: i32) -> GridNode {
         let index = self.get_index(x, y);
         return self.nodes[index];
+    }
+
+    #[wasm_bindgen(js_name = hasNode)]
+    pub fn has_node(&self, x: i32, y: i32) -> bool {
+        if x < 0 || x as u32 >= self.width || y < 0 || y as u32 >= self.height {
+            return false;
+        }
+
+        return true;
     }
 
     #[wasm_bindgen(js_name = generateMaze)]
@@ -127,6 +136,12 @@ impl Universe {
         let index = self.get_index(x, y);
         self.nodes[index].passable = passable;
     }
+
+    #[wasm_bindgen(js_name = getSnapshot)]
+    pub fn get_snapshot(&self) -> IGridSnapshot {
+        let snapshot = self.get_snapshot_prv();
+        return JsValue::from_serde(&snapshot).unwrap().unchecked_into();
+    }
 }
 
 impl Universe {
@@ -134,7 +149,28 @@ impl Universe {
         (y * self.width as i32 + x) as usize
     }
 
-    fn get_cell_ref(&self, x: i32, y: i32) -> &GridNode {
+    fn get_snapshot_prv(&self) -> GridSnapshot {
+        let mut snapshot = GridSnapshot {
+            width: self.width as i32,
+            height: self.height as i32,
+            weight: 0,
+            walls: Vec::new(),
+            weights: Vec::new(),
+        };
+
+        for node in &self.nodes {
+            if !node.passable {
+                snapshot.walls.push(format!("{},{}", node.x, node.y));
+            } else if node.weight > 0 {
+                snapshot.weights.push(format!("{},{}", node.x, node.y));
+                snapshot.weight = node.weight;
+            }
+        }
+
+        return snapshot;
+    }
+
+    fn get_node_ref(&self, x: i32, y: i32) -> &GridNode {
         let index = self.get_index(x, y);
         return &self.nodes[index];
     }
@@ -167,16 +203,16 @@ impl Universe {
 
         if surrounding_walls {
             for row in 0..self.height as i32 {
-                let left_node = self.get_cell(0, row).clone();
-                let right_node = self.get_cell((self.width - 1) as i32, row).clone();
+                let left_node = self.get_node(0, row).clone();
+                let right_node = self.get_node((self.width - 1) as i32, row).clone();
 
                 result.push(left_node);
                 result.push(right_node);
             }
 
             for col in 0..self.width as i32 {
-                let top_node = self.get_cell(col, 0).clone();
-                let bottom_node = self.get_cell(col, (self.height - 1) as i32).clone();
+                let top_node = self.get_node(col, 0).clone();
+                let bottom_node = self.get_node(col, (self.height - 1) as i32).clone();
 
                 result.push(top_node);
                 result.push(bottom_node);
@@ -226,7 +262,7 @@ impl Universe {
         if orientation == Orientation::Horizontal {
             for col in 0..self.width as i32 {
                 if col != rand_col && col >= col_start - 1 && col <= col_end + 1 {
-                    let node = self.get_cell(col as i32, rand_row as i32).clone();
+                    let node = self.get_node(col as i32, rand_row as i32).clone();
                     result.push(node);
                 }
             }
@@ -277,7 +313,7 @@ impl Universe {
         } else {
             for row in 0..self.height as i32 {
                 if row != rand_row && row >= row_start - 1 && row <= row_end + 1 {
-                    let node = self.get_cell(rand_col as i32, row as i32).clone();
+                    let node = self.get_node(rand_col as i32, row as i32).clone();
                     result.push(node);
                 }
             }
@@ -336,8 +372,8 @@ impl Universe {
 
         let mut frontier: VecDeque<&GridNode> = VecDeque::new();
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut visited: HashSet<&GridNode> = HashSet::new();
@@ -375,8 +411,8 @@ impl Universe {
         let mut frontier_start: VecDeque<&GridNode> = VecDeque::new();
         let mut frontier_end: VecDeque<&GridNode> = VecDeque::new();
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from_start: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut came_from_end: HashMap<&GridNode, &GridNode> = HashMap::new();
@@ -451,8 +487,8 @@ impl Universe {
 
         let mut frontier: PriorityQueue<&GridNode> = PriorityQueue::new();
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut visited: HashSet<&GridNode> = HashSet::new();
@@ -492,8 +528,8 @@ impl Universe {
 
         let mut frontier: Vec<&GridNode> = Vec::new();
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut visited: HashSet<&GridNode> = HashSet::new();
@@ -529,8 +565,8 @@ impl Universe {
 
         let mut frontier: PriorityQueue<&GridNode> = PriorityQueue::new();
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut times: HashMap<&GridNode, i32> = HashMap::new();
         let mut came_from: HashMap<&GridNode, &GridNode> = HashMap::new();
@@ -568,8 +604,8 @@ impl Universe {
             processed: Vec::new(),
         };
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut g_score: HashMap<&GridNode, i32> = HashMap::new();
@@ -615,8 +651,8 @@ impl Universe {
             processed: Vec::new(),
         };
 
-        let start_node = self.get_cell_ref(start_x, start_y);
-        let end_node = self.get_cell_ref(end_x, end_y);
+        let start_node = self.get_node_ref(start_x, start_y);
+        let end_node = self.get_node_ref(end_x, end_y);
 
         let mut came_from_start: HashMap<&GridNode, &GridNode> = HashMap::new();
         let mut came_from_end: HashMap<&GridNode, &GridNode> = HashMap::new();
@@ -700,20 +736,20 @@ impl Universe {
     fn get_neighbors(&self, x: i32, y: i32) -> Vec<&GridNode> {
         let mut vec: Vec<&GridNode> = Vec::with_capacity(4);
 
-        if y > 0 && self.get_cell_ref(x, y - 1).passable {
-            vec.push(self.get_cell_ref(x, y - 1));
+        if y > 0 && self.get_node_ref(x, y - 1).passable {
+            vec.push(self.get_node_ref(x, y - 1));
         }
 
-        if y < self.height as i32 - 1 && self.get_cell_ref(x, y + 1).passable {
-            vec.push(self.get_cell_ref(x, y + 1));
+        if y < self.height as i32 - 1 && self.get_node_ref(x, y + 1).passable {
+            vec.push(self.get_node_ref(x, y + 1));
         }
 
-        if x > 0 && self.get_cell_ref(x - 1, y).passable {
-            vec.push(self.get_cell_ref(x - 1, y));
+        if x > 0 && self.get_node_ref(x - 1, y).passable {
+            vec.push(self.get_node_ref(x - 1, y));
         }
 
-        if x < self.width as i32 - 1 && self.get_cell_ref(x + 1, y).passable {
-            vec.push(self.get_cell_ref(x + 1, y));
+        if x < self.width as i32 - 1 && self.get_node_ref(x + 1, y).passable {
+            vec.push(self.get_node_ref(x + 1, y));
         }
 
         return vec;
