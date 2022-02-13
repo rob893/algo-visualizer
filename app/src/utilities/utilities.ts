@@ -22,14 +22,16 @@ export function getAlgoNameText(algo: PathFindingAlgorithm, shortened: boolean =
   switch (algo) {
     case PathFindingAlgorithm.Astar:
       return shortened ? 'A*' : 'A* Search';
+    case PathFindingAlgorithm.AstarBidirectional:
+      return shortened ? 'A*' : 'Bidirectional A* Search';
     case PathFindingAlgorithm.Dijkstra:
       return shortened ? "Dijkstra's" : "Dijkstra's Algorithm";
     case PathFindingAlgorithm.GreedyBFS:
       return shortened ? 'Greedy' : 'Greedy Best-First Search';
     case PathFindingAlgorithm.BFS:
       return shortened ? 'BFS' : 'Breadth First Search';
-    case PathFindingAlgorithm.BFSBi:
-      return shortened ? 'Bi-BFS' : 'Bidirectional Breadth First Search';
+    case PathFindingAlgorithm.BFSBidirectional:
+      return shortened ? 'BFS' : 'Bidirectional Breadth First Search';
     case PathFindingAlgorithm.DFS:
       return shortened ? 'DFS' : 'Depth First Search';
     default:

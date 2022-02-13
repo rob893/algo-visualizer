@@ -102,8 +102,13 @@ impl Universe {
         let path = match algorithm {
             PathFindingAlgorithm::Dijkstra => self.dijkstra(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::Astar => self.astar(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::AstarBidirectional => {
+                self.astar_bidirectional(start_x, start_y, end_x, end_y)
+            }
             PathFindingAlgorithm::BFS => self.bfs(start_x, start_y, end_x, end_y),
-            PathFindingAlgorithm::BFSBi => self.bfs_bi(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::BFSBidirectional => {
+                self.bfs_bidirectional(start_x, start_y, end_x, end_y)
+            }
             PathFindingAlgorithm::DFS => self.dfs(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::GreedyBFS => self.greedy_bfs(start_x, start_y, end_x, end_y),
         };
@@ -361,7 +366,7 @@ impl Universe {
         return result;
     }
 
-    fn bfs_bi(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
+    fn bfs_bidirectional(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
         let mut result = PathResult {
             path: Vec::new(),
             processed: Vec::new(),
@@ -591,6 +596,100 @@ impl Universe {
                     let f_score = -1 * (tentative_g_score + Universe::heuristic(next, end_node));
                     frontier.enqueue(next, f_score);
                     came_from.insert(next, current);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    fn astar_bidirectional(
+        &self,
+        start_x: i32,
+        start_y: i32,
+        end_x: i32,
+        end_y: i32,
+    ) -> PathResult {
+        let mut result: PathResult = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut came_from_start: HashMap<&GridNode, &GridNode> = HashMap::new();
+        let mut came_from_end: HashMap<&GridNode, &GridNode> = HashMap::new();
+        let mut g_score_start: HashMap<&GridNode, i32> = HashMap::new();
+        let mut g_score_end: HashMap<&GridNode, i32> = HashMap::new();
+
+        g_score_start.insert(start_node, 0);
+        g_score_end.insert(end_node, 0);
+
+        let mut frontier_start: PriorityQueue<&GridNode> = PriorityQueue::new();
+        let mut frontier_end: PriorityQueue<&GridNode> = PriorityQueue::new();
+
+        frontier_start.enqueue(start_node, 0);
+        frontier_end.enqueue(end_node, 0);
+
+        while frontier_start.count() > 0 || frontier_end.count() > 0 {
+            if frontier_start.count() > 0 {
+                let current = frontier_start.dequeue().unwrap();
+                result.processed.push(current.clone());
+
+                if current == end_node {
+                    return Universe::construct_path(result, came_from_start, end_node);
+                }
+
+                if came_from_end.contains_key(current) {
+                    let mut here_end = Universe::construct_path(result, came_from_end, current);
+                    here_end.path.pop();
+                    let start_here = Universe::construct_path(here_end, came_from_start, current);
+
+                    return start_here;
+                }
+
+                for next in self.get_neighbors(current.x, current.y) {
+                    let tentative_g_score =
+                        1 + *g_score_start.get(current).unwrap() + next.weight as i32;
+
+                    if tentative_g_score < *g_score_start.get(next).unwrap_or(&i32::MAX) {
+                        g_score_start.insert(next, tentative_g_score);
+                        let f_score =
+                            -1 * (tentative_g_score + Universe::heuristic(next, end_node));
+                        frontier_start.enqueue(next, f_score);
+                        came_from_start.insert(next, current);
+                    }
+                }
+            }
+
+            if frontier_end.count() > 0 {
+                let current = frontier_end.dequeue().unwrap();
+                result.processed.push(current.clone());
+
+                if current == start_node {
+                    return Universe::construct_path(result, came_from_end, start_node);
+                }
+
+                if came_from_start.contains_key(current) {
+                    let mut here_end = Universe::construct_path(result, came_from_start, current);
+                    here_end.path.pop();
+                    let start_here = Universe::construct_path(here_end, came_from_end, current);
+
+                    return start_here;
+                }
+
+                for next in self.get_neighbors(current.x, current.y) {
+                    let tentative_g_score =
+                        1 + *g_score_end.get(current).unwrap() + next.weight as i32;
+
+                    if tentative_g_score < *g_score_end.get(next).unwrap_or(&i32::MAX) {
+                        g_score_end.insert(next, tentative_g_score);
+                        let f_score =
+                            -1 * (tentative_g_score + Universe::heuristic(next, start_node));
+                        frontier_end.enqueue(next, f_score);
+                        came_from_end.insert(next, current);
+                    }
                 }
             }
         }
