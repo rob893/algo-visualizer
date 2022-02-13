@@ -18,3 +18,12 @@ export interface NodeTypeColorMapping {
 export type ColorSettings = {
   [key in NodeType]: NodeTypeColorMapping;
 };
+
+export interface PathFindingAlgorithmRun {
+  algorithmName: string;
+  pathNodeCount: number;
+  pathCost: number;
+  processedNodeCount: number;
+  timeTaken: number;
+  timestamp: Date;
+}

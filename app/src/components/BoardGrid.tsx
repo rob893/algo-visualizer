@@ -7,14 +7,15 @@ import { IGridNode, Universe } from '../wasm/algo_visualizer';
 import { GridNode as WasmGridNode, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
 import { NodeContextSelection, PlayType } from '../models/enums';
 import GridNode from './GridNode';
-import { PlayContext } from '../models/models';
+import { PathFindingAlgorithmRun, PlayContext } from '../models/models';
+import { isAlgoRequest } from '../utilities/typeguards';
 
 export interface GridProps {
   gridWidth: number;
   gridHeight: number;
   nodeWidth: number;
   nodeHeight: number;
-  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | PathFindingAlgorithmRun | boolean>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
   onWeightChange: Subject<number>;
   onResetPath: Subject<void>;
@@ -126,7 +127,7 @@ export default function BoardGrid({
     setClass(nodeKey, 'end');
   };
 
-  const handleRandomizeWalls = async ({
+  const handleGenerateMaze = async ({
     playType,
     mazeType,
     context
@@ -289,16 +290,18 @@ export default function BoardGrid({
           algo: PathFindingAlgorithm;
           context: PlayContext;
         }
+      | PathFindingAlgorithmRun
   ): Promise<void> => {
-    if (typeof event === 'boolean') {
+    if (!isAlgoRequest(event)) {
       return;
     }
+
     const { algo, context } = event;
     handleResetPath();
     running = true;
-    await drawPath(universe, getPoint(start), getPoint(end), algo, context);
+    const stats = await drawPath(universe, getPoint(start), getPoint(end), algo, context);
     running = false;
-    onFindPath.next(true);
+    onFindPath.next(stats);
   };
 
   const handleWeightChange = (newWeight: number): void => {
@@ -318,7 +321,7 @@ export default function BoardGrid({
     const pathSub = onFindPath.subscribe(handleOnFindPath);
     const resetBoardSub = onResetBoard.subscribe(handleReset);
     const resetPathSub = onResetPath.subscribe(handleResetPath);
-    const mazeSub = onGenerateMaze.subscribe(handleRandomizeWalls);
+    const mazeSub = onGenerateMaze.subscribe(handleGenerateMaze);
     const selectionSub = onSelectionChange.subscribe(handleSelectionChange);
     const weightSub = onWeightChange.subscribe(handleWeightChange);
 

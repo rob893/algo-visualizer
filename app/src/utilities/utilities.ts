@@ -1,5 +1,5 @@
 import { AnimationSpeed } from '../models/enums';
-import { ColorSettings } from '../models/models';
+import { ColorSettings, PathFindingAlgorithmRun } from '../models/models';
 import { MazeType, PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
 
 export function chunk<T>(arr: T[], chunkSize: number): T[][] {
@@ -117,25 +117,24 @@ export async function drawPath(
   { x: ex, y: ey }: Point,
   algo: PathFindingAlgorithm,
   context: { cancel: boolean; speed: number }
-): Promise<void> {
+): Promise<PathFindingAlgorithmRun> {
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
-  const timeTaken = `${performance.now() - t0}ms`;
-  const stats = {
-    algo: getAlgoNameText(algo),
+  const timeTaken = performance.now() - t0;
+  const stats: PathFindingAlgorithmRun = {
+    algorithmName: getAlgoNameText(algo),
     pathNodeCount: res.path.length,
     pathCost: res.path.length + res.path.reduce((prev, curr) => prev + curr.weight, 0),
     processedNodeCount: res.processed.length,
-    timeTaken
+    timeTaken,
+    timestamp: new Date()
   };
-
-  console.log(stats);
 
   let prev: HTMLElement | null = null;
 
   for (const visitedNode of res.processed) {
     if (context.cancel) {
-      return;
+      return stats;
     }
 
     const ele = document.getElementById(getKey(visitedNode));
@@ -161,7 +160,7 @@ export async function drawPath(
 
   for (const pathNode of res.path) {
     if (context.cancel) {
-      return;
+      return stats;
     }
 
     const ele = document.getElementById(getKey(pathNode));
@@ -184,4 +183,6 @@ export async function drawPath(
       }
     }
   }
+
+  return stats;
 }

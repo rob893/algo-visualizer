@@ -9,7 +9,7 @@ import { Fragment, useEffect } from 'react';
 import { inputService } from './services/InputService';
 import { useViewport } from './hooks/useViewport';
 import { NodeContextSelection, PlayType } from './models/enums';
-import { PlayContext } from './models/models';
+import { PathFindingAlgorithmRun, PlayContext } from './models/models';
 
 /**
  * !!! TO ANYONE READING !!!
@@ -51,7 +51,9 @@ export default function App(): JSX.Element {
   const gridWidth = calculateGridWidth(nodeWidth);
   const universe = wasmService.resize(gridWidth, gridHeight);
 
-  const onFindPath = new Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>();
+  const onFindPath = new Subject<
+    { algo: PathFindingAlgorithm; context: PlayContext } | PathFindingAlgorithmRun | boolean
+  >();
   const onResetPath = new Subject<void>();
   const onResetBoard = new Subject<void>();
   const onWeightChange = new Subject<number>();

@@ -4,6 +4,7 @@ import {
   FormatColorFill,
   GitHub,
   HelpOutline,
+  History,
   InfoOutlined,
   LegendToggleOutlined,
   MoreVert,
@@ -42,12 +43,14 @@ import HelpDialog from './HelpDialog';
 import Legend from './Legend';
 import SettingsDialog from './SettingsDialog';
 import { green, red } from '@mui/material/colors';
-import { PlayContext } from '../models/models';
+import { PathFindingAlgorithmRun, PlayContext } from '../models/models';
 import ColorPicker from './ColorPicker';
 import { getAlgoNameText } from '../utilities/utilities';
+import { isPathFindingAlgorithmRun } from '../utilities/typeguards';
+import RunHistoryDialog from './RunHistoryDialog';
 
 export interface ControlBarProps {
-  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | boolean>;
+  onFindPath: Subject<{ algo: PathFindingAlgorithm; context: PlayContext } | PathFindingAlgorithmRun | boolean>;
   onResetPath: Subject<void>;
   onWeightChange: Subject<number>;
   onGenerateMaze: Subject<{ playType: PlayType; mazeType: MazeType; context: PlayContext }>;
@@ -86,6 +89,8 @@ export default function ControlBar({
   );
   const [openLegend, setOpenLegend] = useState(false);
   const [playType, setPlayType] = useState(PlayType.Path);
+  const [runHistory, setRunHistory] = useState<PathFindingAlgorithmRun[]>([]);
+  const [runHistoryOpen, setRunHistoryOpen] = useState(false);
 
   const [moreMenuAnchorEl, setMoreMenuAnchorEl] = useState<null | HTMLElement>(null);
   const moreMenuOpen = Boolean(moreMenuAnchorEl);
@@ -172,7 +177,10 @@ export default function ControlBar({
 
   useEffect(() => {
     const pathSub = onFindPath.subscribe(event => {
-      if (typeof event === 'boolean' && event) {
+      if (isPathFindingAlgorithmRun(event)) {
+        setRunHistory([event, ...runHistory]);
+        setRunning(false);
+      } else if (typeof event === 'boolean') {
         setRunning(false);
       }
     });
@@ -234,6 +242,12 @@ export default function ControlBar({
               </IconButton>
             </Tooltip>
 
+            <Tooltip title="Run History">
+              <IconButton onClick={() => setRunHistoryOpen(true)}>
+                <History color="primary" />
+              </IconButton>
+            </Tooltip>
+
             <Tooltip title="Colors">
               <IconButton onClick={() => setColorOpen(true)}>
                 <FormatColorFill color="primary" />
@@ -255,6 +269,12 @@ export default function ControlBar({
           onClose={() => setOpenHelpDialog(false)}
           onShowHelpCheckboxChange={handleHelpCheckbox}
           showHelpAtStartChecked={showAtStartChecked}
+        />
+        <RunHistoryDialog
+          open={runHistoryOpen}
+          runHistory={runHistory}
+          onClose={() => setRunHistoryOpen(false)}
+          onClearHistory={() => setRunHistory([])}
         />
       </Toolbar>
     </AppBar>
@@ -291,31 +311,44 @@ export default function ControlBar({
                   </ListItemIcon>
                   <ListItemText>About</ListItemText>
                 </MenuItem>
+
                 <MenuItem onClick={handleHelpClick}>
                   <ListItemIcon>
                     <HelpOutline fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Help</ListItemText>
                 </MenuItem>
+
+                <MenuItem onClick={() => setRunHistoryOpen(true)}>
+                  <ListItemIcon>
+                    <History fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Run History</ListItemText>
+                </MenuItem>
+
                 <MenuItem onClick={() => setOpenLegend(true)}>
                   <ListItemIcon>
                     <LegendToggleOutlined fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Legend</ListItemText>
                 </MenuItem>
+
                 <MenuItem onClick={() => setColorOpen(true)}>
                   <ListItemIcon>
                     <FormatColorFill fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Colors</ListItemText>
                 </MenuItem>
+
                 <MenuItem onClick={() => setOpenSettingsDialog(true)}>
                   <ListItemIcon>
                     <Settings fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Settings</ListItemText>
                 </MenuItem>
+
                 <Divider />
+
                 <Link
                   href="https://github.com/rob893/algo-visualizer"
                   target="_blank"
@@ -352,6 +385,12 @@ export default function ControlBar({
             onPlayTypeChosen={handlePlayTypeChange}
             onMazeTypeChosen={handleMazeTypeChange}
             onWeightChosen={w => onWeightChange.next(w)}
+          />
+          <RunHistoryDialog
+            open={runHistoryOpen}
+            runHistory={runHistory}
+            onClose={() => setRunHistoryOpen(false)}
+            onClearHistory={() => setRunHistory([])}
           />
         </Toolbar>
       </AppBar>
