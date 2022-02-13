@@ -41,7 +41,6 @@ export default function RunHistoryDialog({
                       <Typography variant="body2" color="text.secondary">
                         Path found in {run.timeTaken.toFixed(2)}ms.
                         <br />
-                        <br />
                         Path Node Count: {run.pathNodeCount}
                         <br />
                         Path Cost: {run.pathCost}
