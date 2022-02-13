@@ -672,9 +672,9 @@ impl Universe {
                 }
 
                 if came_from_start.contains_key(current) {
-                    let mut here_end = Universe::construct_path(result, came_from_start, current);
+                    let mut here_end = Universe::construct_path(result, came_from_end, current);
                     here_end.path.pop();
-                    let start_here = Universe::construct_path(here_end, came_from_end, current);
+                    let start_here = Universe::construct_path(here_end, came_from_start, current);
 
                     return start_here;
                 }
