@@ -5,6 +5,7 @@ pub enum PathFindingAlgorithm {
     Astar,
     Dijkstra,
     BFS,
+    BFSBi,
     DFS,
     GreedyBFS,
 }

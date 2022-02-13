@@ -28,6 +28,8 @@ export function getAlgoNameText(algo: PathFindingAlgorithm, shortened: boolean =
       return shortened ? 'Greedy' : 'Greedy Best-First Search';
     case PathFindingAlgorithm.BFS:
       return shortened ? 'BFS' : 'Breadth First Search';
+    case PathFindingAlgorithm.BFSBi:
+      return shortened ? 'Bi-BFS' : 'Bidirectional Breadth First Search';
     case PathFindingAlgorithm.DFS:
       return shortened ? 'DFS' : 'Depth First Search';
     default:
@@ -116,7 +118,16 @@ export async function drawPath(
 ): Promise<void> {
   const t0 = performance.now();
   const res = universe.findPath(sx, sy, ex, ey, algo);
-  console.log(`WASM path found in ${performance.now() - t0}ms!`);
+  const timeTaken = `${performance.now() - t0}ms`;
+  const stats = {
+    algo: getAlgoNameText(algo),
+    pathNodeCount: res.path.length,
+    pathCost: res.path.length + res.path.reduce((prev, curr) => prev + curr.weight, 0),
+    processedNodeCount: res.processed.length,
+    timeTaken
+  };
+
+  console.log(stats);
 
   let prev: HTMLElement | null = null;
 

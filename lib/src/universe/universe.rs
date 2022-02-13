@@ -103,6 +103,7 @@ impl Universe {
             PathFindingAlgorithm::Dijkstra => self.dijkstra(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::Astar => self.astar(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::BFS => self.bfs(start_x, start_y, end_x, end_y),
+            PathFindingAlgorithm::BFSBi => self.bfs_bi(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::DFS => self.dfs(start_x, start_y, end_x, end_y),
             PathFindingAlgorithm::GreedyBFS => self.greedy_bfs(start_x, start_y, end_x, end_y),
         };
@@ -353,6 +354,83 @@ impl Universe {
                     visited.insert(neighbor);
                     came_from.insert(neighbor, current);
                     frontier.push_back(neighbor);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    fn bfs_bi(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> PathResult {
+        let mut result = PathResult {
+            path: Vec::new(),
+            processed: Vec::new(),
+        };
+
+        let mut frontier_start: VecDeque<&GridNode> = VecDeque::new();
+        let mut frontier_end: VecDeque<&GridNode> = VecDeque::new();
+
+        let start_node = self.get_cell_ref(start_x, start_y);
+        let end_node = self.get_cell_ref(end_x, end_y);
+
+        let mut came_from_start: HashMap<&GridNode, &GridNode> = HashMap::new();
+        let mut came_from_end: HashMap<&GridNode, &GridNode> = HashMap::new();
+        let mut visited_start: HashSet<&GridNode> = HashSet::new();
+        let mut visited_end: HashSet<&GridNode> = HashSet::new();
+
+        frontier_start.push_back(start_node);
+        frontier_end.push_back(end_node);
+        visited_start.insert(start_node);
+        visited_end.insert(end_node);
+
+        while frontier_start.len() > 0 || frontier_end.len() > 0 {
+            if frontier_start.len() > 0 {
+                let current = frontier_start.pop_front().unwrap();
+                result.processed.push(current.clone());
+
+                if current == end_node {
+                    return Universe::construct_path(result, came_from_start, end_node);
+                }
+
+                if came_from_end.contains_key(current) {
+                    let mut here_end = Universe::construct_path(result, came_from_end, current);
+                    here_end.path.pop();
+                    let start_here = Universe::construct_path(here_end, came_from_start, current);
+
+                    return start_here;
+                }
+
+                for neighbor in self.get_neighbors(current.x, current.y) {
+                    if !visited_start.contains(neighbor) {
+                        visited_start.insert(neighbor);
+                        came_from_start.insert(neighbor, current);
+                        frontier_start.push_back(neighbor);
+                    }
+                }
+            }
+
+            if frontier_end.len() > 0 {
+                let current = frontier_end.pop_front().unwrap();
+                result.processed.push(current.clone());
+
+                if current == start_node {
+                    return Universe::construct_path(result, came_from_end, start_node);
+                }
+
+                if came_from_start.contains_key(current) {
+                    let mut here_end = Universe::construct_path(result, came_from_end, current);
+                    here_end.path.pop();
+                    let start_here = Universe::construct_path(here_end, came_from_start, current);
+
+                    return start_here;
+                }
+
+                for neighbor in self.get_neighbors(current.x, current.y) {
+                    if !visited_end.contains(neighbor) {
+                        visited_end.insert(neighbor);
+                        came_from_end.insert(neighbor, current);
+                        frontier_end.push_back(neighbor);
+                    }
                 }
             }
         }

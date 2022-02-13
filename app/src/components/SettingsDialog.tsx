@@ -115,6 +115,7 @@ export default function SettingsDialog({
                 {getAlgoNameText(PathFindingAlgorithm.GreedyBFS)}
               </MenuItem>
               <MenuItem value={PathFindingAlgorithm.BFS}>{getAlgoNameText(PathFindingAlgorithm.BFS)}</MenuItem>
+              <MenuItem value={PathFindingAlgorithm.BFSBi}>{getAlgoNameText(PathFindingAlgorithm.BFSBi)}</MenuItem>
               <MenuItem value={PathFindingAlgorithm.DFS}>{getAlgoNameText(PathFindingAlgorithm.DFS)}</MenuItem>
             </Select>
           </Grid>

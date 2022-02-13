@@ -25,8 +25,8 @@ export interface ColorCardProps {
   onResetToDefault: () => void;
   onUseColorGradChange: (useColorGrad: boolean) => void;
   onSeperateColorsChange: (seperateColors: boolean) => void;
-  onPrimaryColorChange: (...params: any[]) => void;
-  onSecondaryColorChange: (...params: any[]) => void;
+  onPrimaryColorChange: (newColor: string) => void;
+  onSecondaryColorChange: (newColor: string) => void;
 }
 
 interface ColorCardPickerState {
