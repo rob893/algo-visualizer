@@ -283,19 +283,35 @@ export default function BoardGrid({
       await wait(5);
     }
 
-    for (const [point, key] of walls
-      .map<[Point, string]>(key => [getPoint(key), key])
-      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
-      setWall(point, key);
-      await wait(5);
-    }
+    const wallChunks = chunk(
+      walls.map<[Point, string]>(key => [getPoint(key), key]).filter(([{ x, y }]) => universe.hasNode(x, y)),
+      350
+    );
 
-    for (const [point, key] of weights
-      .map<[Point, string]>(key => [getPoint(key), key])
-      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
-      setWeighted(point, key, weight);
-      await wait(5);
-    }
+    const weightChunks = chunk(
+      weights.map<[Point, string]>(key => [getPoint(key), key]).filter(([{ x, y }]) => universe.hasNode(x, y)),
+      350
+    );
+
+    const processChunk = async (
+      chunk: [Point, string][],
+      processor: (point: Point, key: string, weight?: number) => void
+    ): Promise<void> => {
+      for (let i = 0, j = chunk.length - 1; i < j; i++, j--) {
+        const [sPoint, sKey] = chunk[i];
+        const [ePoint, eKey] = chunk[j];
+
+        processor(sPoint, sKey, weight);
+        processor(ePoint, eKey, weight);
+
+        await wait(5);
+      }
+    };
+
+    await Promise.all([
+      ...wallChunks.map(chunk => processChunk(chunk, setWall)),
+      ...weightChunks.map(chunk => processChunk(chunk, setWeighted))
+    ]);
   };
 
   const handleOnClick = (nodeKey: string, { x, y }: Point): void => {
