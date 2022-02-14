@@ -145,7 +145,7 @@ export default function RunHistoryDialog({
               body: 'Are you sure you want to clear your run history? This is not recoverable.',
               yesAction: () => {
                 onClearHistory();
-                setConfirmDialogOptions(defaultConfirmDialog.current);
+                onClose();
               }
             });
           }}

@@ -252,22 +252,10 @@ export default function BoardGrid({
     ]
   ]);
 
-  const handleRestoreRunHistoryState = (runHistory: PathFindingAlgorithmRun): void => {
+  const handleRestoreRunHistoryState = async (runHistory: PathFindingAlgorithmRun): Promise<void> => {
     handleReset();
 
     const { start, end, walls, weights, weight } = runHistory;
-
-    for (const [point, key] of walls
-      .map<[Point, string]>(key => [getPoint(key), key])
-      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
-      setWall(point, key);
-    }
-
-    for (const [point, key] of weights
-      .map<[Point, string]>(key => [getPoint(key), key])
-      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
-      setWeighted(point, key, weight);
-    }
 
     const { x: sx, y: sy } = getPoint(start);
     const newStart = {
@@ -279,6 +267,7 @@ export default function BoardGrid({
 
     if (startAction) {
       startAction(newStart, getKey(newStart));
+      await wait(5);
     }
 
     const { x: ex, y: ey } = getPoint(end);
@@ -291,6 +280,21 @@ export default function BoardGrid({
 
     if (endAction) {
       endAction(newEnd, getKey(newEnd));
+      await wait(5);
+    }
+
+    for (const [point, key] of walls
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
+      setWall(point, key);
+      await wait(5);
+    }
+
+    for (const [point, key] of weights
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))) {
+      setWeighted(point, key, weight);
+      await wait(5);
     }
   };
 
