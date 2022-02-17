@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
+import { bindLinqToNativeTypes } from 'typescript-extended-linq';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
@@ -13,6 +15,8 @@ import { localStorageService } from './services/LocalStorageService';
 import { LocalStorageKey } from './models/enums';
 import { ColorSettings } from './models/models';
 import { loadColorScheme } from './utilities/utilities';
+
+bindLinqToNativeTypes();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

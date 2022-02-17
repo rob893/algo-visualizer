@@ -2,21 +2,21 @@ import { AnimationSpeed } from '../models/enums';
 import { ColorSettings, PathFindingAlgorithmRun } from '../models/models';
 import { MazeType, PathFindingAlgorithm, Universe } from '../wasm/algo_visualizer';
 
-export function chunk<T>(arr: T[], chunkSize: number): T[][] {
-  if (chunkSize <= 0) {
-    throw new Error();
-  }
+// export function chunk<T>(arr: T[], chunkSize: number): T[][] {
+//   if (chunkSize <= 0) {
+//     throw new Error();
+//   }
 
-  const copy = [...arr];
+//   const copy = [...arr];
 
-  const res: T[][] = [];
+//   const res: T[][] = [];
 
-  for (let i = 0; i < copy.length; i += chunkSize) {
-    res.push(copy.slice(i, i + chunkSize));
-  }
+//   for (let i = 0; i < copy.length; i += chunkSize) {
+//     res.push(copy.slice(i, i + chunkSize));
+//   }
 
-  return res;
-}
+//   return res;
+// }
 
 export function getAlgoNameText(algo: PathFindingAlgorithm, shortened: boolean = false): string {
   switch (algo) {

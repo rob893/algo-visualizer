@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { useEffect } from 'react';
 import { Subject } from 'rxjs';
 import { inputService, MouseButton } from '../services/InputService';
-import { chunk, drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
+import { drawPath, getKey, getPoint, Point, wait } from '../utilities/utilities';
 import { IGridNode, Universe } from '../wasm/algo_visualizer';
 import { GridNode as WasmGridNode, PathFindingAlgorithm, MazeType } from '../wasm/algo_visualizer';
 import { NodeContextSelection, PlayType } from '../models/enums';
@@ -140,7 +140,10 @@ export default function BoardGrid({
   }): Promise<void> => {
     const useChunk = false; // For use if I want to :)
     const maze = universe.generateMaze(mazeType);
-    const chunks = chunk(maze, 500);
+    const chunks = maze
+      .chunk(500)
+      .select(c => c.toArray())
+      .toArray();
 
     const processNode = ({ x, y }: IGridNode): void => {
       const node = universe.getNode(x, y);
@@ -283,15 +286,19 @@ export default function BoardGrid({
       await wait(5);
     }
 
-    const wallChunks = chunk(
-      walls.map<[Point, string]>(key => [getPoint(key), key]).filter(([{ x, y }]) => universe.hasNode(x, y)),
-      350
-    );
+    const wallChunks = walls
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))
+      .chunk(350)
+      .select(c => c.toArray())
+      .toArray();
 
-    const weightChunks = chunk(
-      weights.map<[Point, string]>(key => [getPoint(key), key]).filter(([{ x, y }]) => universe.hasNode(x, y)),
-      350
-    );
+    const weightChunks = weights
+      .map<[Point, string]>(key => [getPoint(key), key])
+      .filter(([{ x, y }]) => universe.hasNode(x, y))
+      .chunk(350)
+      .select(c => c.toArray())
+      .toArray();
 
     const processChunk = async (
       chunk: [Point, string][],
