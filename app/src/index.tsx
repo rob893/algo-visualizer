@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-empty-interface */
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { bindLinqToNativeTypes } from 'typescript-extended-linq';
@@ -27,16 +26,23 @@ console.log('Initializing WASM...');
 wasmService
   .init()
   .then(() => {
-    ReactDOM.render(
-      <React.StrictMode>
+    const container = document.getElementById('root');
+
+    if (!container) {
+      throw new Error('Document missing root element!. Please ensure there is an element with id = root.');
+    }
+
+    const root = createRoot(container);
+
+    root.render(
+      <StrictMode>
         <ThemeProvider theme={theme}>
           <ViewportProvider>
             <CssBaseline />
             <App />
           </ViewportProvider>
         </ThemeProvider>
-      </React.StrictMode>,
-      document.getElementById('root')
+      </StrictMode>
     );
 
     // If you want to start measuring performance in your app, pass a function

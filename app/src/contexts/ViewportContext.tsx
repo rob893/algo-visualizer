@@ -2,7 +2,7 @@ import { createContext, FC, useEffect, useState } from 'react';
 
 export const ViewportContext = createContext({} as ViewportProps);
 
-export const ViewportProvider: FC = ({ children }) => {
+export const ViewportProvider: FC<{ children: JSX.Element | JSX.Element[] }> = ({ children }) => {
   const [width, setWidth] = useState(window.innerWidth);
   const [height, setHeight] = useState(window.innerHeight);
 
